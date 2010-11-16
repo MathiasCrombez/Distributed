@@ -5,9 +5,14 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <netdb.h>
+#include <string.h>
+#include <unistd.h>
 
 #define SERVEURNAME 0
+#define PORT 0
 
+uint32_t idSocket;
 // Connecte le cient au serveur et renvoit le port
 uint32_t connect2server();
 
