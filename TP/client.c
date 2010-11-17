@@ -2,6 +2,9 @@
 
 int main() {
     connect2server();
+    
+    
 
+    disconnect2server();
     return 0;
 }

@@ -2,6 +2,7 @@
 #define CLIENT_H
 
 #include <stdio.h>
+#include <inttypes.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -9,8 +10,8 @@
 #include <string.h>
 #include <unistd.h>
 
-#define SERVEURNAME 0
-#define PORT 0
+#define SERVEURNAME "194.254.210.10"
+#define PORT 8080
 
 uint32_t idSocket;
 // Connecte le cient au serveur et renvoit le port
