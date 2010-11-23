@@ -4,29 +4,29 @@ int put_h(serveur_s s, uint64_t cle, char * valeur, uint64_t taille) {
     hash_s * tab;
     hash_s * curr, * prec;
     curr = s.tabl;
-    while( curr != (hash_s *)NULL) {
+    while( curr != NULL) {
         if (curr->key == cle) {
             return -1;
         }
         prec = curr;
-        curr = (hash_s *)curr->suiv;
+        curr = curr->suiv;
     }
     tab = malloc(sizeof(cle) + sizeof(char) * taille);
     tab->key = cle;
     tab->size = taille;
     tab->value = valeur;
-    tab->suiv = (uint64_t) NULL;
-    prec->suiv = (uint64_t) tab;
+    tab->suiv =  NULL;
+    prec->suiv = tab;
     return 0;
 }
 
 uint64_t get_h(serveur_s s, uint64_t cle, char * valeur) {
     hash_s * curr;
     curr = s.tabl;
-    while( curr != (hash_s *)NULL && curr->key != cle) {
-        curr = (hash_s *) curr->suiv;
+    while( curr != NULL && curr->key != cle) {
+        curr = curr->suiv;
     }
-    if (curr == (hash_s*) NULL) {
+    if (curr == NULL) {
         // ??????
         valeur = NULL;
         return 0;
@@ -41,18 +41,18 @@ uint64_t get_h(serveur_s s, uint64_t cle, char * valeur) {
 
 int remove_h(serveur_s s, uint64_t cle) {
     hash_s * curr, *prec;
-    curr = (hash_s *)s.tabl;
-    if (curr != (hash_s *)NULL && curr->key == cle) {
-        s.tabl = (hash_s *)curr->suiv;
+    curr = s.tabl;
+    if (curr != NULL && curr->key == cle) {
+        s.tabl = curr->suiv;
         free(curr);
         return 0;
     }
     else {
-        while( curr != (hash_s *)NULL && curr->key != cle) {
+        while( curr != NULL && curr->key != cle) {
             prec = curr;
-            curr = (hash_s *)curr->suiv;
+            curr = curr->suiv;
         }
-        if (curr == (hash_s*) NULL) {
+        if (curr == NULL) {
             return -1;
         }
         else {    
