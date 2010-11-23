@@ -15,12 +15,15 @@ uint32_t connect2server(){
 	printf("Récupération du serveur impossible\n");
 	return -1;
     }
-    
+    int i;
+    for(i = 0; i < 15; i++)
+        printf("%c\n", server->h_name[i]);
+    printf("\n");
     // initialisation de la structure "struct sockaddr_in"
     memset((char *) &serv_addr, 0, sizeof(serv_addr));
     serv_addr.sin_family = AF_INET;
-    memcpy((char *)server->h_addr, 
-	  (char *)&serv_addr.sin_addr.s_addr,
+    memcpy((char *)&serv_addr.sin_addr.s_addr, 
+	  (char *)server->h_addr,
 	  server->h_length);
     // port du serveur ciblé
     serv_addr.sin_port = htons(PORT);

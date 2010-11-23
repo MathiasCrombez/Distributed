@@ -10,8 +10,8 @@
 #include <string.h>
 #include <unistd.h>
 
-#define SERVEURNAME "194.254.210.10"
-#define PORT 8080
+#define SERVEURNAME "itinerix.local"
+#define PORT 4343
 
 uint32_t idSocket;
 // Connecte le cient au serveur et renvoit le port
