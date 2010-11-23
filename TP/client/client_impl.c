@@ -15,10 +15,6 @@ uint32_t connect2server(){
 	printf("Récupération du serveur impossible\n");
 	return -1;
     }
-    int i;
-    for(i = 0; i < 15; i++)
-        printf("%c\n", server->h_name[i]);
-    printf("\n");
     // initialisation de la structure "struct sockaddr_in"
     memset((char *) &serv_addr, 0, sizeof(serv_addr));
     serv_addr.sin_family = AF_INET;
@@ -33,6 +29,7 @@ uint32_t connect2server(){
 	printf("Echec de la connexion\n");
 	return -1;
     }
+    printf("client : connecté\n");
     return 0;
 }
 
