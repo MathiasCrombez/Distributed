@@ -12,12 +12,15 @@
 
 typedef struct serveur {
     char * serveurname;
+    uint64_t port;
     hash_s * tabl;
+    uint64_t firstKey;
+    uint64_t size;
 } serveur_s;
 
 int put_h(serveur_s s, uint64_t cle, char * valeur, uint64_t taille);
 
-//----------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------
 /**
  * La fonction get() recupère la valeur et sa taille associés à la clé et le serveur
  *
