@@ -1,23 +1,47 @@
 #include "serveur_impl.h"
 
 serveur_s create_serveur(char* serveurname, uint64_t port,
-                         uint64_t first_k, uint64_t last_k) {
-    serveur_s s;
+                         uint64_t first_k, uint64_t last_k,
+                         idServeur_s next) {
+    serveur_s new_s;
     uint64_t size_l = last_k - first_k + 1;
     hash_s* tab[size_l];
     int i;
     for (i = 0; i < size_l ; i++) {
         tab[i] = NULL;
     }
-    s.serveurname = serveurname;
-    s.port = port;
-    s.size = size_l;
-    s.firstKey = first_k;
-    s.tabl = tab;
-    return s;
+    new_s.s.serveurname = serveurname;
+    new_s.s.port = port;
+    new_s.size = size_l;
+    new_s.firstKey = first_k;
+    new_s.tabl = tab;
+    new_s.next_serv = next;
+    return new_s;
 }
 
 
+void *talk_to_client(void * donne) {
+
+    int idSocket = (int) donne;
+    /*    message_t ms;
+
+    bzero(ms.data,MESSAGE_SIZE);
+    strcpy(ms.data,"Tp DHT, mathias ramzi yongzhi");
+    strcat(ms.data,"\n");
+    send(idSocket,ms.data,MESSAGE_SIZE,0);
+    bzero(ms.data,MESSAGE_SIZE);	
+
+    int longueur = recv(idSocket,ms.data,MESSAGE_SIZE,0);
+    if (longueur < 0) {
+
+        printf("Serveur Recieve Data Failed!\n");
+        exit(1);
+    }
+    printf("\nSocket Num: %d \t %s",idSocket, ms.data);
+*/
+    shutdown(idSocket, 2);
+    pthread_exit(NULL); 
+}
 
 
 int put_h(serveur_s s, uint64_t cle, char * valeur, uint64_t taille) {

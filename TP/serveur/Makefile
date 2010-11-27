@@ -5,13 +5,13 @@ CFLAGS = -Wall -p -g
 
 
 serveur : $(OBJECTS)
-	gcc $(CFLAGS) -o serveur $(OBJECTS)
+	gcc $(CFLAGS) -o serveur $(OBJECTS) -lpthread
 hash.o : hash.c
 	gcc $(CFLAGS) -c hash.c
 serveur_impl.o : serveur_impl.c
 	gcc $(CFLAGS) -c serveur_impl.c
 serveur.o : serveur.c
-	gcc $(CFLAGS) -c serveur.c
+	gcc $(CFLAGS) -c serveur.c 
 
 
 clean :
