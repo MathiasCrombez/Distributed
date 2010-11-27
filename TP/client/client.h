@@ -12,14 +12,10 @@
 #include <unistd.h>
 
 #include "message.h"
+#include "commun.h"
 
 #define SERVEURNAME "127.0.0.1"
-#define PORT 4242
 
-
-
-
-typedef uint32_t socket_t;
 
 
 struct client {
@@ -46,11 +42,13 @@ typedef struct client client_t;
 
 client_t creerClient(const char *nom, uint32_t k);
 uint32_t connect2server(client_t client);
-uint32_t envoyerMessage(message_t message,socket_t serveur);
 
 
 uint32_t put(uint32_t cle, uint32_t valeur);/** Envoie un couple clé valeur **/
 uint32_t get(uint32_t cle);/** Reçoit la valeur associé à la clé **/
 uint32_t removeKey(uint32_t cle);/** Supprime une entrée de la DHT **/
 uint32_t disconnect2server();
+
+
+uint32_t quit(char * nomDuServeur);
 #endif

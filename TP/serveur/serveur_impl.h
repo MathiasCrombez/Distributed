@@ -15,40 +15,51 @@
 #include <inttypes.h>
 
 #include "hash.h"
-
+#include "commun.h"
 
 #define THREAD_MAX 5
 #define LENGTH_LISTEN_QUEUE 10
 #define MESSAGE_SIZE 256
 
+#define DEBUG_MESSAGE
 
-
-typedef struct idServeur {
-    char * serveurname;
+struct idServeur {
+    char serveurname[MAXCAR];
     uint64_t port;
-} idServeur_s;
+} ;
 
-typedef struct serveur {
-    //char * serveurname;
-    //uint64_t port;
-    idServeur_s s;
-    hash_s ** tabl;
+
+struct idClient {
+
+	struct sockaddr_in client_addr;
+	socket_t idSocket;
+};
+
+struct serveur {
     
-    
+    struct idServeur s;
+    struct sockaddr_in serv_addr;
+	socket_t idSocket;
 	
+	struct idClient tableauClient[LENGTH_LISTEN_QUEUE];
+	
+    hash_t ** tabl;
     uint64_t firstKey;
     uint64_t size;
     
-    idServeur_s next_serv;
-} serveur_s;
+    struct idServeur* next_serv;
+} ;
 
-serveur_s create_serveur(char* serveurname, uint64_t port,
-                         uint64_t first_k, uint64_t last_k,
-                         idServeur_s next);
 
+typedef struct serveur serveur_t;
+
+
+serveur_t creerServeur(char serveurname[MAXCAR], uint64_t first_k,
+							uint64_t last_k,struct idServeur* next);
+							
 void *talk_to_client(void * donne);
 
-int put_h(serveur_s s, uint64_t cle, char * valeur, uint64_t taille);
+int put_h(serveur_t s, uint64_t cle, char * valeur, uint64_t taille);
 
 //--------------------------------------------------------------------------------------
 /**
@@ -61,9 +72,9 @@ int put_h(serveur_s s, uint64_t cle, char * valeur, uint64_t taille);
  *
  * @return size, la taille de valeur
  */
-uint64_t get_h(serveur_s s, uint64_t cle, char * valeur);
+uint64_t get_h(serveur_t s, uint64_t cle, char * valeur);
 
-int remove_h(serveur_s s, uint64_t cle, char * valeur, uint64_t taille);
+int remove_h(serveur_t s, uint64_t cle, char * valeur, uint64_t taille);
 
 
 #endif

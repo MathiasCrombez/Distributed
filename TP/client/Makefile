@@ -1,13 +1,13 @@
 .PHONY: clean exec
-OBJECTS = client.o client_impl.o
+OBJECTS = client.o client_impl.o ../commun/message.o
 CFLAGS = -Wall -p -g
 
-IFLAGS = -I ../message/
+IFLAGS = -I ../commun/
 
 
 client : $(OBJECTS)
 	gcc $(CFLAGS) -o client $(OBJECTS)
-client.o : client.c
+client.o : client.c 
 	gcc $(CFLAGS) -c client.c $(IFLAGS)
 client_impl.o : client_impl.c
 	gcc $(CFLAGS) -c client_impl.c $(IFLAGS)

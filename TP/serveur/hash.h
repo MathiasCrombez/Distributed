@@ -5,6 +5,6 @@ typedef struct hash {
     uint64_t size;
     char * value;
     struct hash * suiv;
-} hash_s;
+} hash_t;
 
 uint64_t hash(unsigned char *str);

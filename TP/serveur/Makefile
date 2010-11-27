@@ -2,7 +2,7 @@
 OBJECTS = serveur.o serveur_impl.o hash.o
 CFLAGS = -Wall -p -g
 
-IFLAGS = -I ../message/
+IFLAGS = -I ../commun/
 
 
 serveur : $(OBJECTS)
