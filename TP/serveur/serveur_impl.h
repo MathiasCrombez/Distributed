@@ -1,3 +1,7 @@
+#ifndef SERVEUR_IMPL_H
+#define SERVEUR_IMPL_H
+
+
 #include <stdio.h>
 #include <sys/types.h> 
 #include <sys/socket.h>
@@ -12,6 +16,9 @@
 
 #include "hash.h"
 
+
+
+uint32_t PORT = 4242;
 
 #define THREAD_MAX 5
 #define LENGTH_LISTEN_QUEUE 10
@@ -57,3 +64,6 @@ int put_h(serveur_s s, uint64_t cle, char * valeur, uint64_t taille);
 uint64_t get_h(serveur_s s, uint64_t cle, char * valeur);
 
 int remove_h(serveur_s s, uint64_t cle, char * valeur, uint64_t taille);
+
+
+#endif

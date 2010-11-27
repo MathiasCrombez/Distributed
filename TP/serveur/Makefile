@@ -15,7 +15,7 @@ serveur.o : serveur.c
 
 
 clean :
-	rm serveur $(OBJECTS)
+	rm -f serveur $(OBJECTS)
 
 exec : 
 	./serveur
