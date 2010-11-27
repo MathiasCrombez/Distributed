@@ -6,7 +6,7 @@ IFLAGS = -I ../message/
 
 
 serveur : $(OBJECTS)
-	gcc $(CFLAGS) -o serveur $(OBJECTS)
+	gcc $(CFLAGS) -o serveur $(OBJECTS) -lpthread
 hash.o : hash.c
 	gcc $(CFLAGS) -c hash.c $(IFLAGS)
 serveur_impl.o : serveur_impl.c
@@ -16,7 +16,7 @@ serveur.o : serveur.c
 
 
 clean :
-	rm serveur $(OBJECTS)
+	rm -f serveur $(OBJECTS)
 
 exec : 
 	./serveur
