@@ -17,9 +17,6 @@
 #include "hash.h"
 
 
-
-uint32_t PORT = 4242;
-
 #define THREAD_MAX 5
 #define LENGTH_LISTEN_QUEUE 10
 #define MESSAGE_SIZE 256
@@ -36,6 +33,9 @@ typedef struct serveur {
     //uint64_t port;
     idServeur_s s;
     hash_s ** tabl;
+    
+    
+	
     uint64_t firstKey;
     uint64_t size;
     

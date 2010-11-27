@@ -1,5 +1,6 @@
 #include "serveur_impl.h"
-//gcc -o serveur serveur.c -lpthread
+
+uint32_t PORT = 4242;
 
 int main()
 {
