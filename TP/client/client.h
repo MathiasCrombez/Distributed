@@ -11,7 +11,7 @@
 #include <string.h>
 #include <unistd.h>
 
-
+#include "message.h"
 
 #define SERVEURNAME "127.0.0.1"
 #define PORT 4242
@@ -43,39 +43,6 @@ typedef struct client client_t;
 
 
 
-
-union query {
-
-	struct suite_query {} quit;
-	
-	struct state_query {} state;
-	
-	struct put_query {
-	
-	
-	
-	} put;
-	
-	struct get_query {
-	
-	
-	} get;
-	
-	struct remove_query {
-	
-		
-	} remove;
-};
-
-enum type_message { QUIT, STATE, PUT, GET, REMOVE };
-
-struct message {
-
-	enum type_message type;
-	union  query requete;
-	
-};
-typedef struct message message_t;
 
 client_t creerClient(const char *nom, uint32_t k);
 uint32_t connect2server(client_t client);

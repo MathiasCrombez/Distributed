@@ -2,14 +2,15 @@
 OBJECTS = client.o client_impl.o
 CFLAGS = -Wall -p -g
 
+IFLAGS = -I ../message/
 
 
 client : $(OBJECTS)
 	gcc $(CFLAGS) -o client $(OBJECTS)
 client.o : client.c
-	gcc $(CFLAGS) -c client.c
+	gcc $(CFLAGS) -c client.c $(IFLAGS)
 client_impl.o : client_impl.c
-	gcc $(CFLAGS) -c client_impl.c
+	gcc $(CFLAGS) -c client_impl.c $(IFLAGS)
 
 
 clean :

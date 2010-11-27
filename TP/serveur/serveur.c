@@ -1,5 +1,5 @@
 #include "serveur_impl.h"
-
+#include "message.h"
 uint64_t PORT = 4242;
 
 int main()
@@ -29,6 +29,10 @@ int main()
 	exit(EXIT_FAILURE);
     }
     printf("connection à %s\n", inet_ntoa(cli_addr.sin_addr));
+    
+    message_t message;
+    recv(cliIdSocket, &message, sizeof(message), 0);
+    printf("message %d\n", message.type);
     shutdown(idSocket, 2);
     return 0; 
 }

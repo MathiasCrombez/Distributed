@@ -55,7 +55,7 @@ uint32_t connect2server(client_t client)
 
 uint32_t envoyerMessage(message_t message, socket_t destination)
 {
-	return (uint32_t) recv(destination, &message, sizeof(message), 0);
+	return (uint32_t) send(destination, &message, sizeof(message), 0);
 }
 
 
