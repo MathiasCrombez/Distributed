@@ -13,7 +13,7 @@ client_impl.o : client_impl.c
 
 
 clean :
-	rm client $(OBJECTS)
+	rm -f client $(OBJECTS)
 
 exec : 
 	./client

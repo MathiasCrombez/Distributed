@@ -14,6 +14,8 @@ serveur_s create_serveur(char* serveurname, uint64_t port,
     s.size = size_l;
     s.firstKey = first_k;
     s.tabl = tab;
+    
+   
     return s;
 }
 
@@ -83,3 +85,5 @@ int remove_h(serveur_s s, uint64_t cle, char* valeur, uint64_t taille) {
         }      
     } 
 }
+
+

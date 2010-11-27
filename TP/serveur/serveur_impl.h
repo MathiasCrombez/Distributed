@@ -14,6 +14,9 @@ typedef struct serveur {
     char * serveurname;
     uint64_t port;
     hash_s ** tabl;
+    
+    
+	
     uint64_t firstKey;
     uint64_t size;
 } serveur_s;
@@ -34,3 +37,7 @@ int put_h(serveur_s s, uint64_t cle, char * valeur, uint64_t taille);
 uint64_t get_h(serveur_s s, uint64_t cle, char * valeur);
 
 int remove_h(serveur_s s, uint64_t cle, char * valeur, uint64_t taille);
+
+
+
+
