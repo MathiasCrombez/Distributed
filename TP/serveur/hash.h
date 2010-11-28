@@ -5,6 +5,8 @@
 #include "commun.h"
 
 
+static uint64_t TAILLE_HASH_TABLE;
+static liste_t* tableDeHachage;
 
 /** la table de hachage a une taille dynamique  :             **/
 /**         	elle pourra  être coupé , tranché etc         **/
@@ -13,28 +15,16 @@
 
 
 #define MAX_TAILLE_HASH_TABLE 1<<16 
-static uint64_t TAILLE_HASH_TABLE;
-static liste_t* tableDeHachage;
+
+
 
 liste_t* creerHashTable(uint64_t taille);
+
+/** les trois opérations de base de la TH**/
 donnee_t getHashTable(char* clef);
 void putHashTable(donnee_t data);
-donnee_t removeHashTable(donnee_t data);
+char* removeHashTable(char* cle);
 
 
-static inline uint64_t hash(char* str) {
-	 uint64_t hash = 5381;
-    
-    assert(str!=NULL);  
-#ifdef DEBUG_MESSAGE
-	printf("la cle est: %s de longueur: %d \n",str,strlen(str));
-#endif
-	
-    while(*str!='\0') {
-        int c = *str;
-        hash = ((hash << 5) + hash) + c;
-        str ++;
-    }
-    return (hash % TAILLE_HASH_TABLE);
-}
+inline uint64_t hash(char* str);
 #endif

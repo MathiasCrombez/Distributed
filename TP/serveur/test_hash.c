@@ -7,10 +7,11 @@
 int main(){
 
 
-creerHashTable(10);
+liste_t* l=creerHashTable(10);
+//printf("taille %d\n",TAILLE_HASH_TABLE);
 
 donnee_t data11,data12,data13,data2,data3;
-data11= creerDonnee("ramzi","tu dois dormir");
+data11= creerDonnee("ramzI","tu dois dormir");
 data12= creerDonnee("ramzi","tu doiss dormir");
 data13= creerDonnee("ramzi","tu doisss dormir");
 data2= creerDonnee("mathias","manga");
@@ -20,9 +21,24 @@ putHashTable(data12);
 putHashTable(data13);
 putHashTable(data2);
 putHashTable(data3);
-printf("%d taille %d\n",hash("ramzi"),TAILLE_HASH_TABLE);
-//liste_t l = tableDeHachage[hash("ramzi")];
-//afficherListe(;
+//printf("taille %d\n",TAILLE_HASH_TABLE);
+
+printf("hash de ramzi :%ld\n",hash("ramzi"));
 
 
+afficherListe(l[hash("ramzi")]);
+
+
+//la clé n'est pas dans la dht
+printf("donné enlevé: %s\n",removeHashTable("ramziii"));
+
+
+//la clé n'est pas dans la dht
+printf("donné enlevé: %s\n",removeHashTable("ramzI"));
+
+printf("liste apres remove ...\n");
+afficherListe(l[hash("ramzi")]);
+
+printf("donné enlevé: %s\n",removeHashTable("ZAngh"));
+afficherListe(l[hash("ramzi")]);
 }
