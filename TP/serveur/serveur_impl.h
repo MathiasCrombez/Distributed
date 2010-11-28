@@ -21,7 +21,7 @@
 #define LENGTH_LISTEN_QUEUE 10
 #define MESSAGE_SIZE 256
 
-#define DEBUG_MESSAGE
+
 
 struct idServeur {
     char serveurname[MAXCAR];

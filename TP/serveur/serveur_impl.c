@@ -16,7 +16,7 @@ serveur_t creerServeur(char serveurname[MAXCAR],uint64_t first_k,
 	for (i = 0; i < size_l; i++) {
 		tab[i] = NULL;
 	}
-	memcpy(SERVEUR.s.serveurname,serveurname,MAXCAR);
+	strncpy(SERVEUR.s.serveurname,serveurname,MAXCAR);
 	
 #ifdef DEBUG_MESSAGE
 	printf("serveurname %s \n",SERVEUR.s.serveurname);
