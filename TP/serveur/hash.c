@@ -27,8 +27,8 @@ inline uint64_t hash(char* str) {
         hash = ((hash << 5) + hash) + c;
         str ++;
     }
-    return 5;
-   // return (hash % TAILLE_HASH_TABLE);
+    
+    return (hash % TAILLE_HASH_TABLE);
 }
 
 

@@ -11,7 +11,7 @@ typedef uint32_t socket_t;
 #define PORT 4242
 #define MAXCAR 20
 
-//#define DEBUG_MESSAGE
+#define DEBUG_MESSAGE
 #undef DEBUG_MESSAGE
 
 typedef struct donnee {
@@ -65,9 +65,11 @@ static inline char *removeKey(liste_t * L_ptr, char *str)
 	liste_t *iterateur_ptr;
 	liste_t *precedent_ptr;
 	liste_t *suivant_ptr;
-
-	iterateur_ptr = L_ptr;
-	precedent_ptr = L_ptr;
+	char *valeur;
+	liste_t l;
+	
+	iterateur_ptr = NULL;
+	precedent_ptr = NULL;
 	suivant_ptr = NULL;
 
 #ifdef DEBUG_MESSAGE
@@ -77,7 +79,24 @@ static inline char *removeKey(liste_t * L_ptr, char *str)
 	}
 #endif
 
-	char *valeur;
+	/** on vérifie si le premier maillon contient la clé **/
+	if (strcmp((*L_ptr)->data->cle, str) == 0) {
+	#ifdef DEBUG_MESSAGE
+		printf("reloveKey: element enleve en tete de liste\n");
+	#endif
+		valeur = (*L_ptr)->data->valeur;
+		l = *L_ptr;
+		*L_ptr = l->suiv;
+		free(l->data);
+		free(l);
+		return valeur;
+	}
+	
+
+	precedent_ptr = L_ptr;
+	iterateur_ptr = &(*L_ptr)->suiv;
+	
+	
 	/** parcour de la liste et reperage du maillon à enlever **/
 	while (*iterateur_ptr != NULL) {
 		assert((*iterateur_ptr)->data != NULL);
