@@ -7,39 +7,43 @@
 int main(){
 
 
-liste_t* l=creerHashTable(10);
-//printf("taille %d\n",TAILLE_HASH_TABLE);
-
-donnee_t data11,data12,data13,data2,data3;
-data11= creerDonnee("ramzI","tu dois dormir");
-data12= creerDonnee("ramzi","tu doiss dormir");
-data13= creerDonnee("ramzi","tu doisss dormir");
-data3=creerDonnee("ZAngh","pouje chwo tchang veun");
-data2= creerDonnee("mathias","manga");
-putHashTable(data11);
-putHashTable(data12);
-putHashTable(data13);
-
-putHashTable(data3);
-putHashTable(data2);
-//printf("taille %d\n",TAILLE_HASH_TABLE);
-
-printf("hash de ramzi :%ld\n",hash("ramzi"));
 
 
-afficherListe(l[hash("ramzi")]);
+table_de_hachage_t table;
 
 
-//la clé n'est pas dans la dht
-printf("donné enlevé: %s\n",removeHashTable("mathias"));
-afficherListe(l[5]);
+table = creerHashTable(100);
 
-/*//la clé n'est pas dans la dht*/
-/*printf("donné enlevé: %s\n",removeHashTable("ramzI"));*/
+donnee_t d1,d2,d3,d4,d5,d6,d7;
 
-/*printf("liste apres remove ...\n");*/
-/*afficherListe(l[hash("ramzi")]);*/
+d1=creerDonnee("ramzi","souris");
+d2=creerDonnee("ramziiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii","souris");
+d3=creerDonnee("ramzi","souriiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiis");
+d4=creerDonnee("ramzi","verte");
+d5=creerDonnee("ramzi","je t'attrape'");
+d6=creerDonnee("ramzi","par la queue");
 
-/*printf("donné enlevé: %s\n",removeHashTable("ZAngh"));*/
-/*afficherListe(l[hash("ramzi")]);*/
+d7=creerDonnee("yong","souris");
+afficherDonnee(getHashTable("yong",table));
+
+uint64_t h = hash("yong")%table.taille;
+afficherListe(table.table_de_hachage[h]);
+
+printf("suppression d'un element pas dans la table\n");
+removeHashTable("yong",table);
+afficherDonnee(getHashTable("yong",table));
+
+putHashTable(d1,table);
+putHashTable(d2,table);
+putHashTable(d3,table);
+putHashTable(d4,table);
+putHashTable(d5,table);
+putHashTable(d6,table);
+
+afficherDonnee(getHashTable("yong",table));
+h = hash("ramzi")%table.taille;
+afficherListe(table.table_de_hachage[h]);
+
+libererHashTable(table);
+afficherListe(table.table_de_hachage[h]);
 }

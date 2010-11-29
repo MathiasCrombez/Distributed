@@ -2,20 +2,13 @@
 #define SERVEUR_IMPL_H
 
 
-#include <stdio.h>
 #include <sys/types.h> 
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <stdlib.h>
-#include <string.h>
 #include <pthread.h>
-#include <sys/errno.h>
-
-#include <inttypes.h>
-
 #include "hash.h"
-#include "commun.h"
+
 
 #define THREAD_MAX 5
 #define LENGTH_LISTEN_QUEUE 10
@@ -43,7 +36,7 @@ struct serveur {
 	
 	struct idClient tableauClient[LENGTH_LISTEN_QUEUE];
 	
-    hash_t ** tabl;
+    table_de_hachage_t tabl;
     uint64_t firstKey;
     uint64_t size;
     
@@ -57,24 +50,24 @@ typedef struct serveur serveur_t;
 serveur_t creerServeur(char serveurname[MAXCAR], uint64_t first_k,
 							uint64_t last_k,struct idServeur* next);
 							
-void *talk_to_client(void * donne);
+//void *talk_to_client(void * donne);
 
-int put_h(serveur_t s, uint64_t cle, char * valeur, uint64_t taille);
+//int put_h( uint64_t cle, char * valeur, uint64_t taille);
 
-//--------------------------------------------------------------------------------------
-/**
- * La fonction get() recupère la valeur et sa taille associés à la clé et le serveur
- *
- * @param s est le serveur qui dispose de la clé (vérifié en amont)
- * @param cle est la clé qui identifie l'entier dans la table de hachage
- * @param valeur est un pointeur modifié dans la fonction pour 
- *        qu'il correspont à la valeur. C'est une sortie.
- *
- * @return size, la taille de valeur
- */
-uint64_t get_h(serveur_t s, uint64_t cle, char * valeur);
+////--------------------------------------------------------------------------------------
+///**
+// * La fonction get() recupère la valeur et sa taille associés à la clé et le serveur
+// *
+// * @param s est le serveur qui dispose de la clé (vérifié en amont)
+// * @param cle est la clé qui identifie l'entier dans la table de hachage
+// * @param valeur est un pointeur modifié dans la fonction pour 
+// *        qu'il correspont à la valeur. C'est une sortie.
+// *
+// * @return size, la taille de valeur
+// */
+//uint64_t get_h(cle_t cle, valeur_t valeur);
 
-int remove_h(serveur_t s, uint64_t cle, char * valeur, uint64_t taille);
+//int remove_h(cle_t cle, valeur, uint64_t taille);
 
 
 #endif

@@ -1,16 +1,16 @@
 #ifndef MESSAGE_H
 #define MESSAGE_H
 
+#include <sys/socket.h>
 #include "commun.h"
 
-#define MAXCAR 20
+
 
 union query {
 
 	struct suite_query {
 		char nomDuServeur [MAXCAR];
 		uint32_t sEstDeconnecte;
-		
 	} quit;
 	
 	struct state_query {} state;

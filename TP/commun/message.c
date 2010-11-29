@@ -1,5 +1,5 @@
 #include "message.h"
-#include <sys/socket.h>
+
 
 
 
@@ -16,3 +16,16 @@ uint32_t recevoirMessage(message_t message, socket_t expediteur){
 }
 
 
+
+/** le client demande au serveur dont le nom est nomDuServeur de se déconnecter **/
+uint32_t quit(char* nomDuServeur){
+
+
+	message_t message ;
+	message.type = QUIT;
+	memcpy((char*)message.requete.quit.nomDuServeurAQuitter,nomDuServeur,MAXCAR);
+	envoyerMessage(message,IDSOCKET);
+
+	return 0;
+
+}
