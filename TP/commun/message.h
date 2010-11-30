@@ -16,29 +16,27 @@ union query {
 	struct state_query {} state;
 	
 	struct put_query {
-	
-	
-	
 	} put;
 	
 	struct get_query {
-	
-	
 	} get;
 	
 	struct remove_query {
-	
-		
 	} remove;
 };
 
-enum type_message { QUIT, STATE, PUT, GET, REMOVE };
+enum type_message { 
+	QUIT,
+	STATE,
+	PUT,
+	GET,
+	REMOVE
+};
 
 struct message {
 
 	enum type_message type;
-	union query requete;
-	
+	union query requete;	
 };
 
 typedef struct message message_t;

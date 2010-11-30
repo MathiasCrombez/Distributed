@@ -1,49 +1,57 @@
 #include "serveur_impl.h"
-#include <stdio.h>
-#include <string.h>
 
+#define SET_SERVEUR_NAME(NAME,PORT){										\
+	strcpy(serveur.s.serveurname,NAME);										\
+	strcat(serveur.s.serveurname,":");										\
+	sprintf(serveur.s.serveurname+strlen(NAME)+1,"%ld",PORT);\
+}
 
-static serveur_t SERVEUR;
-
-
-
-serveur_t creerServeur(char serveurname[MAXCAR],uint64_t first_k,
-							uint64_t last_k, struct idServeur* next)
+serveur_t creerServeur(char *nomDuServeur, uint64_t port)
 {
-	uint64_t size_l = last_k - first_k + 1;
-	
-	table_de_hachage_t tab= creerHashTable(size_l);
-	strncpy(SERVEUR.s.serveurname,serveurname,MAXCAR);
+/*	uint64_t first_k=0,last_k=0;*/
+/*	struct idServeur* next=NULL;*/
+/*	uint64_t size_l = last_k - first_k + 1;*/
+/*	table_de_hachage_t tab= creerHashTable(size_l);*/
+/*	SERVEUR.size = size_l;*/
+/*	SERVEUR.firstKey = first_k;*/
+/*	SERVEUR.tabl = tab;*/
+/*	SERVEUR.next_serv = next;*/
+	int yes = 1;
+	serveur_t serveur;
 
-#ifdef DEBUG_MESSAGE
-	printf("serveurname %s \n",SERVEUR.s.serveurname);
-#endif
+	serveur.s.port = port;
+	SET_SERVEUR_NAME(nomDuServeur, port);
 
-	SERVEUR.s.port = PORT;
-	SERVEUR.size = size_l;
-	SERVEUR.firstKey = first_k;
-	SERVEUR.tabl = tab;
-	SERVEUR.next_serv = next;
-	SERVEUR.idSocket = socket(AF_INET, SOCK_STREAM, 0);
-	if(SERVEUR.idSocket<0){
-        perror("socket()");
-	    exit(EXIT_FAILURE);
-    }
-        
-    SERVEUR.serv_addr.sin_family = AF_INET;
-    SERVEUR.serv_addr.sin_addr.s_addr = INADDR_ANY;
-    SERVEUR.serv_addr.sin_port = htons(PORT);
-    
-    if (bind(SERVEUR.idSocket,(struct sockaddr *)&SERVEUR.serv_addr,sizeof(struct sockaddr_in)) < 0) {
-	    perror("bind()");
-	    exit(-1);
-    }
-    
-    if(listen(SERVEUR.idSocket,LENGTH_LISTEN_QUEUE)) {
-        perror("liste()");
-        exit(-1);
-    }
-	return SERVEUR;
+	serveur.idSocket = socket(AF_INET, SOCK_STREAM, 0);
+	if (serveur.idSocket < 0) {
+		perror("socket()");
+		exit(EXIT_FAILURE);
+	}
+
+	serveur.serv_addr.sin_family = AF_INET;
+	serveur.serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+	serveur.serv_addr.sin_port = htons(port);
+
+	// lose the pesky "Address already in use" error message
+	if (setsockopt
+	    (serveur.idSocket, SOL_SOCKET, SO_REUSEADDR, &yes,
+	     sizeof(int)) == -1) {
+		perror("setsockopt()");
+		exit(-1);
+	}
+
+	if (bind
+	    (serveur.idSocket, (struct sockaddr *)&serveur.serv_addr,
+	     sizeof(struct sockaddr_in)) < 0) {
+		perror("bind()");
+		exit(-1);
+	}
+
+	if (listen(serveur.idSocket, LENGTH_LISTEN_QUEUE)) {
+		perror("liste()");
+		exit(-1);
+	}
+	return serveur;
 }
 
 /*void *talk_to_client(void *donne)*/

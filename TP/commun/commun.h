@@ -7,12 +7,12 @@
 #include <string.h>
 #include <assert.h>
 #include <sys/errno.h>
+#include <assert.h>
 
 
-#define PORT 4242
 #define MAXCAR 20
 #define DEBUG_MESSAGE
-#undef DEBUG_MESSAGE
+//#undef DEBUG_MESSAGE
 
 typedef uint32_t socket_t;
 typedef char* cle_t;
