@@ -42,8 +42,8 @@ putHashTable(d6,table);
 
 afficherDonnee(getHashTable("yong",table));
 h = hash("ramzi")%table.taille;
-afficherListe(table.table_de_hachage[h]);
+afficherLigneHashTable(table,h);
 
 libererHashTable(table);
-afficherListe(table.table_de_hachage[h]);
+afficherLigneHashTable(table,h);
 }

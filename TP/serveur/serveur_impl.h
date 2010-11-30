@@ -8,7 +8,7 @@
 #include <arpa/inet.h>
 #include <pthread.h>
 #include "hash.h"
-
+#include <unistd.h>
 
 #define THREAD_MAX 5
 #define LENGTH_LISTEN_QUEUE 10
@@ -28,7 +28,7 @@ struct idClient {
 	socket_t idSocket;
 };
 
-struct serveur {
+typedef struct serveur {
     
     struct idServeur s;
     struct sockaddr_in serv_addr;
@@ -41,14 +41,12 @@ struct serveur {
     uint64_t size;
     
     struct idServeur* next_serv;
-} ;
+} serveur_t;
 
 
-typedef struct serveur serveur_t;
-
-
-serveur_t creerServeur(char serveurname[MAXCAR], uint64_t first_k,
-							uint64_t last_k,struct idServeur* next);
+/** on creer un serveur.Il ne partage pas la DHT encor donc pas besoin de
+ ** first_k, las_k et next en argument								**/
+serveur_t creerServeur(char* nomDuServeur, uint64_t port);
 							
 //void *talk_to_client(void * donne);
 

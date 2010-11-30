@@ -5,32 +5,33 @@
 
 int main(int argc, char* argv[])
 {
-
-	
-	if (argc < 2){ 
-    	printf("Usage: %s nomDuServeur\n",argv[0]);
+	if (argc < 3){ 
+    	printf("Usage: %s nomDuServeur Port\n",argv[0]);
     	exit(0);
 	}
-   
+	
 	int nbClient =0;
-    serveur_t serveur = creerServeur(argv[1],0,10, NULL);
-    
+    serveur_t serveur;
     socket_t sockClient;
+    socklen_t cli_len = sizeof(struct sockaddr_in);
     struct sockaddr_in cli_addr;
+    
+    serveur = creerServeur(argv[1],atoi(argv[2]));
+    printf("nom du serveur : %s\n",serveur.s.serveurname);
     
     while(nbClient<LENGTH_LISTEN_QUEUE){
     	/** doit utiliser des pthread 										**/
     	/** creation d'un thread à chaque fois que la demande de connexion  **/
     	/** d'un client est acceptée 										**/
-		sockClient = accept(serveur.idSocket, (struct sockaddr *) &cli_addr, sizeof(cli_addr));
+		sockClient = accept(serveur.idSocket, (struct sockaddr *) &cli_addr, &cli_len);
 		
 		/** remplissage du tableau permettant d'itentifier les clients connectés**/
 		serveur.tableauClient[nbClient].client_addr= cli_addr;
 		serveur.tableauClient[nbClient].idSocket= sockClient;
 		nbClient ++;
-#ifdef DEBUG_MESSAGE
+
 		printf("le client vient de se connecter au serveur\n");
-#endif
+
 	}
 	
 	printf("votre serveur n'accepte pas plus de %d connexions à la fois\n",LENGTH_LISTEN_QUEUE);
