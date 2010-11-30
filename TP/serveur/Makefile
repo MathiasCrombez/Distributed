@@ -21,11 +21,11 @@ test_hash:test_hash.o hash.o
 	gcc  -g -o test_hash test_hash.o hash.o
 test_hash.o:test_hash.c ../commun/commun.h
 	gcc -g -c test_hash.c -I ../commun
-	
-	
+
+
 
 clean :
-	rm -f serveur test_hash $(OBJECTS) test_hash.o
+	rm -f serveur test_hash $(OBJECTS) test_hash.o gmon.out
 
 exec : 
 	./serveur

@@ -14,7 +14,7 @@ client_impl.o : client_impl.c
 
 
 clean :
-	rm -f client $(OBJECTS)
+	rm -f client $(OBJECTS) gmon.out
 
 exec : 
 	./client
