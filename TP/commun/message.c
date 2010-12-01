@@ -1,30 +1,35 @@
 #include "message.h"
 
 
+void afficherMessage(message_t M)
+{
 
+/*    switch (M.type_mess) {*/
 
+/*    case REQUETE:*/
+/*	printf("le message est une requete\n");*/
+/*	break;*/
+/*    case REPONSE:*/
+/*	printf("le message est une reponse\n");*/
+/*	break;*/
+/*    default:*/
+/*	printf("le message de type inconnu\n");*/
+/*	return;*/
+/*    }*/
 
-uint32_t envoyerMessage(message_t message,socket_t destinataire){
-	return send(destinataire, &message, sizeof(message),0);
+/*    switch (M.type_requete) {*/
+
+/*    case PUT:*/
+/*	break;*/
+/*    case GET:*/
+/*	break;*/
+/*    case STRING:*/
+/*	break;*/
+/*    case CLE:*/
+/*	break;*/
+/*    default:*/
+
+/*    }*/
+
 }
 
-
-uint32_t recevoirMessage(message_t message, socket_t expediteur){
-	
-		return recv(expediteur,&message, sizeof(message),0);
-}
-
-
-
-/** le client demande au serveur dont le nom est nomDuServeur de se déconnecter **/
-uint32_t quit(char* nomDuServeur){
-
-
-/*	message_t message ;*/
-/*	message.type = QUIT;*/
-/*	memcpy((char*)message.requete.quit.nomDuServeurAQuitter,nomDuServeur,MAXCAR);*/
-/*	envoyerMessage(message,IDSOCKET);*/
-
-/*	return 0;*/
-
-}

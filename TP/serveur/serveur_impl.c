@@ -16,47 +16,47 @@ serveur_t creerServeur(char *nomDuServeur, uint64_t port)
 /*	SERVEUR.firstKey = first_k;*/
 /*	SERVEUR.tabl = tab;*/
 /*	SERVEUR.next_serv = next;*/
-	int yes = 1;
-	serveur_t serveur;
+    int yes = 1;
+    serveur_t serveur;
 
-	serveur.s.port = port;
-	SET_SERVEUR_NAME(nomDuServeur, port);
+    serveur.s.port = port;
+    SET_SERVEUR_NAME(nomDuServeur, port);
 
-	serveur.idSocket = socket(AF_INET, SOCK_STREAM, 0);
-	if (serveur.idSocket < 0) {
-		perror("socket()");
-		exit(EXIT_FAILURE);
-	}
+    serveur.idSocket = socket(AF_INET, SOCK_STREAM, 0);
+    if (serveur.idSocket < 0) {
+	perror("socket()");
+	exit(EXIT_FAILURE);
+    }
 
-	serveur.serv_addr.sin_family = AF_INET;
-	serveur.serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-	serveur.serv_addr.sin_port = htons(port);
+    serveur.serv_addr.sin_family = AF_INET;
+    serveur.serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    serveur.serv_addr.sin_port = htons(port);
 
-	// lose the pesky "Address already in use" error message
-	if (setsockopt
-	    (serveur.idSocket, SOL_SOCKET, SO_REUSEADDR, &yes,
-	     sizeof(int)) == -1) {
-		perror("setsockopt()");
-		exit(-1);
-	}
+    // lose the pesky "Address already in use" error message
+    if (setsockopt
+	(serveur.idSocket, SOL_SOCKET, SO_REUSEADDR, &yes,
+	 sizeof(int)) == -1) {
+	perror("setsockopt()");
+	exit(-1);
+    }
 
-	if (bind
-	    (serveur.idSocket, (struct sockaddr *)&serveur.serv_addr,
-	     sizeof(struct sockaddr_in)) < 0) {
-		perror("bind()");
-		exit(-1);
-	}
+    if (bind
+	(serveur.idSocket, (struct sockaddr *) &serveur.serv_addr,
+	 sizeof(struct sockaddr_in)) < 0) {
+	perror("bind()");
+	exit(-1);
+    }
 
-	if (listen(serveur.idSocket, LENGTH_LISTEN_QUEUE)) {
-		perror("liste()");
-		exit(-1);
-	}
-	return serveur;
+    if (listen(serveur.idSocket, LENGTH_LISTEN_QUEUE)) {
+	perror("liste()");
+	exit(-1);
+    }
+    return serveur;
 }
 
-void *talk_to_client(void* socket)
+void *talk_to_client(void *socket)
 {
-    socket_t sockClient = (socket_t)socket;
+    socket_t sockClient = (socket_t) socket;
     /**
      * Corps de la fonction de routine lors de la création de pthread
      * (apparition d'un client

@@ -20,9 +20,9 @@ typedef char* valeur_t;
 
 
 typedef struct donnee {
-	char cle[MAXCAR];
-	char valeur[MAXCAR];
-} *donnee_t;
+	char* cle;
+	char* valeur;
+}* donnee_t;
 
 typedef struct maillon {
 	donnee_t data;
@@ -32,17 +32,22 @@ typedef struct maillon {
 static inline donnee_t creerDonnee(cle_t K, valeur_t V)
 {
 	donnee_t D;
-	D = (donnee_t) malloc(sizeof(struct donnee));
-
-	if (D == NULL) {
-		perror("malloc()");
-		exit(-1);
-	}
-
-	strncpy(D->cle, K, MAXCAR);
-	strncpy(D->valeur, V, MAXCAR);
-
+	
+	D=malloc(sizeof(struct donnee));
+	
+	D->cle = (cle_t)malloc(sizeof(cle_t)*strlen(K));
+	strcpy(D->cle,K);
+	D->valeur=(valeur_t)malloc(sizeof(valeur_t)*strlen(V));
+	strcpy(D->valeur,V);
+	
 	return D;
+}
+
+static inline void libererDonnee(donnee_t D){
+
+	free(D->cle);
+	free(D->valeur);
+	free(D);
 }
 
 /** ajoute une donné à la liste pointé par L_ptr 
@@ -108,7 +113,7 @@ static inline valeur_t removeKey(liste_t * L_ptr, cle_t K)
 		valeur = (*L_ptr)->data->valeur;
 		l = *L_ptr;
 		*L_ptr = l->suiv;
-		free(l->data);
+		libererDonnee(l->data);
 		free(l);
 		return valeur;
 	} else {
@@ -135,7 +140,7 @@ static inline valeur_t removeKey(liste_t * L_ptr, cle_t K)
 		valeur = (*iterateur_ptr)->data->valeur;
 		suivant_ptr = &((*iterateur_ptr)->suiv);
 
-		free((*iterateur_ptr)->data);
+		libererDonnee((*iterateur_ptr)->data);
 		free(*iterateur_ptr);
 		(*precedent_ptr)->suiv = *suivant_ptr;
 
@@ -158,7 +163,7 @@ static void afficherDonnee(donnee_t D)
 	if (D == NULL) {
 		printf("dada non init\n");
 	} else {
-		printf("cle: %s, valeur: %s \n", D->cle, D->valeur);
+		printf("cle: %s, valeur: %s\n", D->cle ,D->valeur);
 	}
 }
 
