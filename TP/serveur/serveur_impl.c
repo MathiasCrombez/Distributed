@@ -54,29 +54,24 @@ serveur_t creerServeur(char *nomDuServeur, uint64_t port)
 	return serveur;
 }
 
-/*void *talk_to_client(void *donne)*/
-/*{*/
-
-/*	int idSocket = (int)donne;*/
-/*	    message_t ms;*/
-
-/*	   bzero(ms.data,MESSAGE_SIZE);*/
-/*	   strcpy(ms.data,"Tp DHT, mathias ramzi yongzhi");*/
-/*	   strcat(ms.data,"\n");*/
-/*	   send(idSocket,ms.data,MESSAGE_SIZE,0);*/
-/*	   bzero(ms.data,MESSAGE_SIZE);     */
-
-/*	   int longueur = recv(idSocket,ms.data,MESSAGE_SIZE,0);*/
-/*	   if (longueur < 0) {*/
-
-/*	   printf("Serveur Recieve Data Failed!\n");*/
-/*	   exit(1);*/
-/*	   }*/
-/*	   printf("\nSocket Num: %d \t %s",idSocket, ms.data);*/
-/*	 */
-/*	shutdown(idSocket, 2);*/
-/*	pthread_exit(NULL);*/
-/*}*/
+void *talk_to_client(void* socket)
+{
+    socket_t sockClient = (socket_t)socket;
+    /**
+     * Corps de la fonction de routine lors de la création de pthread
+     * (apparition d'un client
+     */
+    printf("test = OK\n");
+    /*
+     * Fermeture de la socket
+     */
+    shutdown(sockClient, 2);
+    /*
+     * On peut utiliser pthread_exit pour renvoyer une valeur (d'erreur ou autre) 
+     * => voir pthread_join
+     */
+    pthread_exit(NULL);
+}
 
 /*int put_h(serveur_t s, cle_t cle, valeur_t valeur, uint64_t taille)*/
 /*{*/

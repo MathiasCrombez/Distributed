@@ -48,11 +48,11 @@ typedef struct serveur {
  ** first_k, las_k et next en argument								**/
 serveur_t creerServeur(char* nomDuServeur, uint64_t port);
 							
-//void *talk_to_client(void * donne);
+void *talk_to_client(void * socket);
 
 //int put_h( uint64_t cle, char * valeur, uint64_t taille);
 
-////--------------------------------------------------------------------------------------
+///**********************************************************/
 ///**
 // * La fonction get() recupère la valeur et sa taille associés à la clé et le serveur
 // *
