@@ -15,7 +15,7 @@ int main(int argc, char *argv[])
     client = creerClient(argv[1]);
     connect2server(client, argv[2], atoi(argv[3]));
 
-    envoyerINT_32(21334,client.idSocket);
+    //envoyerINT_32(21334,client.idSocket);
     envoyerChaine("dfffffffffffffffffffffg",client.idSocket);
     return 1;
 }

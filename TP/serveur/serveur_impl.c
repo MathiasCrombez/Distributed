@@ -65,9 +65,11 @@ void talk_to_client(socket_t socket)
     /*
      * Fermeture de la socket
      */
-     int i= recevoirINT_32(socket);
-     printf("int %d\n",i);
-      char* s = recevoirChaine(socket);
+     int i;
+/*      recevoirINT_32(&i,socket);*/
+/*     printf("int %d\n",i);*/
+      char* s ;
+       recevoirChaine(&s,socket);
       
       printf("%s\n",s);
    // shutdown(sockClient, 2);
