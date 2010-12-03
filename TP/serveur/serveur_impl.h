@@ -7,9 +7,11 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <pthread.h>
-#include "hash.h"
 #include <unistd.h>
 
+
+#include "hash.h"
+#include "message.h"
 #define THREAD_MAX 5
 #define LENGTH_LISTEN_QUEUE 10
 #define MESSAGE_SIZE 256
@@ -48,7 +50,7 @@ typedef struct serveur {
  ** first_k, las_k et next en argument								**/
 serveur_t creerServeur(char* nomDuServeur, uint64_t port);
 							
-void *talk_to_client(void * socket);
+void talk_to_client(socket_t  socket);
 
 //int put_h( uint64_t cle, char * valeur, uint64_t taille);
 
