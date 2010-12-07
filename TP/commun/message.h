@@ -94,7 +94,7 @@ static int envoyerINT_32(uint32_t I, socket_t to)
 		return 0;
 	}
 //#ifdef DEBUG_MESSAGE
-	printf("envoi d'un int: %d ...\n");
+	printf("envoi d'un int: %d ...\n", I);
 //#endif
 //    fflush(fd);
 	return 1;

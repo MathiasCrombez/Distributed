@@ -1,26 +1,26 @@
 #include "serveur_impl.h"
 
-#define SET_SERVEUR_NAME(NAME,PORT){										\
-	strcpy(serveur.s.serveurname,NAME);										\
-	strcat(serveur.s.serveurname,":");										\
-	sprintf(serveur.s.serveurname+strlen(NAME)+1,"%ld",PORT);\
-}
+#define SET_SERVEUR_NAME(NAME,PORT){                                    \
+	strcpy(serveur.s.serveurname,NAME);                             \
+	strcat(serveur.s.serveurname,":");                              \
+	sprintf(serveur.s.serveurname+strlen(NAME)+1,"%ld",PORT);       \
+    }
 
 serveur_t creerServeur(char *nomDuServeur, uint64_t port)
 {
-/*	uint64_t first_k=0,last_k=0;*/
-/*	struct idServeur* next=NULL;*/
-/*	uint64_t size_l = last_k - first_k + 1;*/
-/*	table_de_hachage_t tab= creerHashTable(size_l);*/
-/*	SERVEUR.size = size_l;*/
-/*	SERVEUR.firstKey = first_k;*/
-/*	SERVEUR.tabl = tab;*/
-/*	SERVEUR.next_serv = next;*/
+    /*	uint64_t first_k=0,last_k=0;*/
+    /*	struct idServeur* next=NULL;*/
+    /*	uint64_t size_l = last_k - first_k + 1;*/
+    /*	table_de_hachage_t tab= creerHashTable(size_l);*/
+    /*	SERVEUR.size = size_l;*/
+    /*	SERVEUR.firstKey = first_k;*/
+    /*	SERVEUR.tabl = tab;*/
+    /*	SERVEUR.next_serv = next;*/
     int yes = 1;
     serveur_t serveur;
 
     serveur.s.port = port;
-    SET_SERVEUR_NAME(nomDuServeur, port);
+    SET_SERVEUR_NAME(nomDuServeur, (long int)port);
 
     serveur.idSocket = socket(AF_INET, SOCK_STREAM, 0);
     if (serveur.idSocket < 0) {
@@ -65,14 +65,14 @@ void talk_to_client(socket_t socket)
     /*
      * Fermeture de la socket
      */
-     int i;
-/*      recevoirINT_32(&i,socket);*/
-/*     printf("int %d\n",i);*/
-      char* s ;
-       recevoirChaine(&s,socket);
+    int i;
+    /*      recevoirINT_32(&i,socket);*/
+    /*     printf("int %d\n",i);*/
+    char* s ;
+    recevoirChaine(&s,socket);
       
-      printf("%s\n",s);
-   // shutdown(sockClient, 2);
+    printf("%s\n",s);
+    // shutdown(sockClient, 2);
     /*
      * On peut utiliser pthread_exit pour renvoyer une valeur (d'erreur ou autre) 
      * => voir pthread_join

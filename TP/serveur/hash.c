@@ -5,8 +5,7 @@ inline uint64_t hash(cle_t K)
     uint64_t hash = 5381;
     assert(K != NULL);
 #ifdef DEBUG_MESSAGE
-    printf("la cle est: %s de longueur: %ld \n", K, strlen(K));
-
+    printf("la cle est: %s de longueur: %ld \n", K, (long)strlen(K));
 #endif
 
     while (*K != '\0') {
@@ -89,11 +88,7 @@ void afficherLigneHashTable(table_de_hachage_t hashTab, uint64_t numeroLigne)
 
     if (numeroLigne > hashTab.taille) {
 #ifdef DEBUG_MESSAGE
-<<<<<<< HEAD
-        printf("afficherLigneHashTable: indice > %d", hashTab.taille);
-=======
-		printf("afficherLigneHashTable: indice > %ld", hashTab.taille);
->>>>>>> 789c7028079496df45fa4ea93129632699620325
+        printf("afficherLigneHashTable: indice > %ld", (long)hashTab.taille);
 #endif
         return;
     } else {

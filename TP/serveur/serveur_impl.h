@@ -26,17 +26,17 @@ struct idServeur {
 
 struct idClient {
 
-	struct sockaddr_in client_addr;
-	socket_t idSocket;
+    struct sockaddr_in client_addr;
+    socket_t idSocket;
 };
 
 typedef struct serveur {
     
     struct idServeur s;
     struct sockaddr_in serv_addr;
-	socket_t idSocket;
+    socket_t idSocket;
 	
-	struct idClient tableauClient[LENGTH_LISTEN_QUEUE];
+    struct idClient tableauClient[LENGTH_LISTEN_QUEUE];
 	
     table_de_hachage_t tabl;
     uint64_t firstKey;

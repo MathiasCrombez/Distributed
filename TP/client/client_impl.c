@@ -6,43 +6,43 @@
 
 client_t creerClient(const char *nom)
 {
-	client_t client;
+    client_t client;
 	
-	/**initialisation des champs du client**/
-	client.monNom = nom;
-	client.idSocket = socket(AF_INET, SOCK_STREAM, 0);
+    /**initialisation des champs du client**/
+    client.monNom = nom;
+    client.idSocket = socket(AF_INET, SOCK_STREAM, 0);
 
-	if (client.idSocket < 0) {
-		perror("socket()");
-		exit(-1);
-	}
+    if (client.idSocket < 0) {
+        perror("socket()");
+        exit(-1);
+    }
 	
-	return client;
+    return client;
 }
 
 uint32_t connect2server(client_t client, char* to_serveur, uint64_t port)
 {
-	char* hostname= to_serveur;	
-	struct hostent *hostinfo = NULL;
+    char* hostname= to_serveur;	
+    struct hostent *hostinfo = NULL;
 		
-	hostinfo = gethostbyname(hostname);
-	if (hostinfo == NULL) {
-		printf("erreur gethostbyname():le serveur %s est inconnu\n", to_serveur);
-		return -1;
-	}
+    hostinfo = gethostbyname(hostname);
+    if (hostinfo == NULL) {
+        printf("erreur gethostbyname():le serveur %s est inconnu\n", to_serveur);
+        return -1;
+    }
 
-	client.serv_addr.sin_family = AF_INET;
-	client.serv_addr.sin_port = htons(port);
-	client.serv_addr.sin_addr = *(struct in_addr *) hostinfo->h_addr;
+    client.serv_addr.sin_family = AF_INET;
+    client.serv_addr.sin_port = htons(port);
+    client.serv_addr.sin_addr = *(struct in_addr *) hostinfo->h_addr;
 	
-	if (connect(client.idSocket, (struct sockaddr *)&client.serv_addr,
-	     sizeof(struct sockaddr_in)) < 0) {
-	#ifdef DEBUG_MESSAGE
-		printf("Echec de la connexion\n");
-	#endif
-		return -1;
-	}
-	return 0;
+    if (connect(client.idSocket, (struct sockaddr *)&client.serv_addr,
+                sizeof(struct sockaddr_in)) < 0) {
+#ifdef DEBUG_MESSAGE
+        printf("Echec de la connexion\n");
+#endif
+        return -1;
+    }
+    return 0;
 }
 
 /*uint32_t put(uint32_t cle, uint32_t valeur)*/
