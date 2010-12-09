@@ -1,10 +1,9 @@
 #include "serveur_impl.h"
-//#include "message.h"
-
 
 
 int main(int argc, char *argv[])
 {
+
     if (argc < 3) {
 	    printf("Usage: %s nomDuServeur Port\n", argv[0]);
 	    exit(0);
@@ -70,5 +69,6 @@ int main(int argc, char *argv[])
     printf("votre serveur n'accepte pas plus de %d connexions à la fois\n",LENGTH_LISTEN_QUEUE);
 
     return 0;
+
 }
 

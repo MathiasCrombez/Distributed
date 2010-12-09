@@ -47,11 +47,11 @@ serveur_t creerServeur(char *nomDuServeur, uint64_t port)
 }
 
 
-
-void *talk_to_client(void *socket)
+void talk_to_client(socket_t socket)
 {
     //ce socket va nous permettre de communiquer avec le client
     socket_t sockClient = (socket_t) socket;
+
     /**
      * Corps de la fonction de routine lors de la création de pthread
      * (apparition d'un client
@@ -149,6 +149,7 @@ uint32_t connect2server( char* to_serveur,uint64_t port){
     /*
      * Fermeture de la socket
      */
+
    // shutdown(sockClient, 2);
     /*
      * On peut utiliser pthread_exit pour renvoyer une valeur (d'erreur ou autre) 

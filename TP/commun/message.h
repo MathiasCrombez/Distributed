@@ -5,22 +5,24 @@
  #include <sys/types.h> 
  #include <arpa/inet.h>
 #include "commun.h"
+
 #define OUI 1
 #define NON 0
 
 
 
 #define T_VALEUR 		sizeof(valeur_t)
+#define T_INT_32 		32
 #define T_OCTET 		sizeof(char)
 #define T_CHAINE(string) strlen(string)*T_OCTET
 #define T_DONNEE(donnee)   T_CHAINE(donnee->cle) + T_CHAINE(donnee->valeur)
 
-
-#define SET_MESSAGE(M,type_m,type_r,len)                               \
+#define SET_MESSAGE(M,type_r,len)                                      \
     message_t M;                                                       \
-    M.type_mess = type_m;                                              \
+                                                                       \
     M.type_requete = type_r;                                           \
     M.taille = len;                                                    \
+
 
 enum ___type_message {
     REQUETE,
@@ -42,19 +44,6 @@ union __message {
 };
 
 
-typedef struct message {
-
-    enum ___type_message type_mess;
-    enum ___type_requete type_requete;
-    size_t taille;
-    union __message mess;
-
-} message_t;
-
-
-
-
-
 
 static int envoyerUInt_32(uint32_t I,socket_t to ){
 
@@ -72,7 +61,6 @@ static int recevoirUInt_32(uint32_t* I,socket_t from){
     *I=atoi(s_I);
     return 1;
 }
-
 
 static int envoyerOctet(char O, socket_t to)
 {
@@ -156,5 +144,6 @@ static int recevoirIdent(struct sockaddr_in* ident , socket_t from){
     
     return 1;
 }
+
 #endif
 
