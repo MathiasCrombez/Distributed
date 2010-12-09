@@ -13,20 +13,21 @@ serveur_t creerServeur(char *nomDuServeur, uint64_t port)
     
    
     
-//  SET_SERVEUR_NAME(nomDuServeur, port);
-  //  SERVEUR.name = nomDuServeur;
+    SET_SERVEUR_NAME(nomDuServeur, port);
     SERVEUR.idSocket = socket(AF_INET, SOCK_STREAM, 0);
     if (SERVEUR.idSocket < 0) {
 	    perror("socket()");
 	    exit(EXIT_FAILURE);
     }
-    #define SERVEURNAME "itinerix"
+    #define SERVEURNAME "194.254.210.43"
     SERVEUR.serv_addr.sin_family = AF_INET;
-   SERVEUR.serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-   //SERVEUR.serv_addr.sin_addr.s_addr = inet_addr(SERVEURNAME);
+    //SERVEUR.serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+   SERVEUR.serv_addr.sin_addr.s_addr = inet_addr(SERVEURNAME);
     SERVEUR.serv_addr.sin_port = htons(port);
     SERVEUR.nextServeur.identifiant =  SERVEUR.serv_addr;
    
+    SERVEUR.firstKey=0;
+    SERVEUR.nextKey = 0;
     
     // lose the pesky "Address already in use" error message
     if (setsockopt(SERVEUR.idSocket, SOL_SOCKET, SO_REUSEADDR, &yes,sizeof(int)) == -1) {
@@ -74,11 +75,24 @@ void talk_to_client(socket_t socket)
         break;
     
      case  CONNECT:
-        printf("un serveur veut participer à la dht\n Mais que faire?!!!\n");
-        printf("mon port %d\n",SERVEUR.nextServeur.identifiant.sin_port);
+        printf("un serveur veut participer à la dht\n");
+        
+        //#### debug ####//
+        printf("mon prochain serveur est:\n");
+        printf("SERVEUR.name %s\n",SERVEUR.name );
+        
+		afficherIdentConnexion(SERVEUR.nextServeur.identifiant);
+		//#### debug ####//
+		
         envoyerIdent(SERVEUR.nextServeur.identifiant, sockClient);
+        envoyerHash(SERVEUR.nextKey,sockClient);
         recevoirIdent(&(SERVEUR.nextServeur.identifiant), sockClient);
-         printf("mon port %d\n",SERVEUR.nextServeur.identifiant.sin_port);
+        recevoirHash(&(SERVEUR.nextKey),sockClient);
+        
+        //#### debug ####//
+        printf("mon prochain serveur est:\n");
+		afficherIdentConnexion(SERVEUR.nextServeur.identifiant);
+        //#### debug ####//
         break;
     
     default  :
@@ -89,7 +103,7 @@ void talk_to_client(socket_t socket)
 }
 
 
-uint32_t connect2server( char* to_serveur,uint64_t port){
+socket_t connect2server( char* to_serveur,uint64_t port){
     
 	struct hostent *hostinfo = NULL;
 	socket_t idSocket;
@@ -98,7 +112,7 @@ uint32_t connect2server( char* to_serveur,uint64_t port){
 	hostinfo = gethostbyname(to_serveur);
 	if (hostinfo == NULL) {
 		printf("erreur gethostbyname():le serveur %s est inconnu\n", to_serveur);
-		return -1;
+		return 0;
 	}
 
     ddr.sin_family = AF_INET;
@@ -109,22 +123,14 @@ uint32_t connect2server( char* to_serveur,uint64_t port){
 	
     if (idSocket < 0) {
 	    perror("socket()");
-	    exit(EXIT_FAILURE);
+	    return 0;
     }
     
-	if (connect(idSocket, (struct sockaddr *)&ddr,
-	     sizeof(struct sockaddr_in)) < 0) {
-	#ifdef DEBUG_MESSAGE
-		printf("Echec de la connexion\n");
-	#endif
+	if (connect(idSocket, (struct sockaddr *)&ddr,sizeof(struct sockaddr_in)) ==-1) {
+		perror("connect()");
 		return 0;
 	}
-	 printf("mon port %d\n",SERVEUR.nextServeur.identifiant.sin_port);
-    envoyerTypeMessage(CONNECT,idSocket);
-    recevoirIdent(&SERVEUR.nextServeur.identifiant,idSocket);
-    envoyerIdent(SERVEUR.serv_addr,idSocket);
-     printf("mon port %d\n",SERVEUR.nextServeur.identifiant.sin_port);
-	return 1;
+	return idSocket;
 }
 
 

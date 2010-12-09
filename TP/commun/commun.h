@@ -8,7 +8,9 @@
 #include <assert.h>
 #include <sys/errno.h>
 #include <assert.h>
-
+#include <sys/socket.h>
+ #include <sys/types.h> 
+ #include <arpa/inet.h>
 
 #define MAXCAR 20
 #define DEBUG_MESSAGE
@@ -179,5 +181,13 @@ static void afficherListe(liste_t L)
 	}
 }
 
+
+
+static void afficherIdentConnexion(struct sockaddr_in ident){
+	
+	printf("\tAdresse Ip: %s\n", inet_ntoa(ident.sin_addr)); 
+	printf("\tPort conne: %d\n", ntohs(ident.sin_port));
+
+}
 #endif
 

@@ -32,10 +32,12 @@ typedef struct serveur {
 
     struct sockaddr_in serv_addr;
     socket_t idSocket;
+    char name[20];
     
     table_de_hachage_t tabl;
     uint64_t firstKey;
-    
+    uint64_t nextKey;
+
     struct idConnexion tableauClient[LENGTH_LISTEN_QUEUE];
     struct idConnexion nextServeur;
     

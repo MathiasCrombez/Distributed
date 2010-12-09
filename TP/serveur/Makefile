@@ -1,7 +1,7 @@
 .PHONY: clean exec test_hash
 all:serveur test_hash
 
-OBJECTS = serveur.o serveur_impl.o hash.o
+OBJECTS = serveur.o serveur_impl.o hash.o message.o
 CFLAGS = -p -g
 IFLAGS = -I ../commun/
 
@@ -14,7 +14,8 @@ serveur_impl.o : serveur_impl.c
 	gcc $(CFLAGS) -c serveur_impl.c $(IFLAGS)
 serveur.o : serveur.c
 	gcc $(CFLAGS) -c serveur.c $(IFLAGS)
-
+message.o : message.c
+	gcc $(CFLAGS) -c message.c $(IFLAGS)
 #####test#####	
 test_hash:test_hash.o hash.o
 	gcc  -g -o test_hash test_hash.o hash.o
