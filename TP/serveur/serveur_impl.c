@@ -6,152 +6,142 @@
 	sprintf(SERVEUR.name+strlen(NAME)+1,"%ld",PORT);                \
 }
 
+#define SERVEURNAME "194.254.210.15"
+
 
 serveur_t creerServeur(char *nomDuServeur, uint64_t port)
 {
-    int yes = 1;
-    
-   
-    
-    SET_SERVEUR_NAME(nomDuServeur, port);
-    SERVEUR.idSocket = socket(AF_INET, SOCK_STREAM, 0);
-    if (SERVEUR.idSocket < 0) {
-	    perror("socket()");
-	    exit(EXIT_FAILURE);
-    }
-    #define SERVEURNAME "194.254.210.43"
-    SERVEUR.serv_addr.sin_family = AF_INET;
-    //SERVEUR.serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-   SERVEUR.serv_addr.sin_addr.s_addr = inet_addr(SERVEURNAME);
-    SERVEUR.serv_addr.sin_port = htons(port);
-    SERVEUR.nextServeur.identifiant =  SERVEUR.serv_addr;
-   
-    SERVEUR.firstKey=0;
-    SERVEUR.nextKey = 0;
-    
-    // lose the pesky "Address already in use" error message
-    if (setsockopt(SERVEUR.idSocket, SOL_SOCKET, SO_REUSEADDR, &yes,sizeof(int)) == -1) {
-	    perror("setsockopt()");
-	    exit(-1);
-    }
+	int yes = 1;
 
-    if (bind(SERVEUR.idSocket, (struct sockaddr *) &SERVEUR.serv_addr,sizeof( SERVEUR.serv_addr)) < 0) {
-	    perror("bind()");
-	    exit(-1);
-    }
+	SET_SERVEUR_NAME(nomDuServeur, port);
+	SERVEUR.idSocket = socket(AF_INET, SOCK_STREAM, 0);
+	if (SERVEUR.idSocket < 0) {
+		perror("socket()");
+		exit(EXIT_FAILURE);
+	}
 
-    if (listen(SERVEUR.idSocket, LENGTH_LISTEN_QUEUE)) {
-	    perror("liste()");
-	    exit(-1);
-    }
-    return SERVEUR;
+	SERVEUR.serv_addr.sin_family = AF_INET;
+	//SERVEUR.serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+	SERVEUR.serv_addr.sin_addr.s_addr = inet_addr(SERVEURNAME);
+	SERVEUR.serv_addr.sin_port = htons(port);
+	SERVEUR.nextServeur.identifiant = SERVEUR.serv_addr;
+	SERVEUR.nextServeur.name = SERVEUR.name;
+	SERVEUR.firstKey = 0;
+	SERVEUR.nextKey = 0;
+
+	// lose the pesky "Address already in use" error message
+	if (setsockopt
+	    (SERVEUR.idSocket, SOL_SOCKET, SO_REUSEADDR, &yes,
+	     sizeof(int)) == -1) {
+		perror("setsockopt()");
+		exit(-1);
+	}
+
+	if (bind
+	    (SERVEUR.idSocket, (struct sockaddr *)&SERVEUR.serv_addr,
+	     sizeof(SERVEUR.serv_addr)) < 0) {
+		perror("bind()");
+		exit(-1);
+	}
+
+	if (listen(SERVEUR.idSocket, LENGTH_LISTEN_QUEUE)) {
+		perror("liste()");
+		exit(-1);
+	}
+	return SERVEUR;
 }
-
 
 void talk_to_client(socket_t socket)
 {
-    //ce socket va nous permettre de communiquer avec le client
-    socket_t sockClient = (socket_t) socket;
+	//ce socket va nous permettre de communiquer avec le client
+	socket_t sockClient = (socket_t) socket;
 
     /**
      * Corps de la fonction de routine lors de la création de pthread
      * (apparition d'un client
      */
-    requete_t type_requete;
-    recevoirTypeMessage(&type_requete,sockClient);
-    
-    switch(type_requete){
-    
-    case  PUT:
-        break;
-        
-    case  GET:
-        break;
-        
-    case  ACK:
-        break;
-    
-    case  IDENT:
-        break;
-    
-     case  CONNECT:
-        printf("un serveur veut participer à la dht\n");
-        
-        //#### debug ####//
-        printf("mon prochain serveur est:\n");
-        printf("SERVEUR.name %s\n",SERVEUR.name );
-        
-		afficherIdentConnexion(SERVEUR.nextServeur.identifiant);
-		//#### debug ####//
-		
-        envoyerIdent(SERVEUR.nextServeur.identifiant, sockClient);
-        envoyerHash(SERVEUR.nextKey,sockClient);
-        recevoirIdent(&(SERVEUR.nextServeur.identifiant), sockClient);
-        recevoirHash(&(SERVEUR.nextKey),sockClient);
-        
-        //#### debug ####//
-        printf("mon prochain serveur est:\n");
-		afficherIdentConnexion(SERVEUR.nextServeur.identifiant);
-        //#### debug ####//
-        break;
-    
-    default  :
-        break;
+	requete_t type_requete;
+	recevoirTypeMessage(&type_requete, sockClient);
 
-    }
-    
+	switch (type_requete) {
+
+	case PUT:
+		break;
+
+	case GET:
+		break;
+
+	case ACK:
+		break;
+
+	case IDENT:
+		break;
+
+	case CONNECT:
+	
+		
+		printf("un serveur veut participer à la dht\n");
+
+		//#### debug ####//
+		printf("mon prochain serveur est:\n");
+		afficherIdentConnexion(SERVEUR.nextServeur);
+		printf("\n");
+		//#### debug ####//
+
+		envoyerIdent(SERVEUR.nextServeur.identifiant, sockClient);
+		envoyerHash(SERVEUR.nextKey, sockClient);
+		envoyerChaine(SERVEUR.nextServeur.name,sockClient);
+		recevoirIdent(&(SERVEUR.nextServeur.identifiant), sockClient);
+		recevoirHash(&(SERVEUR.nextKey), sockClient);
+		recevoirChaine(&(SERVEUR.nextServeur.name), sockClient);
+
+		//#### debug ####//
+		printf("mon prochain serveur est:\n");
+		afficherIdentConnexion(SERVEUR.nextServeur);
+		printf("\n");
+		//#### debug ####//
+		break;
+
+	default:
+		break;
+
+	}
+
 }
 
+socket_t connect2server(char *to_serveur, uint64_t port)
+{
 
-socket_t connect2server( char* to_serveur,uint64_t port){
-    
 	struct hostent *hostinfo = NULL;
 	socket_t idSocket;
 	struct sockaddr_in ddr;
-	
+
 	hostinfo = gethostbyname(to_serveur);
 	if (hostinfo == NULL) {
-		printf("erreur gethostbyname():le serveur %s est inconnu\n", to_serveur);
+		printf("erreur gethostbyname():le serveur %s est inconnu\n",
+		       to_serveur);
 		return 0;
 	}
 
-    ddr.sin_family = AF_INET;
-	ddr.sin_port   = htons(port);
-	ddr.sin_addr   = *(struct in_addr *) hostinfo->h_addr;
+	ddr.sin_family = AF_INET;
+	ddr.sin_port = htons(port);
+	ddr.sin_addr = *(struct in_addr *)hostinfo->h_addr;
 	idSocket = socket(AF_INET, SOCK_STREAM, 0);
 
-	
-    if (idSocket < 0) {
-	    perror("socket()");
-	    return 0;
-    }
-    
-	if (connect(idSocket, (struct sockaddr *)&ddr,sizeof(struct sockaddr_in)) ==-1) {
+	if (idSocket < 0) {
+		perror("socket()");
+		return 0;
+	}
+
+	if (connect
+	    (idSocket, (struct sockaddr *)&ddr,
+	     sizeof(struct sockaddr_in)) == -1) {
 		perror("connect()");
 		return 0;
 	}
 	return idSocket;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
-  
-   
     /*
      * Fermeture de la socket
      */
@@ -227,8 +217,4 @@ socket_t connect2server( char* to_serveur,uint64_t port){
 /*		}*/
 /*	}*/
 /*}*/
-
-
-
-
 

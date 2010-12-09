@@ -26,6 +26,7 @@ struct idConnexion {
 
 	struct sockaddr_in identifiant;
 	socket_t idSocket;
+	char* name;
 };
 
 typedef struct serveur {
@@ -44,7 +45,8 @@ typedef struct serveur {
 } serveur_t;
 
 
-static serveur_t SERVEUR;
+//## variable global ##/
+serveur_t SERVEUR;
 
 
 /** on creer un serveur.Il ne partage pas la DHT encor donc pas besoin de
@@ -72,5 +74,15 @@ void talk_to_client(socket_t  socket);
 //int remove_h(cle_t cle, valeur, uint64_t taille);
 
 uint32_t connect2server( char* to_serveur,uint64_t port);
+int messageConnect2Server(char* ip, uint64_t port);
 
+
+static void afficherIdentConnexion(struct idConnexion ident){
+	
+	printf("identifiant connexion:\n");
+	printf("\tNom       : %s\n",ident.name);
+	printf("\tAdresse Ip: %s\n", inet_ntoa(ident.identifiant.sin_addr)); 
+	printf("\tPort conne: %d\n", ntohs(ident.identifiant.sin_port));
+
+}
 #endif

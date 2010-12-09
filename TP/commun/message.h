@@ -10,7 +10,8 @@
 
 
 #define T_VALEUR 		   sizeof(valeur_t)
-#define T_INT_32 		   32
+#define T_INT_32 		   10
+#define T_INT_64 		   20
 #define T_OCTET 		   sizeof(char)
 #define T_CHAINE(string)   strlen(string)*T_OCTET
 #define T_DONNEE(donnee)   T_CHAINE(donnee->cle) + T_CHAINE(donnee->valeur)
@@ -55,14 +56,14 @@ typedef enum ___type_requete {
 
 static int envoyerUInt_32(uint32_t I,socket_t to ){
 
-    char* s_I= malloc(sizeof(uint32_t));
+    char* s_I= malloc(T_INT_32);
     if(s_I == NULL){
         perror("malloc()");
         return 0;
     }
     sprintf(s_I,"%d",I);
     
-    if(send(to,s_I,sizeof(uint32_t),0)==-1){
+    if(send(to,s_I,T_INT_32,0)==-1){
         perror("send()");
         return 0;   
     }
@@ -72,13 +73,13 @@ static int envoyerUInt_32(uint32_t I,socket_t to ){
 
 static int recevoirUInt_32(uint32_t* I,socket_t from){
 
-    char* s_I= malloc(sizeof(uint32_t));
+    char* s_I= malloc(T_INT_32);
     if(s_I == NULL){
         perror("malloc()");
         return 0;
     }
     
-    if(recv(from,s_I,sizeof(uint32_t),0)==-1){
+    if(recv(from,s_I,T_INT_32,0)==-1){
         perror("recv()");
         return 0;
     }
@@ -90,14 +91,14 @@ static int recevoirUInt_32(uint32_t* I,socket_t from){
 
 static envoyerUInt_64(uint64_t I, socket_t to){
 
-    char* s_I= malloc(sizeof(uint64_t));
+    char* s_I= malloc(T_INT_64);
     if(s_I == NULL){
         perror("malloc()");
         return 0;
     }
     sprintf(s_I,"%ld",I);
     
-    if(send(to,s_I,sizeof(uint64_t),0)==-1){
+    if(send(to,s_I,T_INT_64,0)==-1){
         perror("send()");
         return 0;   
     }
@@ -108,12 +109,12 @@ static envoyerUInt_64(uint64_t I, socket_t to){
 
 static recevoirUInt_64(uint64_t* I, socket_t from)
 {
-    char* s_I= malloc(sizeof(uint64_t));
+    char* s_I= malloc(T_INT_64);
     if(s_I == NULL){
         perror("malloc()");
         return 0;
     }
-      if(recv(from,s_I,sizeof(uint64_t),0)==-1){
+      if(recv(from,s_I,T_INT_64,0)==-1){
         perror("recv()");
         return 0;
     }
