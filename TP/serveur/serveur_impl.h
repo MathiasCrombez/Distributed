@@ -9,6 +9,8 @@
 #include <pthread.h>
 #include "hash.h"
 #include <unistd.h>
+#include "message.h"
+#include <netdb.h>
 
 #define THREAD_MAX 5
 #define LENGTH_LISTEN_QUEUE 10
@@ -16,37 +18,35 @@
 
 
 
-struct idServeur {
-    char serveurname[MAXCAR];
-    uint64_t port;
-} ;
 
 
-struct idClient {
+struct idConnexion {
 
-	struct sockaddr_in client_addr;
+	struct sockaddr_in identifiant;
 	socket_t idSocket;
 };
 
 typedef struct serveur {
-    
-    struct idServeur s;
+
     struct sockaddr_in serv_addr;
-	socket_t idSocket;
-	
-	struct idClient tableauClient[LENGTH_LISTEN_QUEUE];
-	
+    socket_t idSocket;
+    
     table_de_hachage_t tabl;
     uint64_t firstKey;
-    uint64_t size;
     
-    struct idServeur* next_serv;
+    struct idConnexion tableauClient[LENGTH_LISTEN_QUEUE];
+    struct idConnexion nextServeur;
+    
 } serveur_t;
+
+
+static serveur_t SERVEUR;
 
 
 /** on creer un serveur.Il ne partage pas la DHT encor donc pas besoin de
  ** first_k, las_k et next en argument								**/
 serveur_t creerServeur(char* nomDuServeur, uint64_t port);
+		
 							
 void *talk_to_client(void * socket);
 
@@ -67,5 +67,6 @@ void *talk_to_client(void * socket);
 
 //int remove_h(cle_t cle, valeur, uint64_t taille);
 
+uint32_t connect2server( char* to_serveur,uint64_t port);
 
 #endif

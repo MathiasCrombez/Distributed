@@ -2,7 +2,7 @@
 all:serveur test_hash
 
 OBJECTS = serveur.o serveur_impl.o hash.o
-CFLAGS = -Wall -p -g
+CFLAGS = -p -g
 
 IFLAGS = -I ../commun/
 

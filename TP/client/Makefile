@@ -1,6 +1,6 @@
 .PHONY: clean exec
 OBJECTS = client.o client_impl.o ../commun/message.o
-CFLAGS = -Wall -p -g
+CFLAGS =  -p -g
 
 IFLAGS = -I ../commun/
 
