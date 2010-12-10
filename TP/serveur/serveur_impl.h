@@ -20,8 +20,6 @@
 
 
 
-
-
 struct idConnexion {
 
 	struct sockaddr_in identifiant;
@@ -38,9 +36,11 @@ typedef struct serveur {
     table_de_hachage_t tabl;
     uint64_t firstKey;
     uint64_t nextKey;
-
+	uint64_t precKey;
+	
     struct idConnexion tableauClient[LENGTH_LISTEN_QUEUE];
-    struct idConnexion nextServeur;
+    struct idConnexion* suivServeur;
+    struct idConnexion* precServeur;
     
 } serveur_t;
 
@@ -49,12 +49,13 @@ typedef struct serveur {
 serveur_t SERVEUR;
 
 
+
 /** on creer un serveur.Il ne partage pas la DHT encor donc pas besoin de
  ** first_k, las_k et next en argument								**/
 serveur_t creerServeur(char* nomDuServeur, uint64_t port);
 		
 							
-void talk_to_client(socket_t  socket);
+void* talk_to_client(void* sockClient);
 
 //int put_h( uint64_t cle, char * valeur, uint64_t taille);
 
@@ -73,16 +74,16 @@ void talk_to_client(socket_t  socket);
 
 //int remove_h(cle_t cle, valeur, uint64_t taille);
 
-uint32_t connect2server( char* to_serveur,uint64_t port);
+socket_t connect2server( char* to_serveur,uint64_t port);
 int messageConnect2Server(char* ip, uint64_t port);
 
 
-static void afficherIdentConnexion(struct idConnexion ident){
+static void afficherIdentConnexion(struct idConnexion* ident){
 	
 	printf("identifiant connexion:\n");
-	printf("\tNom       : %s\n",ident.name);
-	printf("\tAdresse Ip: %s\n", inet_ntoa(ident.identifiant.sin_addr)); 
-	printf("\tPort conne: %d\n", ntohs(ident.identifiant.sin_port));
+	printf("\tNom       : %s\n",ident->name);
+	printf("\tAdresse Ip: %s\n", inet_ntoa(ident->identifiant.sin_addr)); 
+	printf("\tPort conne: %d\n", ntohs(ident->identifiant.sin_port));
 
 }
 #endif
