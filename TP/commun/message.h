@@ -21,13 +21,20 @@
 //      REQUETE,
 //      REPONSE,
 //};
-
+/**
+ * Type de la requete
+ */
 typedef enum _type_requete {
 	INT_32,
 	CHAINE,
 	AUTRE,
 } requete_t;
 
+
+/**
+ * Définition de la structure du message
+ * @param taille permet de savoir la taille du message pour quand il se finit
+ */
 typedef struct message {
 
 	//enum ___type_message type_mess;
@@ -63,6 +70,9 @@ typedef struct message {
 //	return n_octet;
 //}
 
+/**
+ * Récéption d'un entier (32 bits)
+ */
 static inline int recevoirINT_32(uint32_t * int_ptr, socket_t from)
 {
 	XDR xdrs;
@@ -80,7 +90,9 @@ static inline int recevoirINT_32(uint32_t * int_ptr, socket_t from)
 	return 1;
 
 }
-
+/**
+ * Envoi d'un entier (32 bits)
+ */
 static int envoyerINT_32(uint32_t I, socket_t to)
 {
 
@@ -100,6 +112,9 @@ static int envoyerINT_32(uint32_t I, socket_t to)
 	return 1;
 }
 
+/**
+ * Envoi d'une chaine de caractères de taille reçu par la valeur renvoyée
+ */
 static ssize_t envoyerChaine(char *chaine, socket_t to)
 {
 	uint32_t size = T_CHAINE(chaine);
@@ -119,6 +134,10 @@ static ssize_t envoyerChaine(char *chaine, socket_t to)
 	return 1;
 }
 
+
+/**
+ * Récéption d'une chaine
+ */
 static int recevoirChaine(char **chaine, socket_t from)
 {
 	uint32_t size;

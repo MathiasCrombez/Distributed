@@ -4,6 +4,10 @@
 
 #define IDSOCKET CLIENT.idSocket
 
+
+/**
+ * Création de la structure client
+ */
 client_t creerClient(const char *nom)
 {
     client_t client;
@@ -19,7 +23,9 @@ client_t creerClient(const char *nom)
 	
     return client;
 }
-
+/**
+ * Se connecte au serveur donné
+ */
 uint32_t connect2server(client_t client, char* to_serveur, uint64_t port)
 {
     char* hostname= to_serveur;	
