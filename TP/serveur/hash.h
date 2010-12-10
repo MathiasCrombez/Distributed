@@ -36,5 +36,11 @@ inline uint64_t hash(cle_t K);
 void segmenterHashTable(uint64_t indice,
                         table_de_hachage_t * hash_tab1_ptr,
                         table_de_hachage_t * hash_tab2_ptr);
+                        
+                        
+
+
+
+
 #endif
 

@@ -14,7 +14,7 @@
 #define T_DONNEE(donnee)   T_CHAINE(donnee->cle) + T_CHAINE(donnee->valeur)
 
 #define DEBUG_MESSAGE_H
-//#undef  DEBUG_MESSAGE_H
+#undef  DEBUG_MESSAGE_H
 
 #ifdef DEBUG_MESSAGE_H
 #   define print_debug(chaine, args...)   printf(chaine,##args)
@@ -232,12 +232,13 @@ static int envoyerIdent(struct sockaddr_in ident, socket_t to)
 static int recevoirIdent(struct sockaddr_in *ident, socket_t from)
 {
 	char *ip;
-
+	uint32_t port;
+	
 	recevoirChaine(&ip, from);
-	recevoirUInt_32(&(ident->sin_port), from);
+	recevoirUInt_32(&port, from);
 
 	ident->sin_addr.s_addr = inet_addr(ip);
-
+	ident->sin_port = port;
 	return 1;
 }
 

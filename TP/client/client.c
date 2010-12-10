@@ -9,14 +9,23 @@ int main(int argc, char *argv[])
 	}
 
 	client_t client;
-
+	char o;
+	donnee_t d;
+	
 	client = creerClient(argv[1]);
 	connect2server(client, argv[2], atoi(argv[3]));
-	envoyerUInt_32(35533, client.idSocket);
-	envoyerChaine("salut serveur, c'est le client'", client.idSocket);
-	donnee_t D = creerDonnee("une nouvelle cle", "range cette valeur dans ta dht");
-	envoyerDonnee(D, client.idSocket);
-
+	
+	envoyerOrigine(FROM_CLIENT,client.idSocket);
+	envoyerTypeMessage(GET,client.idSocket);
+	envoyerCle("d",client.idSocket);
+	recevoirOctet(&o,client.idSocket);
+	if(o==0){
+		printf("la cle n'existe pas");
+	}
+	else if(o==1){
+		recevoirDonnee(&d,client.idSocket);
+		afficherDonnee(d);
+	}
 	return 1;
 }
 

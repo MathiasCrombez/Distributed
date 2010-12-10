@@ -4,9 +4,6 @@ inline uint64_t hash(cle_t K)
 {
 	uint64_t hash = 5381;
 	assert(K != NULL);
-#ifdef DEBUG_MESSAGE
-	printf("la cle est: %s de longueur: %ld \n", K, strlen(K));
-#endif
 
 	while (*K != '\0') {
 		int c = *K;
@@ -52,11 +49,13 @@ void libererHashTable(table_de_hachage_t hashTab)
 }
 
 /** retourne null si la valeur associé à cle n'est pas dans la table **/
-donnee_t getHashTable(char *cle, table_de_hachage_t hashTab)
+donnee_t getHashTable(cle_t cle, table_de_hachage_t hashTab)
 {
 	uint64_t h;
 	liste_t liste;
 	assert(cle != NULL);
+	assert(hashTab.taille!=0);
+	assert(hashTab.table_de_hachage!=NULL);
 	h = hash(cle) % hashTab.taille;
 	liste = hashTab.table_de_hachage[h];
 	return getKey(liste, cle);
@@ -66,11 +65,15 @@ void putHashTable(donnee_t D, table_de_hachage_t hashTab)
 {
 	uint64_t h;
 	liste_t *liste_ptr;
-
 	assert(D != NULL);
+	assert(hashTab.taille!=0);
+	assert(hashTab.table_de_hachage!=NULL);
 	h = hash(D->cle) % hashTab.taille;
 	liste_ptr = &hashTab.table_de_hachage[h];
-	ajouterDonnee(liste_ptr, D);
+	if(!ajouterDonnee(liste_ptr, D)){
+		perror("ajouterDonnee()");
+		return;
+	}
 }
 
 valeur_t removeHashTable(cle_t cle, table_de_hachage_t hashTab)
@@ -78,6 +81,8 @@ valeur_t removeHashTable(cle_t cle, table_de_hachage_t hashTab)
 	uint64_t h;
 	liste_t *liste_ptr;
 	assert(cle != NULL);
+	assert(hashTab.taille!=0);
+	assert(hashTab.table_de_hachage!=NULL);
 	h = hash(cle) % hashTab.taille;
 	liste_ptr = &hashTab.table_de_hachage[h];
 	return removeKey(liste_ptr, cle);
@@ -95,6 +100,74 @@ void afficherLigneHashTable(table_de_hachage_t hashTab, uint64_t numeroLigne)
 		afficherListe(hashTab.table_de_hachage[numeroLigne]);
 	}
 }
+
+void afficherHashTable(table_de_hachage_t hashTab){
+	
+	int i=0;
+	printf(":::::Table de hachage:::::\n");
+	for(i=0;i<hashTab.taille;i++){
+		printf("******Ligne %d*******\n",i);
+		afficherLigneHashTable(hashTab,i);
+	}
+
+}
+
+//creer une table de hachage juste pour les testes
+table_de_hachage_t TEST_HASH_TABLE(){
+
+	table_de_hachage_t tablh=creerHashTable(10);
+
+	donnee_t d1,d2,d3,d4,d5,d6,d7,d8,d9,d10;
+	donnee_t d11,d12,d13,d14,d15,d16,d17,d18,d19,d20;
+	
+	assert(NULL!=(d1  = creerDonnee("a","AAAAAAAAAAA")));
+	assert(NULL!=(d2  = creerDonnee("b","BBBBBBBBBBB")));
+	assert(NULL!=(d3  = creerDonnee("c","CCCCCCCCCCC")));
+	assert(NULL!=(d4  = creerDonnee("d","DDDDDDDDDDD")));
+	assert(NULL!=(d5  = creerDonnee("e","EEEEEEEEEEE")));
+	assert(NULL!=(d6  = creerDonnee("f","FFFFFFFFFFF")));
+	assert(NULL!=(d7  = creerDonnee("g","GGGGGGGGGGG")));
+	assert(NULL!=(d8  = creerDonnee("h","HHHHHHHHHHH")));
+	assert(NULL!=(d9  = creerDonnee("i","IIIIIIIIIII")));
+	assert(NULL!=(d10 = creerDonnee("j","JJJJJJJJJJJ")));
+	assert(NULL!=(d11 = creerDonnee("k","KKKKKKKKKKK")));
+	assert(NULL!=(d12 = creerDonnee("l","LLLLLLLLLLL")));
+	assert(NULL!=(d13 = creerDonnee("m","MMMMMMMMMMM")));
+	assert(NULL!=(d14 = creerDonnee("n","NNNNNNNNNNN")));
+	assert(NULL!=(d15 = creerDonnee("o","OOOOOOOOOOO")));
+	assert(NULL!=(d16 = creerDonnee("p","PPPPPPPPPPP")));
+	assert(NULL!=(d17 = creerDonnee("q","QQQQQQQQQQQ")));
+	assert(NULL!=(d18 = creerDonnee("r","RRRRRRRRRRR")));
+	assert(NULL!=(d19 = creerDonnee("s","SSSSSSSSSSS")));
+	assert(NULL!=(d20 = creerDonnee("t","TTTTTTTTTTT")));
+
+	putHashTable(d1,tablh);
+	putHashTable(d2,tablh);
+	putHashTable(d3,tablh);
+	putHashTable(d4,tablh);
+	putHashTable(d5,tablh);
+	putHashTable(d6,tablh);
+	putHashTable(d7,tablh);
+	putHashTable(d8,tablh);
+	putHashTable(d9,tablh);
+	putHashTable(d10,tablh);
+	putHashTable(d11,tablh);
+	putHashTable(d12,tablh);
+	putHashTable(d13,tablh);
+	putHashTable(d14,tablh);
+	putHashTable(d15,tablh);
+	putHashTable(d16,tablh);
+	putHashTable(d17,tablh);
+	putHashTable(d18,tablh);
+	putHashTable(d19,tablh);
+	putHashTable(d20,tablh);
+	
+	
+	return tablh;
+}
+
+
+
 
 void segmenterHashTable(uint64_t indice,
 			table_de_hachage_t * hash_tab1_ptr,

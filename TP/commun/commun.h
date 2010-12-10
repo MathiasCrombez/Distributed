@@ -9,13 +9,14 @@
 #include <sys/errno.h>
 #include <assert.h>
 #include <sys/socket.h>
- #include <sys/types.h> 
- #include <arpa/inet.h>
+#include <sys/types.h> 
+#include <arpa/inet.h>
 #include <netdb.h>
 
 #define MAXCAR 20
 #define DEBUG_MESSAGE
-//#undef DEBUG_MESSAGE
+//#undef DEBUG_MESSAG
+
 
 typedef uint32_t socket_t;
 typedef char* cle_t;
@@ -32,15 +33,33 @@ typedef struct maillon {
 	struct maillon *suiv;
 } *liste_t;
 
+
+
 static inline donnee_t creerDonnee(cle_t K, valeur_t V)
 {
 	donnee_t D;
 	
 	D=malloc(sizeof(struct donnee));
+	if(D==NULL){
+		perror("malloc()");
+		return NULL;
+	}
 	
 	D->cle = (cle_t)malloc(sizeof(cle_t)*strlen(K));
+	if(D->cle==NULL){
+		free(D);
+		perror("malloc()");
+		return NULL;
+	}
 	strcpy(D->cle,K);
+	
 	D->valeur=(valeur_t)malloc(sizeof(valeur_t)*strlen(V));
+	if(D->valeur==NULL){
+		free(D->cle);
+		free(D);
+		perror("malloc()");
+		return NULL;
+	}
 	strcpy(D->valeur,V);
 	
 	return D;
@@ -54,21 +73,37 @@ static inline void libererDonnee(donnee_t D){
 }
 
 /** ajoute une donné à la liste pointé par L_ptr 
- ** Permet aussi de creer une liste 								**/
-static inline void ajouterDonnee(liste_t * L_ptr, donnee_t D)
+ ** Permet aussi de creer une liste 		**/
+static inline int ajouterDonnee(liste_t * L_ptr, donnee_t D)
 {
-	/** creation d'un maillon **/
+	
+	if(D==NULL){
+		return 0;
+	}
 	liste_t teteDeListe;
+	liste_t iterateur;
 
+	//verifie si la cle existe deja
+	for (iterateur = *L_ptr; iterateur != NULL; iterateur = iterateur->suiv) {
+	//TODO data->cle!=NULL TOUJOuRS ????
+		if (strcmp(iterateur->data->cle, D->cle) == 0) {
+			free(iterateur->data->valeur);
+			iterateur->data->valeur=D->valeur;
+			return 1;
+		}
+	}
+	
+	/** creation d'un maillon **/
 	teteDeListe = (liste_t) malloc(sizeof(struct maillon));
 	if (teteDeListe == NULL) {
 		perror("malloc()");
-		exit(-1);
+		return 0;
 	}
 	teteDeListe->data = D;
 	teteDeListe->suiv = *L_ptr;
 
 	*L_ptr = teteDeListe;
+	return 1;
 }
 
 static inline donnee_t getKey(liste_t L, cle_t K)
@@ -153,7 +188,6 @@ static inline valeur_t removeKey(liste_t * L_ptr, cle_t K)
 
 static inline void libererListe(liste_t * L_ptr)
 {
-
 	while (*L_ptr != NULL) {
 		/** on enlève la tête de liste jusqu'à vider la liste **/
 		removeKey(L_ptr, (*L_ptr)->data->cle);

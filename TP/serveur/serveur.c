@@ -1,5 +1,9 @@
 #include "serveur_impl.h"
 
+extern table_de_hachage_t TEST_HASH_TABLE();
+
+
+
 int main(int argc, char *argv[])
 {
 
@@ -9,7 +13,7 @@ int main(int argc, char *argv[])
 	}
 
 	int nbClient = 0;
-	serveur_t serveur;
+	serveur_t* serveur_ptr;
 	socket_t sockClient;
 	struct sockaddr_in cli_addr;
 	socklen_t cli_len = sizeof(struct sockaddr_in);
@@ -18,7 +22,7 @@ int main(int argc, char *argv[])
 	origine_t from;
 
 	//creation d'un serveur
-	serveur = creerServeur(argv[1], atoi(argv[2]));
+	serveur_ptr = creerServeur(argv[1], atoi(argv[2]));
 
 	//connexion à un serveur pour participer à la DHT
 	printf("se connecter à un serveur?[o|n]\n");
@@ -33,7 +37,7 @@ int main(int argc, char *argv[])
 		}
 	} else {
 		printf("vous êtes le premier serveur de la DHT\n");
-		//messageParticiperDhtAvec(ip,to);
+		serveur_ptr->tabl=TEST_HASH_TABLE();
 	}
 	
 
@@ -44,7 +48,7 @@ int main(int argc, char *argv[])
 		 * d'un client est acceptée
 		 */
 		 printf("serveur en ecoute\n");
-		sockClient = accept(serveur.idSocket, (struct sockaddr *)&cli_addr,&cli_len);
+		sockClient = accept(serveur_ptr->idSocket, (struct sockaddr *)&cli_addr,&cli_len);
 		recevoirOrigine(&from, sockClient);
 
 		switch (from) {
@@ -54,13 +58,13 @@ int main(int argc, char *argv[])
 			/*
 			 * remplissage du tableau permettant d'itentifier les clients connectés
 			 */
-			serveur.tableauClient[nbClient].identifiant = cli_addr;
-			serveur.tableauClient[nbClient].idSocket = sockClient;
+			serveur_ptr->tableauClient[nbClient].identifiant = cli_addr;
+			serveur_ptr->tableauClient[nbClient].idSocket = sockClient;
 			nbClient++;
 
 			printf("le client vient de se connecter au serveur\n");
-			pthread_t client_thread=serveur.tableauClient[nbClient].thread;
-			if (pthread_create(&client_thread, NULL, *talk_to_client,(void *)sockClient) < 0) {
+			pthread_t client_thread=serveur_ptr->tableauClient[nbClient].thread;
+			if (pthread_create(&client_thread, NULL, *talk_to_client,(void *)&sockClient) < 0) {
 				perror("Creation d'un nouveau pthread impossible \n");
 				break;
 			}
@@ -73,7 +77,7 @@ int main(int argc, char *argv[])
 
 			/* creation d'un thread pour repondre aux requetes du serveur */
 			pthread_t server_thread;
-			if (pthread_create(&server_thread, NULL, *talk_to_server,(void *)sockClient) < 0) {
+			if (pthread_create(&server_thread, NULL, *talk_to_server,(void *)&sockClient) < 0) {
 				perror("Creation d'un nouveau pthread impossible \n");
 				break;
 			}
