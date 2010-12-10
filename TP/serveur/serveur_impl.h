@@ -1,8 +1,7 @@
 #ifndef SERVEUR_IMPL_H
 #define SERVEUR_IMPL_H
 
-
-#include <sys/types.h> 
+#include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -11,52 +10,46 @@
 #include "message.h"
 #include <netdb.h>
 
-
 #include "hash.h"
 #include "message.h"
 #define THREAD_MAX 5
 #define LENGTH_LISTEN_QUEUE 10
 #define MESSAGE_SIZE 256
 
-
-
 struct idConnexion {
 
 	struct sockaddr_in identifiant;
 	socket_t idSocket;
-	char* name;
+	char *name;
+	pthread_t thread;
 };
 
 typedef struct serveur {
 
-    struct sockaddr_in serv_addr;
-    socket_t idSocket;
-    char name[20];
-    
-    table_de_hachage_t tabl;
-    uint64_t firstKey;
-    uint64_t nextKey;
-	uint64_t precKey;
-	
-    struct idConnexion tableauClient[LENGTH_LISTEN_QUEUE];
-    struct idConnexion* suivServeur;
-    struct idConnexion* precServeur;
-    
-} serveur_t;
+	struct sockaddr_in serv_addr;
+	socket_t idSocket;
+	char name[20];
 
+	table_de_hachage_t tabl;
+	uint64_t firstKey;
+	uint64_t nextKey;
+	uint64_t precKey;
+
+	struct idConnexion tableauClient[LENGTH_LISTEN_QUEUE];
+	struct idConnexion *suivServeur;
+	struct idConnexion *precServeur;
+
+} serveur_t;
 
 //## variable global ##/
 serveur_t SERVEUR;
 
-
-
 /** on creer un serveur.Il ne partage pas la DHT encor donc pas besoin de
  ** first_k, las_k et next en argument								**/
-serveur_t creerServeur(char* nomDuServeur, uint64_t port);
-		
-							
-void* talk_to_client(void* sockClient);
+serveur_t creerServeur(char *nomDuServeur, uint64_t port);
 
+void *talk_to_client(void *sockClient);
+void *talk_to_server(void *sockServer);
 //int put_h( uint64_t cle, char * valeur, uint64_t taille);
 
 ///**********************************************************/
@@ -74,16 +67,17 @@ void* talk_to_client(void* sockClient);
 
 //int remove_h(cle_t cle, valeur, uint64_t taille);
 
-socket_t connect2server( char* to_serveur,uint64_t port);
-int messageConnect2Server(char* ip, uint64_t port);
+socket_t connect2server(char *to_serveur, uint64_t port);
+int messageConnect2Server(char *ip, uint64_t port);
 
+static void afficherIdentConnexion(struct idConnexion *ident)
+{
 
-static void afficherIdentConnexion(struct idConnexion* ident){
-	
 	printf("identifiant connexion:\n");
-	printf("\tNom       : %s\n",ident->name);
-	printf("\tAdresse Ip: %s\n", inet_ntoa(ident->identifiant.sin_addr)); 
+	printf("\tNom       : %s\n", ident->name);
+	printf("\tAdresse Ip: %s\n", inet_ntoa(ident->identifiant.sin_addr));
 	printf("\tPort conne: %d\n", ntohs(ident->identifiant.sin_port));
 
 }
 #endif
+

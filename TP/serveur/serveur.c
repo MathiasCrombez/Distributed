@@ -15,6 +15,7 @@ int main(int argc, char *argv[])
 	socklen_t cli_len = sizeof(struct sockaddr_in);
 	char ip[20];
 	int po;
+	origine_t from;
 
 	//creation d'un serveur
 	serveur = creerServeur(argv[1], atoi(argv[2]));
@@ -34,7 +35,7 @@ int main(int argc, char *argv[])
 		printf("vous êtes le premier serveur de la DHT\n");
 		//messageParticiperDhtAvec(ip,to);
 	}
-	printf("serveur en ecoute\n");
+	
 
 	while (nbClient < LENGTH_LISTEN_QUEUE) {
 		/* 
@@ -42,27 +43,53 @@ int main(int argc, char *argv[])
 		 * creation d'un thread à chaque fois que la demande de connexion 
 		 * d'un client est acceptée
 		 */
-		sockClient =accept(serveur.idSocket, (struct sockaddr *)&cli_addr,&cli_len);
+		 printf("serveur en ecoute\n");
+		sockClient = accept(serveur.idSocket, (struct sockaddr *)&cli_addr,&cli_len);
+		recevoirOrigine(&from, sockClient);
 
-		/*
-		 * remplissage du tableau permettant d'itentifier les clients connectés
-		 */
-		serveur.tableauClient[nbClient].identifiant = cli_addr;
-		serveur.tableauClient[nbClient].idSocket = sockClient;
-		nbClient++;
+		switch (from) {
 
-		printf("le client vient de se connecter au serveur\n");
+		case FROM_CLIENT:
 
-		pthread_t client_thread;
-		if (pthread_create(&client_thread, NULL, *talk_to_client,(void *)sockClient) < 0) {
-			perror("Creation d'un nouveau pthread impossible \n");
+			/*
+			 * remplissage du tableau permettant d'itentifier les clients connectés
+			 */
+			serveur.tableauClient[nbClient].identifiant = cli_addr;
+			serveur.tableauClient[nbClient].idSocket = sockClient;
+			nbClient++;
+
+			printf("le client vient de se connecter au serveur\n");
+			pthread_t client_thread=serveur.tableauClient[nbClient].thread;
+			if (pthread_create(&client_thread, NULL, *talk_to_client,(void *)sockClient) < 0) {
+				perror("Creation d'un nouveau pthread impossible \n");
+				break;
+			}
+			printf("le client est validé : pthread crée\n");
 			break;
+
+		case FROM_SERVEUR:
+
+			printf("un serveur vient de se connecter au serveur\n");
+
+			/* creation d'un thread pour repondre aux requetes du serveur */
+			pthread_t server_thread;
+			if (pthread_create(&server_thread, NULL, *talk_to_server,(void *)sockClient) < 0) {
+				perror("Creation d'un nouveau pthread impossible \n");
+				break;
+			}
+			printf("le serveur est validé : pthread crée\n");
+			break;
+
+		default:
+
+			printf("type d'expediteur inconnu\n");
+
 		}
-		printf("le client est validé : pthread crée\n");
 
 	}
 
-	printf("votre serveur n'accepte pas plus de %d connexions à la fois\n",LENGTH_LISTEN_QUEUE);
+	printf("votre serveur n'accepte pas plus de %d connexions à la fois\n",
+	       LENGTH_LISTEN_QUEUE);
 
 	return 0;
 

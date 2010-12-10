@@ -8,8 +8,7 @@
 
 
 ///###### METTRE TON IP ICI ######//
-#define SERVEURNAME "194.254.210.10"
-
+#define SERVEURNAME "194.254.210.122"
 
 /**
 *Initialisation de la variable globale SERVEUR.
@@ -108,54 +107,96 @@ void* talk_to_client(void* idSocket)
 
 	case CONNECT:
 
-		SERVEUR.suivServeur->idSocket = sockClient;
-		printf("un serveur veut participer à la dht\n");
 		
-		envoyerIdent(SERVEUR.serv_addr, sockClient);	
-		envoyerChaine(SERVEUR.name, sockClient);
-		
-		//envoi des champs de suivServeur
-		envoyerIdent(SERVEUR.suivServeur->identifiant, sockClient);	
-		envoyerChaine(SERVEUR.suivServeur->name, sockClient);
-		
-		//envoi de firstKey et nextKey
-		envoyerHash(SERVEUR.firstKey, sockClient);
-		envoyerHash(SERVEUR.nextKey, sockClient);
-		
-		recevoirIdent(&(SERVEUR.suivServeur->identifiant), sockClient);
-		recevoirChaine(&(SERVEUR.suivServeur->name), sockClient);
-		
-		recevoirHash(&(SERVEUR.nextKey), sockClient);
-		
-		
-		//enregistrement de la connection
-		//shutdown(SERVEUR.suivServeur->idSocket,2);
-		
-//TODO       //#### decrementer le compteur nbclient
-		
-		//#### debug ####//
-		printf("****serveur precedent est:****\n");
-		afficherIdentConnexion(SERVEUR.precServeur);
-		printf("\n");
-		printf("****serveur suivant est:****\n");
-		afficherIdentConnexion(SERVEUR.suivServeur);
-		printf("\n");
-		//#### debug ####//
 		break;
 
 
 	case DISCONNECT:
 	
-		printf("un serveur souhaite ma mort\n");
-		shutdown(sockClient,SHUT_RDWR);
-		printf("c'est fait!\n");
-		break;
+		
 	default:
 		break;
 
 	}
 
 }
+
+
+
+void* talk_to_server(void* idSocket)
+{
+	//ce socket va nous permettre de communiquer avec le client
+	socket_t sockServer = (socket_t)idSocket;
+	char reponse;
+	printf("talk_to_server()\n");
+	/**
+     	* Corps de la fonction de routine lors de la création de pthread
+     	* (apparition d'un client
+     	*/
+	requete_t type_requete;
+	
+	/*while(1)*/{
+	
+		recevoirTypeMessage(&type_requete, sockServer);
+
+		switch (type_requete) {
+
+			struct sockaddr_in id_connexion;
+			char* nom;
+			
+	
+			
+		case CONNECT:
+			recevoirOctet(&reponse,sockServer);
+			
+			if(reponse==0){
+				printf("SERVER CONNECT\n");
+				envoyerIdent(SERVEUR.serv_addr, sockServer);	
+				envoyerChaine(SERVEUR.name, sockServer);
+		
+				envoyerIdent(SERVEUR.suivServeur->identifiant, sockServer);	
+				envoyerChaine(SERVEUR.suivServeur->name, sockServer);
+			
+				recevoirIdent(&(SERVEUR.suivServeur->identifiant), sockServer);
+				recevoirChaine(&(SERVEUR.suivServeur->name), sockServer);
+			}
+			else if(reponse==1) {
+			
+				recevoirIdent(&SERVEUR.precServeur->identifiant, sockServer);
+				recevoirChaine(&SERVEUR.precServeur->name, sockServer);
+			}
+
+			//#### debug ####//
+			printf("****serveur precedent est:****\n");
+			afficherIdentConnexion(SERVEUR.precServeur);
+			printf("\n");
+			printf("****serveur suivant est:****\n");
+			afficherIdentConnexion(SERVEUR.suivServeur);
+			printf("\n");
+			//#### debug ####//
+			shutdown(sockServer,SHUT_RDWR);
+			pthread_exit(NULL);
+			break;
+
+
+		case DISCONNECT:
+	
+			printf("un serveur souhaite ma mort\n");
+			recevoirIdent(&(SERVEUR.precServeur->identifiant), sockServer);
+			recevoirChaine(&(SERVEUR.precServeur->name), sockServer);
+			shutdown(sockServer,SHUT_RDWR);
+			pthread_exit(NULL);
+			printf("c'est fait!\n");
+			return NULL;
+		default:
+			printf("message incinnu");
+			break;
+
+		}
+	}
+	
+}
+
 
 socket_t connect2server(char *to_serveur, uint64_t port)
 {
@@ -171,7 +212,8 @@ socket_t connect2server(char *to_serveur, uint64_t port)
 		printf("erreur gethostbyname():le serveur %s est inconnu\n",to_serveur);
 		return 0;
 	}
-
+	printf("connexion au serveur sur port %ld\n",port);
+	
 	server_info.sin_family = AF_INET;
 	server_info.sin_port = htons(port);
 	server_info.sin_addr = *(struct in_addr *)hostinfo->h_addr;
