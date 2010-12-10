@@ -8,6 +8,8 @@
 #include <arpa/inet.h>
 #include <pthread.h>
 #include <unistd.h>
+#include "message.h"
+#include <netdb.h>
 
 
 #include "hash.h"
@@ -18,39 +20,42 @@
 
 
 
-struct idServeur {
-    char serveurname[MAXCAR];
-    uint64_t port;
-} ;
+struct idConnexion {
 
-
-struct idClient {
-
-    struct sockaddr_in client_addr;
-    socket_t idSocket;
+	struct sockaddr_in identifiant;
+	socket_t idSocket;
+	char* name;
 };
 
 typedef struct serveur {
-    
-    struct idServeur s;
+
     struct sockaddr_in serv_addr;
     socket_t idSocket;
-	
-    struct idClient tableauClient[LENGTH_LISTEN_QUEUE];
-	
+    char name[20];
+    
     table_de_hachage_t tabl;
     uint64_t firstKey;
-    uint64_t size;
+    uint64_t nextKey;
+	uint64_t precKey;
+	
+    struct idConnexion tableauClient[LENGTH_LISTEN_QUEUE];
+    struct idConnexion* suivServeur;
+    struct idConnexion* precServeur;
     
-    struct idServeur* next_serv;
 } serveur_t;
+
+
+//## variable global ##/
+serveur_t SERVEUR;
+
 
 
 /** on creer un serveur.Il ne partage pas la DHT encor donc pas besoin de
  ** first_k, las_k et next en argument								**/
 serveur_t creerServeur(char* nomDuServeur, uint64_t port);
+		
 							
-void talk_to_client(socket_t  socket);
+void* talk_to_client(void* sockClient);
 
 //int put_h( uint64_t cle, char * valeur, uint64_t taille);
 
@@ -69,5 +74,16 @@ void talk_to_client(socket_t  socket);
 
 //int remove_h(cle_t cle, valeur, uint64_t taille);
 
+socket_t connect2server( char* to_serveur,uint64_t port);
+int messageConnect2Server(char* ip, uint64_t port);
 
+
+static void afficherIdentConnexion(struct idConnexion* ident){
+	
+	printf("identifiant connexion:\n");
+	printf("\tNom       : %s\n",ident->name);
+	printf("\tAdresse Ip: %s\n", inet_ntoa(ident->identifiant.sin_addr)); 
+	printf("\tPort conne: %d\n", ntohs(ident->identifiant.sin_port));
+
+}
 #endif

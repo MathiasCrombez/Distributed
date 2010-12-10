@@ -8,7 +8,10 @@
 #include <assert.h>
 #include <sys/errno.h>
 #include <assert.h>
-
+#include <sys/socket.h>
+ #include <sys/types.h> 
+ #include <arpa/inet.h>
+#include <netdb.h>
 
 #define MAXCAR 20
 #define DEBUG_MESSAGE
@@ -178,6 +181,9 @@ static void afficherListe(liste_t L)
 		afficherDonnee(iterateur->data);
 	}
 }
+
+
+
 
 #endif
 
