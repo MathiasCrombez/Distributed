@@ -1,4 +1,7 @@
-#include "client.h"
+#include "client_impl.h"
+
+
+
 
 int main(int argc, char *argv[])
 {
@@ -8,15 +11,16 @@ int main(int argc, char *argv[])
 		exit(0);
 	}
 
-	client_t client;
-
-	client = creerClient(argv[1]);
-	connect2server(client, argv[2], atoi(argv[3]));
-	envoyerUInt_32(35533, client.idSocket);
-	envoyerChaine("salut serveur, c'est le client'", client.idSocket);
-	donnee_t D = creerDonnee("une nouvelle cle", "range cette valeur dans ta dht");
-	envoyerDonnee(D, client.idSocket);
-
+	client_t* client_ptr;
+	socket_t sockServer;
+	char o;
+	donnee_t d;
+	
+	client_ptr = creerClient(argv[1]);
+	sockServer = connect2server(argv[2], atoi(argv[3]));
+	
+	message_get("d",sockServer);
+	
 	return 1;
 }
 
