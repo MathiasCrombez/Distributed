@@ -22,9 +22,9 @@
 
 struct idConnexion {
 
-	struct sockaddr_in identifiant;
-	socket_t idSocket;
-	char* name;
+    struct sockaddr_in identifiant;
+    socket_t idSocket;
+    char* name;
 };
 
 typedef struct serveur {
@@ -36,7 +36,7 @@ typedef struct serveur {
     table_de_hachage_t tabl;
     uint64_t firstKey;
     uint64_t nextKey;
-	uint64_t precKey;
+    uint64_t precKey;
 	
     struct idConnexion tableauClient[LENGTH_LISTEN_QUEUE];
     struct idConnexion* suivServeur;
@@ -80,10 +80,10 @@ int messageConnect2Server(char* ip, uint64_t port);
 
 static void afficherIdentConnexion(struct idConnexion* ident){
 	
-	printf("identifiant connexion:\n");
-	printf("\tNom       : %s\n",ident->name);
-	printf("\tAdresse Ip: %s\n", inet_ntoa(ident->identifiant.sin_addr)); 
-	printf("\tPort conne: %d\n", ntohs(ident->identifiant.sin_port));
+    printf("identifiant connexion:\n");
+    printf("\tNom       : %s\n",ident->name);
+    printf("\tAdresse Ip: %s\n", inet_ntoa(ident->identifiant.sin_addr)); 
+    printf("\tPort conne: %d\n", ntohs(ident->identifiant.sin_port));
 
 }
 #endif

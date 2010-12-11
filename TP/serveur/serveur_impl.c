@@ -8,7 +8,7 @@
 
 
 ///###### METTRE TON IP ICI ######//
-#define SERVEURNAME "194.254.210.10"
+#define SERVEURNAME "129.88.57.45"
 
 
 /**
