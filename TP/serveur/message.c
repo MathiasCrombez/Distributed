@@ -42,7 +42,10 @@ int message_connect_2_server(char *ip, uint64_t port)
 	envoyerIdent(SERVEUR.serv_addr,sockServer);
 	envoyerChaine(SERVEUR.name,sockServer);
 	
-	shutdown(sockServer,SHUT_RDWR);
+	if (shutdown(sockServer,SHUT_RDWR)) {
+            printf("echec de la premiere deconnection du serveur\n");
+            return 0;
+        }
 	
 	printf("debug info client\n");
 	afficherIdentConnexion(SERVEUR.suivServeur);
@@ -56,7 +59,11 @@ int message_connect_2_server(char *ip, uint64_t port)
 	envoyerChaine(SERVEUR.name, new_socket);
 
 		
-	shutdown(new_socket,SHUT_RDWR);
+	if (shutdown(new_socket,SHUT_RDWR)) {
+            printf("echec de la deuxieme deconnection du serveur\n");
+            return 0;
+        }
+
 #ifdef DEBUG_MESSAGE_SERVEUR
 	printf("****serveur precedent est:****\n");
 	afficherIdentConnexion(SERVEUR.precServeur);

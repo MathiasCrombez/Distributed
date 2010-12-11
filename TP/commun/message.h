@@ -126,7 +126,7 @@ static envoyerUInt_64(uint64_t I, socket_t to)
 		perror("malloc()");
 		return 0;
 	}
-	sprintf(s_I, "%ld", I);
+	sprintf(s_I, "%lld", I);
 
 	if (send(to, s_I, T_INT_64, 0) == -1) {
 		perror("send()");
@@ -135,9 +135,6 @@ static envoyerUInt_64(uint64_t I, socket_t to)
 	print_debug("envoi de: %ld\n", I);
 	return 1;
 }
-
-
-
 /*
  *reception d'un entier sur 64 bits.
  *L'entier est reçu sous forme de chaine de caractere, qui est 
@@ -220,6 +217,7 @@ static int recevoirChaine(char **chaine, socket_t from)
 		return 0;
 	}
 	print_debug("\t:");
+
 	*chaine = (char *)calloc(taille_chaine,T_OCTET);
 	if (*chaine == NULL) {
 		perror("malloc");
@@ -229,7 +227,11 @@ static int recevoirChaine(char **chaine, socket_t from)
 		perror("recv()");
 		return 0;
 	}
-	print_debug("recep de: %s\n", *chaine);
+        if (strlen(*chaine) != taille_chaine) {
+            printf("Réception chaine : taille incompatible\n");
+            return 0;
+        }
+	print_debug("recep de taille %d %d de: %s\n", taille_chaine, strlen(*chaine), *chaine);
 	return 1;
 }
 	

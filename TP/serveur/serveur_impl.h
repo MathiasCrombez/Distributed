@@ -36,7 +36,8 @@
 /*
  * mettre son ip
  */
-#define SERVEURNAME "194.254.210.78"
+
+#define SERVEURNAME "194.254.210.122"
 
 //==============================================================================
 //				TYPES
@@ -107,7 +108,6 @@ static void afficherIdentConnexion(struct idConnexion *ident)
 	printf("\tNom       : %s\n", ident->name);
 	printf("\tAdresse Ip: %s\n", inet_ntoa(ident->identifiant.sin_addr));
 	printf("\tPort conne: %d\n", ntohs(ident->identifiant.sin_port));
-
 }
 
 
