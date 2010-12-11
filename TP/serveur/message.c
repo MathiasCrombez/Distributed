@@ -47,8 +47,11 @@ int message_connect_2_server(char *ip, uint64_t port)
             return 0;
         }
 	
-	new_socket=connect2server(inet_ntoa(SERVEUR.suivServeur->identifiant.sin_addr)
-                                  ,ntohs(SERVEUR.suivServeur->identifiant.sin_port));
+	printf("debug info client\n");
+	afficherIdentConnexion(SERVEUR.suivServeur);
+	printf("fin debug");
+	
+	new_socket=connect2server(inet_ntoa(SERVEUR.suivServeur->identifiant.sin_addr),ntohs(SERVEUR.suivServeur->identifiant.sin_port));
 	envoyerOrigine(FROM_SERVEUR,new_socket);
 	envoyerTypeMessage(CONNECT,new_socket);
 	envoyerOctet(1,new_socket);

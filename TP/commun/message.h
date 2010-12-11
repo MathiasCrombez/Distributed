@@ -28,8 +28,8 @@
 #define T_DONNEE(donnee)   T_CHAINE(donnee->cle) + T_CHAINE(donnee->valeur)
 
 
-//#define DEBUG_MESSAGE_H
-#undef  DEBUG_MESSAGE_H
+#define DEBUG_MESSAGE_H
+//#undef  DEBUG_MESSAGE_H
 #ifdef DEBUG_MESSAGE_H
 #   define print_debug(chaine, args...)   printf(chaine,##args)
 #else
@@ -217,7 +217,7 @@ static int recevoirChaine(char **chaine, socket_t from)
 		return 0;
 	}
 	print_debug("\t:");
-	*chaine = (char *)malloc(T_OCTET * taille_chaine);
+	*chaine = (char *)calloc(taille_chaine, T_OCTET);
 	if (*chaine == NULL) {
 		perror("malloc");
 		return 0;
@@ -226,7 +226,11 @@ static int recevoirChaine(char **chaine, socket_t from)
 		perror("recv()");
 		return 0;
 	}
-	print_debug("recep de: %s\n", *chaine);
+        if (strlen(*chaine) != taille_chaine) {
+            printf("Réception chaine : taille incompatible\n");
+            return 0;
+        }
+	print_debug("recep de taille %d %d de: %s\n", taille_chaine, strlen(*chaine), *chaine);
 	return 1;
 }
 	
