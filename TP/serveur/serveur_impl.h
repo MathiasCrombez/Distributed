@@ -56,7 +56,10 @@ struct idConnexion {
 	pthread_t thread;
 };
 
-
+typedef struct tableauClient {
+    struct idConnexion client;
+    struct tableauClient * suiv;
+} * tabClient_t;
 
 typedef struct serveur {
 
@@ -69,7 +72,7 @@ typedef struct serveur {
 	uint64_t nextKey;
 	uint64_t precKey;
 
-	struct idConnexion tableauClient[LENGTH_LISTEN_QUEUE];
+    tabClient_t tableauClient;
 	struct idConnexion *suivServeur;
 	struct idConnexion *precServeur;
 

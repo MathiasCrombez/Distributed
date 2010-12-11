@@ -1,97 +1,107 @@
 #include"message.h"
-
+#include "client_impl.h"
 
 
 #define DEBUG_MESSAGE_CLIENT
 
 //TODO ICI DEFINIR LE PROTOCOLE DE COMMUNICATION SEULEMENT ICI!!!
 
+socket_t message_connect(char* server,uint64_t port){
+    char ack;
+    socket_t from; 
+
+    from = connect2server(server, port);
+        
+    envoyerOrigine(FROM_CLIENT,from);
+    envoyerTypeMessage(CONNECT,from);
+	
+    if(ack==0){
+        // TODO répétition en cas d'echec : wait & while
+        printf("Echec de la connexion");
+        return -1;
+    }
+    else if(ack==1){
+#ifdef DEBUG_MESSAGE_CLIENT
+        printf("connection success");
+#endif
+    }
+    return from;
+}
 
 donnee_t  message_get(cle_t K,socket_t from){
 
-	donnee_t D;
-	char ack;
+    donnee_t D;
+    char ack;
 	
-	envoyerOrigine(FROM_CLIENT,from);
-	envoyerTypeMessage(GET,from);
-	envoyerCle(K,from);
-	recevoirOctet(&ack,from);
+    envoyerOrigine(FROM_CLIENT,from);
+    envoyerTypeMessage(GET,from);
+    envoyerCle(K,from);
+    recevoirOctet(&ack,from);
 	
-	if(ack==0){
-	#ifdef DEBUG_MESSAGE_CLIENT
-		printf("la cle n'existe pas");
-	#endif
-	}
-	else if(ack==1){
-		recevoirDonnee(&D,from);
-	#ifdef DEBUG_MESSAGE_CLIENT
-		afficherDonnee(D);
-	#endif
-	}
-	return D;
+    if(ack==0){
+#ifdef DEBUG_MESSAGE_CLIENT
+        printf("la cle n'existe pas\n");
+#endif
+    }
+    else if(ack==1){
+        recevoirDonnee(&D,from);
+#ifdef DEBUG_MESSAGE_CLIENT
+        afficherDonnee(D);
+#endif
+    }
+    return D;
 }
 
+void  message_put(cle_t K,socket_t from){
 
+    donnee_t D;
+    char ack;
+	
+    envoyerOrigine(FROM_CLIENT,from);
+    envoyerTypeMessage(PUT,from);
+    envoyerCle(K,from);
+    recevoirOctet(&ack,from);
+	
+    if(ack==0){
+#ifdef DEBUG_MESSAGE_CLIENT
+        printf("la cle n'existe pas\n");
+#endif
+    }
+    else if(ack==1){
+        envoyerDonnee(D,from);
+#ifdef DEBUG_MESSAGE_CLIENT
+        afficherDonnee(D);
+#endif
+    }
+}
 
-/*uint32_t put(uint32_t cle, uint32_t valeur)*/
-/*{*/
-/*	if (write(IDSOCKET, &cle, sizeof(uint32_t)) < 0) {*/
-/*		printf("PUT : echec de l'envoi de la clé %d\n", cle);*/
-/*		return -1;*/
-/*	}*/
-/*	if (write(IDSOCKET, &valeur, sizeof(uint32_t)) < 0) {*/
-/*		printf*/
-/*		    ("PUT : echec de l'envoi de la valeur %d associé à la clé %d \n",*/
-/*		     cle, valeur);*/
-/*		return -1;*/
-/*	}*/
+valeur_t message_remove(cle_t K,socket_t from){
 
-/*	return 0;*/
-/*}*/
+    donnee_t D;
+    char ack;
+    valeur_t V;
+	
+    envoyerOrigine(FROM_CLIENT,from);
+    envoyerTypeMessage(REMOVEKEY,from);
+    envoyerCle(K,from);
+    recevoirOctet(&ack,from);
+	
+    if(ack==0){
+#ifdef DEBUG_MESSAGE_CLIENT
+        printf("la cle n'existe pas\n");
+#endif
+        return NULL;
+    }
+    else if(ack==1){
+        recevoirValeur(&V, from);
+#ifdef DEBUG_MESSAGE_CLIENT
+        printf("Valeur supprime : %s\n", V);
+#endif
+        return V;
+    }
+}
 
-/*uint32_t get(uint32_t cle)*/
-/*{*/
-/*	uint32_t valeur = 0;*/
-
-/*	if (write(IDSOCKET, &cle, sizeof(uint32_t)) < 0) {*/
-/*		printf("GET : echec de l'envoi de la clé %d\n", cle);*/
-/*		return -1;*/
-/*	}*/
-/*	if (read(IDSOCKET, &valeur, sizeof(uint32_t)) < 0) {*/
-/*		printf("GET : echec de la lecture de la valeur");*/
-/*		return -1;*/
-/*	}*/
-/*	return valeur;*/
-/*}*/
-
-/*uint32_t removeKey(uint32_t cle)*/
-/*{*/
-/*	if (write(IDSOCKET, &cle, sizeof(uint32_t)) < 0) {*/
-/*		printf("REMOVE : echec de l'envoi de la clé %d\n", cle);*/
-/*		return -1;*/
-/*	}*/
-/*	return 0;*/
-/*}*/
-
-/*uint32_t disconnect2server()*/
-/*{*/
-/*	// signal de mort?*/
-/*	if (shutdown(IDSOCKET, 2) < 0) {*/
-/*		printf("disconnect2server : echec de la deconnexion\n");*/
-/*	}*/
-/*	return 0;*/
-/*}*/
-
-/*uint32_t quit(char *nomDuServeur)*/
-/*{*/
-
-/*	message_t message;*/
-
-/*	message.type = QUIT;*/
-/*	memcpy(message.requete.quit.nomDuServeur, nomDuServeur, MAXCAR);*/
-
-/*	envoyerMessage(message, IDSOCKET);*/
-/*	recevoirMessage(message, IDSOCKET);*/
-
-/*}*/
-
+void message_disconnect(socket_t from){
+    envoyerOrigine(FROM_CLIENT,from);
+    envoyerTypeMessage(DISCONNECT,from);
+}

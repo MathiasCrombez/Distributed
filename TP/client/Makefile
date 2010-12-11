@@ -13,7 +13,7 @@ client_impl.o : client_impl.c
 	gcc $(CFLAGS) -c client_impl.c $(IFLAGS)
 message.o: message.c
 	gcc $(CFLAGS) -c message.c $(IFLAGS)
-	
+
 
 
 clean :

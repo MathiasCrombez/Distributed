@@ -50,6 +50,7 @@ typedef enum  {
 typedef enum  {
 	PUT,
 	GET,
+        REMOVEKEY,
 	ACK,
 	IDENT,
 	CONNECT,
@@ -132,7 +133,7 @@ static envoyerUInt_64(uint64_t I, socket_t to)
 		perror("send()");
 		return 0;
 	}
-	print_debug("envoi de: %ld\n", I);
+	print_debug("envoi de: %lld\n", I);
 	return 1;
 }
 /*
@@ -153,7 +154,7 @@ static recevoirUInt_64(uint64_t * I, socket_t from)
 	}
 	//TODO UN PEU OPTIMISTE ON SUPPOSE QUE ATOLL RECOI BIEN UN NETIER EN CHAINE
 	*I = atoll(s_I);
-	print_debug("recep de: %ld\n", *I);
+	print_debug("recep de: %lld\n", *I);
 	return 1;
 }
 

@@ -13,6 +13,7 @@ int main(int argc, char *argv[])
     }
 
     int nbClient = 0;
+    tabClient_t p;
     serveur_t* serveur_ptr;
     socket_t sockClient;
     struct sockaddr_in cli_addr;
@@ -58,12 +59,18 @@ int main(int argc, char *argv[])
             /*
              * remplissage du tableau permettant d'itentifier les clients connectés
              */
-            serveur_ptr->tableauClient[nbClient].identifiant = cli_addr;
-            serveur_ptr->tableauClient[nbClient].idSocket = sockClient;
+            p = malloc(sizeof(tabClient_t));
+            p->client.identifiant = cli_addr;
+            p->client.idSocket = sockClient;
             nbClient++;
 
             printf("le client vient de se connecter au serveur\n");
-            pthread_t client_thread=serveur_ptr->tableauClient[nbClient].thread;
+            pthread_t client_thread=p->client.thread;
+            
+            p->suiv = serveur_ptr->tableauClient;
+            serveur_ptr->tableauClient = p;
+
+
             if (pthread_create(&client_thread, NULL, *talk_to_client,(void *)&sockClient) < 0) {
                 perror("Creation d'un nouveau pthread impossible \n");
                 break;
