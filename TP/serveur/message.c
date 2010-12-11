@@ -16,7 +16,7 @@
 
 
 
-int messageConnect2Server(char *ip, uint64_t port)
+int message_connect_2_server(char *ip, uint64_t port)
 {
 
 	socket_t new_socket;

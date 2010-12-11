@@ -1,4 +1,7 @@
-#include "client.h"
+#include "client_impl.h"
+
+
+
 
 int main(int argc, char *argv[])
 {
@@ -8,24 +11,16 @@ int main(int argc, char *argv[])
 		exit(0);
 	}
 
-	client_t client;
+	client_t* client_ptr;
+	socket_t sockServer;
 	char o;
 	donnee_t d;
 	
-	client = creerClient(argv[1]);
-	connect2server(client, argv[2], atoi(argv[3]));
+	client_ptr = creerClient(argv[1]);
+	sockServer = connect2server(argv[2], atoi(argv[3]));
 	
-	envoyerOrigine(FROM_CLIENT,client.idSocket);
-	envoyerTypeMessage(GET,client.idSocket);
-	envoyerCle("d",client.idSocket);
-	recevoirOctet(&o,client.idSocket);
-	if(o==0){
-		printf("la cle n'existe pas");
-	}
-	else if(o==1){
-		recevoirDonnee(&d,client.idSocket);
-		afficherDonnee(d);
-	}
+	message_get("d",sockServer);
+	
 	return 1;
 }
 

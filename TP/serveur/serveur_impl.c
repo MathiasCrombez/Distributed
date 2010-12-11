@@ -6,13 +6,13 @@
 	sprintf(SERVEUR.name+strlen(NAME)+1,"%ld",PORT);        \
 }
 
-///###### METTRE TON IP ICI ######//
-#define SERVEURNAME "194.254.210.122"
-#define DEBUG_SERVEUR_IMPL
 
-/**
-*Initialisation de la variable globale SERVEUR.
-**/
+
+
+
+/*
+ *Initialisation de la variable globale SERVEUR.
+ */
 serveur_t* creerServeur(char *nomDuServeur, uint64_t port)
 {
 	int yes = 1;
@@ -96,7 +96,6 @@ void *talk_to_client(void *idSocket)
 		recevoirCle(&K,sockClient);
 		printf("la cle reçue est %s\n",K);
 		printf("son hash= %ld\n",hash(K));
-		afficherHashTable(SERVEUR.tabl);
 		D = getHashTable(K,SERVEUR.tabl); 
 		if(D==NULL){
 			envoyerOctet(0,sockClient);

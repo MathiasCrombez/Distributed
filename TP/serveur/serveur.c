@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
 		scanf("%d", &po);
 		printf("ip: %s et port: %d'\n", ip, po);
 
-		if (!messageConnect2Server(ip, po)) {
+		if (!message_connect_2_server(ip, po)) {
 			exit(-1);
 		}
 	} else {
