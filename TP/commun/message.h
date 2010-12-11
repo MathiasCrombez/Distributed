@@ -126,7 +126,7 @@ static envoyerUInt_64(uint64_t I, socket_t to)
 		perror("malloc()");
 		return 0;
 	}
-	sprintf(s_I, "%ld", I);
+	sprintf(s_I, "%lld", I);
 
 	if (send(to, s_I, T_INT_64, 0) == -1) {
 		perror("send()");

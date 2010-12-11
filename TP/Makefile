@@ -10,3 +10,4 @@ clean:
 	$(MAKE) clean -C client
 	$(MAKE) clean -C serveur
 	$(MAKE) clean -C commun
+	rm -f gmon.out

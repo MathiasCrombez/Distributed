@@ -3,7 +3,7 @@
 #define SET_SERVEUR_NAME(NAME,PORT){				\
 	strcpy(SERVEUR.name,NAME);				\
 	strcat(SERVEUR.name,":");				\
-	sprintf(SERVEUR.name+strlen(NAME)+1,"%ld",PORT);        \
+	sprintf(SERVEUR.name+strlen(NAME)+1,"%lld",PORT);        \
 }
 
 
@@ -92,7 +92,7 @@ void *talk_to_client(void *idSocket)
 	case GET:
 		recevoirCle(&K,sockClient);
 		printf("la cle reçue est %s\n",K);
-		printf("son hash= %ld\n",hash(K));
+		printf("son hash= %lld\n",hash(K));
 		D = getHashTable(K,SERVEUR.tabl); 
 		if(D==NULL){
 			envoyerOctet(0,sockClient);
@@ -199,7 +199,7 @@ socket_t connect2server(char *to_serveur, uint64_t port)
 		       to_serveur);
 		return 0;
 	}
-	printf("connexion au serveur sur port %ld\n", port);
+	printf("connexion au serveur sur port %lld\n", port);
 
 	server_info.sin_family = AF_INET;
 	server_info.sin_port = htons(port);
