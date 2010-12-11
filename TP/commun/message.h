@@ -28,8 +28,8 @@
 #define T_DONNEE(donnee)   T_CHAINE(donnee->cle) + T_CHAINE(donnee->valeur)
 
 
-//#define DEBUG_MESSAGE_H
-#undef  DEBUG_MESSAGE_H
+#define DEBUG_MESSAGE_H
+//#undef  DEBUG_MESSAGE_H
 #ifdef DEBUG_MESSAGE_H
 #   define print_debug(chaine, args...)   printf(chaine,##args)
 #else
@@ -73,7 +73,7 @@ typedef enum  {
 static int envoyerUInt_32(uint32_t I, socket_t to)
 {
 
-	char *s_I = malloc(T_INT_32);
+	char *s_I = calloc(T_INT_32,T_OCTET);
 	if (s_I == NULL) {
 		perror("malloc()");
 		return 0;
@@ -97,7 +97,7 @@ static int envoyerUInt_32(uint32_t I, socket_t to)
 static int recevoirUInt_32(uint32_t * I, socket_t from)
 {
 
-	char *s_I = malloc(T_INT_32);
+	char *s_I = calloc(T_INT_32,T_OCTET);
 	if (s_I == NULL) {
 		perror("malloc()");
 		return 0;
@@ -121,7 +121,7 @@ static int recevoirUInt_32(uint32_t * I, socket_t from)
 static envoyerUInt_64(uint64_t I, socket_t to)
 {
 
-	char *s_I = malloc(T_INT_64);
+	char *s_I = calloc(T_INT_64,T_OCTET);
 	if (s_I == NULL) {
 		perror("malloc()");
 		return 0;
@@ -145,7 +145,7 @@ static envoyerUInt_64(uint64_t I, socket_t to)
  */
 static recevoirUInt_64(uint64_t * I, socket_t from)
 {
-	char *s_I = malloc(T_INT_64);
+	char *s_I = calloc(T_INT_64,T_OCTET);
 	if (s_I == NULL) {
 		perror("malloc()");
 		return 0;
@@ -220,7 +220,7 @@ static int recevoirChaine(char **chaine, socket_t from)
 		return 0;
 	}
 	print_debug("\t:");
-	*chaine = (char *)malloc(T_OCTET * taille_chaine);
+	*chaine = (char *)calloc(taille_chaine,T_OCTET);
 	if (*chaine == NULL) {
 		perror("malloc");
 		return 0;
