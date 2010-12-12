@@ -42,7 +42,7 @@ typedef struct idConnexion {
 	struct sockaddr_in identifiant;
 	char *name;
 	uint64_t h;
-	uint64_t taille_hashtab;
+	uint32_t taille_hashtab;
 } idConnexion_t;
 //==============================================================================
 //			       MACROS
@@ -120,6 +120,10 @@ static void afficherIdentConnexion(struct idConnexion *ident)
 		printf("\tAdresse Ip: %s\n", inet_ntoa(ident->identifiant.sin_addr));
 		printf("\tPort conne: %d\n", ntohs(ident->identifiant.sin_port));
 		printf("\tProtocole : AF_INET=%d recu:%d\n",AF_INET ,ident->identifiant.sin_family);
+	#ifdef SERVEUR_IMPL_H
+		printf("\th         : %lu\n",ident->h);
+		printf("\tsize hasht: %u\n",ident->taille_hashtab);
+	#endif
 	}
 }
 #endif

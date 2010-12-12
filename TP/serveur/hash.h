@@ -12,7 +12,7 @@
 
 
 typedef struct Table_De_Hachage {
-    uint64_t taille;
+    uint32_t taille;
     /**
      * L'utilisation d'un pointeur permet d'avoir une table de hachage
      * de taille dynamique.C'est utile car dans une dht , chaque processus

@@ -45,7 +45,7 @@ inline idConnexion_t* message_whois_next_server(struct sockaddr_in serv_addr){
  	envoyerOrigine(FROM_SERVEUR,sock_next_server);
  	envoyerTypeMessage(WHOIS_NEXT_SERVER,sock_next_server);
  	
- 	recevoirIdent(next_server_info, sock_next_server);
+ 	recevoirIdent(&next_server_info, sock_next_server);
  	return next_server_info;
  }
  
@@ -63,7 +63,7 @@ inline idConnexion_t* message_ident(struct sockaddr_in serv_addr){
 	envoyerOrigine(FROM_SERVEUR,sock_next_server);
  	envoyerTypeMessage(IDENT,sock_next_server);
  	
- 	recevoirIdent(server_info, sock_next_server);
+ 	recevoirIdent(&server_info, sock_next_server);
  	return server_info;
 }
 
@@ -73,7 +73,7 @@ inline idConnexion_t* message_ident(struct sockaddr_in serv_addr){
  * Equilibrage de charge.Apres un parcour rapide de la dht, on décide de la
  * valeur du h
  */
-int message_connect_2_server(char* ip,uint64_t port){
+int message_connect_2_server(char* ip,uint32_t port){
 
 	uint64_t taille_max;
 	socket_t sockClient;
@@ -96,35 +96,25 @@ int message_connect_2_server(char* ip,uint64_t port){
 	
 	//itinialisation
 	taille_max = 0;
-	server_most_charged = iterator_server_info;
+	server_most_charged = NULL;
 	
 	while(1){	
 
-		printf("zezez\n");
 		iterator_server_info= message_ident(serv_addr);
 		assert(iterator_server_info!=NULL);
-	#ifdef DEBUG_MESSAGE_SERVEUR
-		afficherIdentConnexion(iterator_server_info);
-	#endif
-		printf("rtrtr\n");
-		if(iterator_server_info->taille_hashtab > taille_max){
 		
+		if(iterator_server_info->taille_hashtab > taille_max){
 			taille_max = iterator_server_info->taille_hashtab ;
 			server_most_charged =  iterator_server_info;
 		}
-		printf("okok\n");
 		iterator_server_info=message_whois_next_server(serv_addr);
-	#ifdef DEBUG_MESSAGE_SERVEUR
-		afficherIdentConnexion(iterator_server_info);
-	#endif
-		printf("okokuiui\n");
 		serv_addr = iterator_server_info->identifiant;
-		
 		shutdown(sockClient,SHUT_RDWR);
-		
-		if( iterator_server_info->identifiant.sin_port==port ) {
-			return message_connect_to(server_most_charged);
-		}	
+	
+		if( serv_addr.sin_port==htons(port) ) {
+			
+			return message_connect_to(server_most_charged->identifiant);
+		}
 	}
 }
 
@@ -136,7 +126,7 @@ inline int message_connect_to(struct sockaddr_in server_info)
 	socket_t new_socket;
 	socket_t sockServer;
 	char reponse=0;
-	
+	idConnexion_t id_connexion;
 	/* 
 	 * Connexion au serveur dont les identifiants sont dans server_info
 	 * recuperation des identifiants du serveur suivant dans le cercle
@@ -151,9 +141,10 @@ inline int message_connect_to(struct sockaddr_in server_info)
 	envoyerTypeMessage(CONNECT,sockServer);
 	
 	envoyerOctet(0,sockServer);
-	recevoirIdent(SERVEUR.precServeur, sockServer);
-	recevoirIdent(SERVEUR.suivServeur, sockServer);
-	envoyerIdent(get_my_idConnexion(),sockServer);
+	recevoirIdent(&SERVEUR.precServeur, sockServer);
+	recevoirIdent(&SERVEUR.suivServeur, sockServer);
+	id_connexion= get_my_idConnexion();
+	envoyerIdent(&id_connexion,sockServer);
 	/*
 	 *on libere la connexion 
 	 */
@@ -177,7 +168,8 @@ inline int message_connect_to(struct sockaddr_in server_info)
 	envoyerTypeMessage(CONNECT,new_socket);
 	
 	envoyerOctet(1,new_socket);
-	envoyerIdent(get_my_idConnexion(), new_socket);	
+	id_connexion= get_my_idConnexion();
+	envoyerIdent(&id_connexion, new_socket);	
 	/*
 	 *on libere la connexion 
 	 */	

@@ -30,6 +30,7 @@
 
 #define DEBUG_MESSAGE_H
 //#undef  DEBUG_MESSAGE_H
+
 #ifdef DEBUG_MESSAGE_H
 #   define print_debug(chaine, args...)   printf(chaine,##args)
 #else
@@ -86,6 +87,7 @@ static int envoyerUInt_32(uint32_t I, socket_t to)
 		exit(-1);
 	}
 	print_debug("envoi de: %u\n", I);
+	free(s_I);
 	return 1;
 }
 
@@ -110,6 +112,7 @@ static int recevoirUInt_32(uint32_t * I, socket_t from)
 	}
 	//TODO EST CE QUIL FAUT FAIRE APPEL A ATOL PLUTOT?
 	*I = (uint32_t)atoi(s_I);
+	free(s_I);
 	print_debug("recep de: %u\n", *I);
 	return 1;
 }
@@ -142,6 +145,7 @@ static envoyerUInt_64(uint64_t I, socket_t to)
 #else
 	print_debug("envoi de: %llu\n", I);
 #endif
+	free(s_I);
 	return 1;
 }
 /*
@@ -161,12 +165,14 @@ static recevoirUInt_64(uint64_t * I, socket_t from)
 		exit(-1);
 	}
 	//TODO UN PEU OPTIMISTE ON SUPPOSE QUE ATOLL RECOI BIEN UN NETIER EN CHAINE
+	
 	*I = atoll(s_I);
 #if __WORDSIZE == 64
 	print_debug("recep de: %lu\n", *I);
 #else
 	print_debug("recep de: %llu\n", *I);
 #endif
+	free(s_I);
 	return 1;
 }
 
@@ -270,13 +276,15 @@ static int envoyerDonnee(donnee_t D, socket_t to)
  */
 static int recevoirDonnee(donnee_t * D, socket_t from)
 {
-	cle_t cle;
-	valeur_t val;
+	cle_t K;
+	valeur_t V;
 	
 	print_debug("debut reception de donnee\n");
-	recevoirCle(&cle, from);
-	recevoirValeur(&val, from);
-	*D = creerDonnee(cle, val);
+	recevoirCle(&K, from);
+	recevoirValeur(&V, from);
+	*D = creerDonnee(K, V);
+	free(K);
+	free(V);
 	print_debug("fin reception de donnee\n");
 	return 1;
 }
@@ -316,35 +324,22 @@ static int recevoirOrigine(origine_t * I, socket_t from)
 
 
 
-/*
- *envoi un hash.Ca peut etre l'envoi de l'identifiant d'un serveur
- */
-static int envoyerHash(uint64_t h, socket_t to)
-{
-	return envoyerUInt_64(h, to);
-}
-
-/*
- *reception d'un resultat de la fonction de hachage
- */
-static int recevoirHash(uint64_t * h, socket_t from)
-{
-	return recevoirUInt_64(h, from);
-}
-
+#define envoyerHash( h, to) envoyerUInt_64(h, to)
+#define recevoirHash(h,from) recevoirUInt_64(h, from)
 
 /*
  * envoi de l'identité du client
  */
-static int envoyerIdent(idConnexion_t ident, socket_t to)
+static int envoyerIdent(idConnexion_t* ident, socket_t to)
 {
+
 	print_debug("******debut envoi de ident*****\n");
-	envoyerChaine(inet_ntoa(ident.identifiant.sin_addr), to);
-	envoyerUInt_32(ident.identifiant.sin_port, to);
-	envoyerUInt_32(ident.identifiant.sin_family,to);
-	envoyerChaine(ident.name,to);
-	envoyerHash(ident.h,to);
-	envoyerUInt_64(ident.taille_hashtab,to);
+	envoyerChaine(inet_ntoa(ident->identifiant.sin_addr), to);
+	envoyerUInt_32(ident->identifiant.sin_port, to);
+	envoyerUInt_32(ident->identifiant.sin_family,to);
+	envoyerChaine(ident->name,to);
+	envoyerHash(ident->h,to);
+	envoyerUInt_32(ident->taille_hashtab,to);
 	print_debug("******fin d'envoi de ident*****\n");
 	return 1;
 }
@@ -352,16 +347,16 @@ static int envoyerIdent(idConnexion_t ident, socket_t to)
 /*
  *reception de l'identité du client ou serveur
  */
-static int recevoirIdent(idConnexion_t* ident, socket_t from)
+static int recevoirIdent(idConnexion_t** ident, socket_t from)
 {
 	char *ip;
 	uint32_t port;
 	uint32_t protocol;
 	char *name;
 	uint64_t h;
-	uint64_t taille_hashtab;
+	uint32_t taille_hashtab;
 	
-	ident = (struct idConnexion*) calloc(1,sizeof(struct idConnexion));
+	*ident = (struct idConnexion*) calloc(1,sizeof(struct idConnexion));
 	if(ident==NULL){
 		perror("calloc()");
 		exit(-1);
@@ -372,16 +367,17 @@ static int recevoirIdent(idConnexion_t* ident, socket_t from)
 	recevoirUInt_32(&protocol,from);
 	recevoirChaine(&name,from);
 	recevoirHash(&h,from);
-	recevoirUInt_64(&taille_hashtab,from);
-	
-	ident->identifiant.sin_addr.s_addr = inet_addr(ip);
-	ident->identifiant.sin_port = port;
-	ident->identifiant.sin_family = (short)protocol;
-	ident->name= name;
-	ident->h= h;
-	ident->taille_hashtab;
+	recevoirUInt_32(&taille_hashtab,from);
+	(*ident)->identifiant.sin_addr.s_addr = inet_addr(ip);
+	(*ident)->identifiant.sin_port = port;
+	(*ident)->identifiant.sin_family = (short)protocol;
+	(*ident)->name= name;
+	(*ident)->h= h;
+	(*ident)->taille_hashtab=taille_hashtab;
 	print_debug("*****fin de reception de ident******\n");
 	return 1;
+	
+	
 }
 
 #endif

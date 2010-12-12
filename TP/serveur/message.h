@@ -26,7 +26,7 @@
 /*
  * connect au serveur le moins chargé
  */
-int message_connect_2_server(char *ip, uint64_t port);
+int message_connect_2_server(char *ip, uint32_t port);
 
 /*
  * se deconnecte du serveur

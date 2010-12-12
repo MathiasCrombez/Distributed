@@ -188,12 +188,13 @@ void *talk_to_server(void *idSocket)
 		recevoirOctet(&reponse, sockServer);
 
 		if (reponse == 0) {
-			envoyerIdent(get_my_idConnexion(), sockServer);
-			envoyerIdent(*SERVEUR.suivServeur,sockServer);
-			recevoirIdent(SERVEUR.suivServeur,sockServer);
+			id_connexion = get_my_idConnexion();
+			envoyerIdent(&id_connexion, sockServer);
+			envoyerIdent(SERVEUR.suivServeur,sockServer);
+			recevoirIdent(&SERVEUR.suivServeur,sockServer);
 			
 		} else if (reponse == 1) {
-			recevoirIdent(SERVEUR.precServeur,sockServer);
+			recevoirIdent(&SERVEUR.precServeur,sockServer);
 		}
 
 	#ifdef DEBUG_SERVEUR_IMPL
@@ -211,14 +212,15 @@ void *talk_to_server(void *idSocket)
 	
 		printf("IDENT\n");
 		id_connexion= get_my_idConnexion();
-		envoyerIdent(id_connexion,sockServer);
+		 printf("##### dht sizeest: %u\n",id_connexion.taille_hashtab);
+		envoyerIdent(&id_connexion,sockServer);
 		break;
 		
 		
 	case WHOIS_NEXT_SERVER:
 	
 		printf("WHOIS_NEXT_SERVER\n");
-		envoyerIdent(*(SERVEUR.suivServeur),sockServer);
+		envoyerIdent(SERVEUR.suivServeur,sockServer);
 		break;
 		
 		
