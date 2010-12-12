@@ -56,6 +56,11 @@ struct idClient {
 };
 
 
+typedef struct tableauClient {
+    struct idClient client;
+    struct tableauClient * suiv;
+} * tabClient_t;
+
 typedef struct serveur {
 
 	struct sockaddr_in serv_addr;
@@ -65,7 +70,7 @@ typedef struct serveur {
 	uint64_t h;
 	table_de_hachage_t tabl;
 	
-	struct idClient tableauClient[LENGTH_LISTEN_QUEUE];
+	tabClient_t tableauClient;
 	idConnexion_t *suivServeur;
 	idConnexion_t *precServeur;
 

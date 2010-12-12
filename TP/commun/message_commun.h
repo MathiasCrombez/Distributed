@@ -50,6 +50,7 @@ typedef enum  {
 typedef enum  {
 	PUT,
 	GET,
+        REMOVEKEY,
 	ACK,
 	IDENT,
 	WHOIS_NEXT_SERVER,
@@ -78,13 +79,13 @@ static int envoyerUInt_32(uint32_t I, socket_t to)
 		perror("calloc()");
 		exit(-1);
 	}
-	sprintf(s_I, "%d", I);
+	sprintf(s_I, "%u", I);
 
 	if (send(to, s_I, T_INT_32, 0) == -1) {
 		perror("send()");
 		exit(-1);
 	}
-	print_debug("envoi de: %d\n", I);
+	print_debug("envoi de: %u\n", I);
 	return 1;
 }
 
@@ -109,7 +110,7 @@ static int recevoirUInt_32(uint32_t * I, socket_t from)
 	}
 	//TODO EST CE QUIL FAUT FAIRE APPEL A ATOL PLUTOT?
 	*I = (uint32_t)atoi(s_I);
-	print_debug("recep de: %d\n", *I);
+	print_debug("recep de: %u\n", *I);
 	return 1;
 }
 
@@ -126,13 +127,21 @@ static envoyerUInt_64(uint64_t I, socket_t to)
 		perror("calloc()");
 		exit(-1);
 	}
-	sprintf(s_I, "%ld", I);
-
+	
+#if __WORDSIZE == 64
+	sprintf(s_I, "%lu", I);
+#else
+	sprintf(s_I, "%llu", I);
+#endif
 	if (send(to, s_I, T_INT_64, 0) == -1) {
 		perror("send()");
 		exit(-1);
 	}
-	print_debug("envoi de: %ld\n", I);
+#if __WORDSIZE == 64
+	print_debug("envoi de: %lu\n", I);
+#else
+	print_debug("envoi de: %llu\n", I);
+#endif
 	return 1;
 }
 /*
@@ -153,7 +162,11 @@ static recevoirUInt_64(uint64_t * I, socket_t from)
 	}
 	//TODO UN PEU OPTIMISTE ON SUPPOSE QUE ATOLL RECOI BIEN UN NETIER EN CHAINE
 	*I = atoll(s_I);
-	print_debug("recep de: %ld\n", *I);
+#if __WORDSIZE == 64
+	print_debug("recep de: %lu\n", *I);
+#else
+	print_debug("recep de: %llu\n", *I);
+#endif
 	return 1;
 }
 

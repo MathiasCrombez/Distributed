@@ -12,6 +12,7 @@
  */
 serveur_t* creerServeur(char *nomDuServeur, uint64_t port)
 {
+
 	int yes = 1;
 
 //TODO  //## MODIFIER LE CHAMP NOM:METTRE UN POINTEUR######//
@@ -78,47 +79,86 @@ serveur_t* creerServeur(char *nomDuServeur, uint64_t port)
  */
 void *talk_to_client(void *idSocket)
 {
-	cle_t K;
-	donnee_t D;
-	requete_t type_requete;
-	socket_t sockClient = *(socket_t*) idSocket;
+    cle_t K;
+    donnee_t D;
+    requete_t type_requete;
+    socket_t sockClient = *(socket_t*) idSocket;
+    tabClient_t curr = SERVEUR.tableauClient, prev = SERVEUR.tableauClient;
 	
-	
-	recevoirTypeMessage(&type_requete, sockClient);
-	switch (type_requete) {
 
-	case PUT:
-		break;
+    recevoirTypeMessage(&type_requete, sockClient);
+    switch (type_requete) {
 
-	case GET:
-		recevoirCle(&K,sockClient);
-		printf("la cle reçue est %s\n",K);
-		printf("son hash= %ld\n",hash(K));
-		D = getHashTable(K,SERVEUR.tabl); 
-		if(D==NULL){
-			envoyerOctet(0,sockClient);
-		} else {
-			envoyerOctet(1,sockClient);
-			envoyerDonnee(D,sockClient);
-		}
-		break;
+    case PUT:
+        recevoirCle(&K,sockClient);
+        printf("la cle reçue est %s\n",K);
+        printf("son hash= %ld\n",hash(K));
+        if(0){
+            envoyerOctet(0,sockClient);
+        } else {
+            envoyerOctet(1,sockClient);
+            recevoirDonnee(&D,sockClient);
+            putHashTable(D,SERVEUR.tabl);
+        }
+        break;
 
-	case ACK:
-		break;
+    case GET:
+        recevoirCle(&K,sockClient);
+        printf("la cle reçue est %s\n",K);
+        printf("son hash= %ld\n",hash(K));
+        D = getHashTable(K,SERVEUR.tabl); 
+        if(D==NULL){
+            envoyerOctet(0,sockClient);
+        } else {
+            envoyerOctet(1,sockClient);
+            envoyerDonnee(D,sockClient);
+        }
+        break;
 
-	case IDENT:
-		break;
+    case REMOVEKEY:
+        recevoirCle(&K,sockClient);
+        printf("la cle reçue est %s\n",K);
+        printf("son hash= %ld\n",hash(K));
+        D = getHashTable(K,SERVEUR.tabl); 
+        if(D==NULL){
+            envoyerOctet(0,sockClient);
+        } else {
+            envoyerOctet(1,sockClient);
+            removeHashTable(K,SERVEUR.tabl);
+        }
+        break;
+    case IDENT:
+        break;
 
-	case CONNECT:
+    case CONNECT:
+            
+        break;
 
-		break;
-
-	case DISCONNECT:
+    case DISCONNECT:
+        if (curr->client.idSocket == sockClient) {
+            SERVEUR.tableauClient = curr->suiv;
+            free(curr);
+        }
+        else {
+            while(curr->client.idSocket != sockClient && curr) {
+                prev = curr;
+                curr = curr->suiv;                    
+            }
+            if (curr) {
+                prev->suiv = curr->suiv;
+                free(curr);
+            }
+            else {
+                printf("Le client de la socket %d n'est pas dans la table du serveur.\n"
+                       , sockClient);
+                exit(1);
+            }
+        }
 
 	default:
-		break;
+            break;
 
-	}
+    }
 
 }
 /**
@@ -201,5 +241,6 @@ void *talk_to_server(void *idSocket)
 	shutdown(sockServer, SHUT_RDWR);
 	pthread_exit(NULL);
 }
+
 
 
