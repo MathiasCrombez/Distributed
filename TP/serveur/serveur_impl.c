@@ -246,3 +246,21 @@ void *talk_to_server(void *idSocket)
 
 
 
+
+idConnexion_t get_my_idConnexion()
+{
+	idConnexion_t  id_connexion;
+	
+	id_connexion.identifiant=SERVEUR.serv_addr;
+	id_connexion.name = SERVEUR.name;	
+	id_connexion.h=SERVEUR.h;
+	id_connexion.taille_hashtab= SERVEUR.tabl.taille;
+	
+	return id_connexion;
+}
+
+
+serveur_t* get_my_server()
+{
+	return &SERVEUR;
+}

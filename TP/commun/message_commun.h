@@ -122,7 +122,7 @@ static int recevoirUInt_32(uint32_t * I, socket_t from)
  *envoi d'un entier sur 64 bits.
  *L'entier est converti en chaine de caractere , puis envoyé
  */
-static envoyerUInt_64(uint64_t I, socket_t to)
+static int envoyerUInt_64(uint64_t I, socket_t to)
 {
 
 	char *s_I = calloc(T_INT_64,T_OCTET);
@@ -153,7 +153,7 @@ static envoyerUInt_64(uint64_t I, socket_t to)
  *L'entier est reçu sous forme de chaine de caractere, qui est 
  *retraduite en entier sur 64 bits
  */
-static recevoirUInt_64(uint64_t * I, socket_t from)
+static int recevoirUInt_64(uint64_t * I, socket_t from)
 {
 	char *s_I = calloc(T_INT_64,T_OCTET);
 	if (s_I == NULL) {

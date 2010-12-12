@@ -105,6 +105,12 @@ inline int ___message_connect_to___(struct sockaddr_in server_info)
 	socket_t sockServer;
 	char reponse=0;
 	idConnexion_t id_connexion;
+	serveur_t* my_server_ptr;
+	
+	
+	id_connexion= get_my_idConnexion();
+	my_server_ptr= get_my_server();
+	
 	/* 
 	 * Connexion au serveur dont les identifiants sont dans server_info
 	 * recuperation des identifiants du serveur suivant dans le cercle
@@ -119,9 +125,10 @@ inline int ___message_connect_to___(struct sockaddr_in server_info)
 	envoyerTypeMessage(CONNECT,sockServer);
 	
 	envoyerOctet(0,sockServer);
-	recevoirIdent(&SERVEUR.precServeur, sockServer);
-	recevoirIdent(&SERVEUR.suivServeur, sockServer);
-	id_connexion= get_my_idConnexion();
+	printf("hjhkhkjhk\n");
+	afficherIdentConnexion(my_server_ptr->precServeur);
+	recevoirIdent(&my_server_ptr->precServeur, sockServer);
+	recevoirIdent(&my_server_ptr->suivServeur, sockServer);
 	envoyerIdent(&id_connexion,sockServer);
 	/*
 	 *on libere la connexion 
@@ -136,7 +143,7 @@ inline int ___message_connect_to___(struct sockaddr_in server_info)
 	 * Connexion au serveur suivant dans le cercle
 	 * envoi de mes identifiants au serveur suivant
 	 */
-	new_socket=___connect2server___(SERVEUR.suivServeur->identifiant);
+	new_socket=___connect2server___(my_server_ptr->suivServeur->identifiant);
 	if (sockServer == 0) {
 		printf("echec de la connexion\n");
 		exit(-1);
@@ -146,7 +153,6 @@ inline int ___message_connect_to___(struct sockaddr_in server_info)
 	envoyerTypeMessage(CONNECT,new_socket);
 	
 	envoyerOctet(1,new_socket);
-	id_connexion= get_my_idConnexion();
 	envoyerIdent(&id_connexion, new_socket);	
 	/*
 	 *on libere la connexion 
@@ -158,10 +164,10 @@ inline int ___message_connect_to___(struct sockaddr_in server_info)
 
 #ifdef DEBUG_MESSAGE_SERVEUR
 	printf("****serveur precedent est:****\n");
-	afficherIdentConnexion(SERVEUR.precServeur);
+	afficherIdentConnexion(my_server_ptr->precServeur);
 	printf("\n");
 	printf("****serveur suivant est:****\n");
-	afficherIdentConnexion(SERVEUR.suivServeur);
+	afficherIdentConnexion(my_server_ptr->suivServeur);
 	printf("\n");
 #endif
 	return 1;
@@ -210,6 +216,10 @@ int message_connect_2_server(char* ip,uint32_t port){
 		shutdown(sockClient,SHUT_RDWR);
 	
 		if( serv_addr.sin_port==htons(port) && serv_addr.sin_addr.s_addr==inet_addr(ip)) {
+			
+			/*
+			 * on a fait le tour des serveurs.Il reste plus qu'à se connecter au serveur le plus chargé 
+			 */
 			
 			return ___message_connect_to___(server_most_charged->identifiant);
 		}

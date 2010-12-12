@@ -36,7 +36,7 @@
 /*
  * mettre son ip
  */
-#define SERVEURNAME "194.254.210.4"
+#define SERVEURNAME "194.254.210.45"
 
 
 
@@ -83,7 +83,7 @@ typedef struct serveur {
 //==============================================================================
 
 
-serveur_t SERVEUR;
+static serveur_t SERVEUR;
 
 
 //==============================================================================
@@ -98,22 +98,16 @@ void *talk_to_server(void *sockServer);
 
 
 
+/*
+ * renvoie les informations de mon serveur 
+ */
+idConnexion_t get_my_idConnexion();
 
 
-
-static  idConnexion_t get_my_idConnexion(){
-
-	idConnexion_t  id_connexion;
-	
-	id_connexion.identifiant=SERVEUR.serv_addr;
-	id_connexion.name = SERVEUR.name;	
-	id_connexion.h=SERVEUR.h;
-	id_connexion.taille_hashtab= SERVEUR.tabl.taille;
-	
-	return id_connexion;
-}
-
-
+/*
+ * renvoie une pointeur vers la variable global SERVEUR
+ */
+serveur_t* get_my_server();
 
 
 #endif

@@ -122,7 +122,7 @@ void afficherHashTable(table_de_hachage_t hashTab)
 table_de_hachage_t TEST_HASH_TABLE()
 {
 
-	table_de_hachage_t tablh = creerHashTable(10);
+	table_de_hachage_t tablh = creerHashTable(MAX_TAILLE_HASH_TABLE);
 
 	donnee_t d1, d2, d3, d4, d5, d6, d7, d8, d9, d10;
 	donnee_t d11, d12, d13, d14, d15, d16, d17, d18, d19, d20;
