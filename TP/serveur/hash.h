@@ -2,13 +2,14 @@
 #define HASH_H
 
 
-#include "commun.h"
+#include "liste_donnee.h"
 
 
-/* 
- * taille maximal d'une table de hachage 
- */
-#define MAX_TAILLE_HASH_TABLE 1<<16
+
+//==============================================================================
+//				TYPES
+//=============================================================================
+
 
 typedef struct Table_De_Hachage {
     uint64_t taille;
@@ -23,6 +24,22 @@ typedef struct Table_De_Hachage {
 
 
 
+//==============================================================================
+//			       MACROS
+//==============================================================================
+
+
+/* 
+ * taille maximal d'une table de hachage 
+ */
+#define MAX_TAILLE_HASH_TABLE 1<<16
+
+
+
+//==============================================================================
+//			       FONCTIONS
+//==============================================================================
+
 /*
  * creer et liberer une table de hachage 
  */
@@ -31,11 +48,11 @@ void libererHashTable(table_de_hachage_t hashTab);
 
 
 /*
- * les trois opérations de base de la TH
+ * les trois opérations de base de la DTH
  */
-donnee_t getHashTable(char *clef,table_de_hachage_t hashTab);
+donnee_t getHashTable(cle_t clef,table_de_hachage_t hashTab);
 void putHashTable(donnee_t data,table_de_hachage_t hashTab);
-valeur_t removeHashTable(char *cle,table_de_hachage_t hashTab);
+valeur_t removeHashTable(cle_t cle,table_de_hachage_t hashTab);
 
 /*
  * fonction de hachage 

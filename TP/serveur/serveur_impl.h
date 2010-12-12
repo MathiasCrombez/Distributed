@@ -36,26 +36,24 @@
 /*
  * mettre son ip
  */
+#define SERVEURNAME "194.254.210.87"
 
-#define SERVEURNAME "194.254.210.122"
+
 
 //==============================================================================
 //				TYPES
 //=============================================================================
 
-/*
- * identifie une connexion.
- * contient l'ip , le port , le nom du client et un socket pour
- * communiquer avec lui
- */ 
-struct idConnexion {
 
+/*
+ *Identifie une connexion avec un client
+ */
+struct idClient {
 	struct sockaddr_in identifiant;
 	socket_t idSocket;
 	char *name;
 	pthread_t thread;
 };
-
 
 
 typedef struct serveur {
@@ -64,14 +62,12 @@ typedef struct serveur {
 	socket_t idSocket;
 	char name[20];
 
+	uint64_t h;
 	table_de_hachage_t tabl;
-	uint64_t firstKey;
-	uint64_t nextKey;
-	uint64_t precKey;
-
-	struct idConnexion tableauClient[LENGTH_LISTEN_QUEUE];
-	struct idConnexion *suivServeur;
-	struct idConnexion *precServeur;
+	
+	struct idClient tableauClient[LENGTH_LISTEN_QUEUE];
+	idConnexion_t *suivServeur;
+	idConnexion_t *precServeur;
 
 } serveur_t;
 
@@ -81,8 +77,8 @@ typedef struct serveur {
 //			VARIABLE GLOBAL
 //==============================================================================
 
-serveur_t SERVEUR;
 
+serveur_t SERVEUR;
 
 
 //==============================================================================
@@ -90,25 +86,29 @@ serveur_t SERVEUR;
 //==============================================================================
 
 /** on creer un serveur.Il ne partage pas la DHT encor donc pas besoin de
- ** first_k, las_k et next en argument								**/
+ ** first_k, las_k et next en argument					**/
 serveur_t* creerServeur(char *nomDuServeur, uint64_t port);
 void *talk_to_client(void *sockClient);
 void *talk_to_server(void *sockServer);
-socket_t connect2server(char *to_serveur, uint64_t port);
-int message_connect_2_server(char *ip, uint64_t port);
 
 
-/*
- * fonction de debug
- */
-static void afficherIdentConnexion(struct idConnexion *ident)
-{
 
-	printf("identifiant connexion:\n");
-	printf("\tNom       : %s\n", ident->name);
-	printf("\tAdresse Ip: %s\n", inet_ntoa(ident->identifiant.sin_addr));
-	printf("\tPort conne: %d\n", ntohs(ident->identifiant.sin_port));
+
+
+
+static  idConnexion_t get_my_idConnexion(){
+
+	idConnexion_t  id_connexion;
+	
+	id_connexion.identifiant=SERVEUR.serv_addr;
+	id_connexion.name = SERVEUR.name;	
+	id_connexion.h=SERVEUR.h;
+	id_connexion.taille_hashtab= SERVEUR.tabl.taille;
+	
+	return id_connexion;
 }
+
+
 
 
 #endif

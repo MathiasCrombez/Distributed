@@ -1,5 +1,5 @@
-#ifndef MESSAGE_H
-#define MESSAGE_H
+#ifndef MESSAGE_COMMUN_H
+#define MESSAGE_COMMUN_H
 
 
 
@@ -52,9 +52,9 @@ typedef enum  {
 	GET,
 	ACK,
 	IDENT,
+	WHOIS_NEXT_SERVER,
 	CONNECT,
 	DISCONNECT,
-	AUTH_CLIENT,
 	AUTH_SERVER,
 } requete_t;
 
@@ -75,14 +75,14 @@ static int envoyerUInt_32(uint32_t I, socket_t to)
 
 	char *s_I = calloc(T_INT_32,T_OCTET);
 	if (s_I == NULL) {
-		perror("malloc()");
-		return 0;
+		perror("calloc()");
+		exit(-1);
 	}
 	sprintf(s_I, "%d", I);
 
 	if (send(to, s_I, T_INT_32, 0) == -1) {
 		perror("send()");
-		return 0;
+		exit(-1);
 	}
 	print_debug("envoi de: %d\n", I);
 	return 1;
@@ -99,13 +99,13 @@ static int recevoirUInt_32(uint32_t * I, socket_t from)
 
 	char *s_I = calloc(T_INT_32,T_OCTET);
 	if (s_I == NULL) {
-		perror("malloc()");
-		return 0;
+		perror("calloc()");
+		exit(-1);
 	}
 
 	if (recv(from, s_I, T_INT_32, 0) == -1) {
 		perror("recv()");
-		return 0;
+		exit(-1);
 	}
 	//TODO EST CE QUIL FAUT FAIRE APPEL A ATOL PLUTOT?
 	*I = (uint32_t)atoi(s_I);
@@ -123,14 +123,14 @@ static envoyerUInt_64(uint64_t I, socket_t to)
 
 	char *s_I = calloc(T_INT_64,T_OCTET);
 	if (s_I == NULL) {
-		perror("malloc()");
-		return 0;
+		perror("calloc()");
+		exit(-1);
 	}
-	sprintf(s_I, "%lld", I);
+	sprintf(s_I, "%ld", I);
 
 	if (send(to, s_I, T_INT_64, 0) == -1) {
 		perror("send()");
-		return 0;
+		exit(-1);
 	}
 	print_debug("envoi de: %ld\n", I);
 	return 1;
@@ -144,12 +144,12 @@ static recevoirUInt_64(uint64_t * I, socket_t from)
 {
 	char *s_I = calloc(T_INT_64,T_OCTET);
 	if (s_I == NULL) {
-		perror("malloc()");
-		return 0;
+		perror("calloc()");
+		exit(-1);
 	}
 	if (recv(from, s_I, T_INT_64, 0) == -1) {
 		perror("recv()");
-		return 0;
+		exit(-1);
 	}
 	//TODO UN PEU OPTIMISTE ON SUPPOSE QUE ATOLL RECOI BIEN UN NETIER EN CHAINE
 	*I = atoll(s_I);
@@ -165,7 +165,7 @@ static int envoyerOctet(char O, socket_t to)
 {
 	if (send(to, &O, T_OCTET, 0) == -1) {
 		perror("send");
-		return 0;
+		exit(-1);
 	}
 	print_debug("envoi de: %c\n", O);
 	return 1;
@@ -178,7 +178,7 @@ static int recevoirOctet(char *O, socket_t from)
 {
 	if (recv(from, O, T_OCTET, 0) == -1) {
 		perror("recv()");
-		return 0;
+		exit(-1);
 	}
 	print_debug("recep de: %c\n", *O);
 	return 1;
@@ -193,12 +193,12 @@ static int envoyerChaine(char *chaine, socket_t to)
 	uint32_t taille_chaine = T_CHAINE(chaine);
 	print_debug("\t:");
 	if (!envoyerUInt_32(taille_chaine, to)) {
-		return 0;
+		exit(-1);
 	}
 	print_debug("\t:");
 	if (send(to, chaine, taille_chaine, 0) == -1) {
 		perror("send()");
-		return 0;
+		exit(-1);
 	}
 	print_debug("envoi de: %s\n", chaine);
 	return 1;
@@ -214,24 +214,20 @@ static int recevoirChaine(char **chaine, socket_t from)
 	uint32_t taille_chaine;
 	print_debug("\t:");
 	if (!recevoirUInt_32(&taille_chaine, from)) {
-		return 0;
+		exit(-1);
 	}
 	print_debug("\t:");
-
 	*chaine = (char *)calloc(taille_chaine,T_OCTET);
 	if (*chaine == NULL) {
-		perror("malloc");
-		return 0;
+		perror("calloc");
+		exit(-1);
 	}
 	if (recv(from, *chaine, taille_chaine, 0) == -1) {
 		perror("recv()");
-		return 0;
+		exit(-1);
 	}
-        if (strlen(*chaine) != taille_chaine) {
-            printf("Réception chaine : taille incompatible\n");
-            return 0;
-        }
-	print_debug("recep de taille %d %d de: %s\n", taille_chaine, strlen(*chaine), *chaine);
+       
+	print_debug("recep  de: %s\n",*chaine);
 	return 1;
 }
 	
@@ -248,7 +244,11 @@ static int recevoirChaine(char **chaine, socket_t from)
  */
 static int envoyerDonnee(donnee_t D, socket_t to)
 {
-	return (envoyerChaine(D->cle, to) & envoyerChaine(D->valeur, to));
+	print_debug("debut envoi de donnee\n");
+	envoyerChaine(D->cle, to);
+	envoyerChaine(D->valeur, to);
+	print_debug("fin envoi de donnee\n");
+	return 1;
 }
 
 
@@ -259,11 +259,12 @@ static int recevoirDonnee(donnee_t * D, socket_t from)
 {
 	cle_t cle;
 	valeur_t val;
-
+	
+	print_debug("debut reception de donnee\n");
 	recevoirCle(&cle, from);
 	recevoirValeur(&val, from);
-
 	*D = creerDonnee(cle, val);
+	print_debug("fin reception de donnee\n");
 	return 1;
 }
 
@@ -300,32 +301,7 @@ static int recevoirOrigine(origine_t * I, socket_t from)
 	return recevoirUInt_32(I, from);
 }
 
-/*
- * envoi de l'identité du client
- */
-static int envoyerIdent(struct sockaddr_in ident, socket_t to)
-{
-	envoyerChaine(inet_ntoa(ident.sin_addr), to);
-	envoyerUInt_32(ident.sin_port, to);
-//    envoyerUInt_32(ident.sin_family,to);
-	return 1;
-}
 
-/*
- *recption de l'identité du client ou serveur
- */
-static int recevoirIdent(struct sockaddr_in *ident, socket_t from)
-{
-	char *ip;
-	uint32_t port;
-	
-	recevoirChaine(&ip, from);
-	recevoirUInt_32(&port, from);
-
-	ident->sin_addr.s_addr = inet_addr(ip);
-	ident->sin_port = port;
-	return 1;
-}
 
 /*
  *envoi un hash.Ca peut etre l'envoi de l'identifiant d'un serveur
@@ -343,6 +319,57 @@ static int recevoirHash(uint64_t * h, socket_t from)
 	return recevoirUInt_64(h, from);
 }
 
+
+/*
+ * envoi de l'identité du client
+ */
+static int envoyerIdent(idConnexion_t ident, socket_t to)
+{
+	print_debug("******debut envoi de ident*****\n");
+	envoyerChaine(inet_ntoa(ident.identifiant.sin_addr), to);
+	envoyerUInt_32(ident.identifiant.sin_port, to);
+	envoyerUInt_32(ident.identifiant.sin_family,to);
+	envoyerChaine(ident.name,to);
+	envoyerHash(ident.h,to);
+	envoyerUInt_64(ident.taille_hashtab,to);
+	print_debug("******fin d'envoi de ident*****\n");
+	return 1;
+}
+
+/*
+ *reception de l'identité du client ou serveur
+ */
+static int recevoirIdent(idConnexion_t* ident, socket_t from)
+{
+	char *ip;
+	uint32_t port;
+	uint32_t protocol;
+	char *name;
+	uint64_t h;
+	uint64_t taille_hashtab;
+	
+	ident = (struct idConnexion*) calloc(1,sizeof(struct idConnexion));
+	if(ident==NULL){
+		perror("calloc()");
+		exit(-1);
+	}
+	print_debug("*****debut reception de ident*****\n");
+	recevoirChaine(&ip,from);
+	recevoirUInt_32(&port,from);
+	recevoirUInt_32(&protocol,from);
+	recevoirChaine(&name,from);
+	recevoirHash(&h,from);
+	recevoirUInt_64(&taille_hashtab,from);
+	
+	ident->identifiant.sin_addr.s_addr = inet_addr(ip);
+	ident->identifiant.sin_port = port;
+	ident->identifiant.sin_family = (short)protocol;
+	ident->name= name;
+	ident->h= h;
+	ident->taille_hashtab;
+	print_debug("*****fin de reception de ident******\n");
+	return 1;
+}
 
 #endif
 

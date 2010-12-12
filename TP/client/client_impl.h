@@ -1,19 +1,9 @@
 #ifndef CLIENT_IMPL_H
 #define CLIENT_IMPL_H
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <inttypes.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <netdb.h>
-#include <string.h>
-#include <unistd.h>
 
-#include "message.h"
+
 #include "commun.h"
-
 
 
 //=============================================================================

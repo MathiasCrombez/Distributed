@@ -3,7 +3,7 @@
 #define SET_SERVEUR_NAME(NAME,PORT){				\
 	strcpy(SERVEUR.name,NAME);				\
 	strcat(SERVEUR.name,":");				\
-	sprintf(SERVEUR.name+strlen(NAME)+1,"%lld",PORT);        \
+	sprintf(SERVEUR.name+strlen(NAME)+1,"%ld",PORT);        \
 }
 
 
@@ -28,8 +28,7 @@ serveur_t* creerServeur(char *nomDuServeur, uint64_t port)
 	SERVEUR.serv_addr.sin_addr.s_addr = inet_addr(SERVEURNAME);
 	SERVEUR.serv_addr.sin_port = htons(port);
 
-	SERVEUR.suivServeur =
-	    (struct idConnexion *)malloc(sizeof(struct idConnexion));
+	SERVEUR.suivServeur =(struct idConnexion *)malloc(sizeof(struct idConnexion));
 	if (SERVEUR.suivServeur == NULL) {
 		perror("malloc()");
 		exit(EXIT_FAILURE);
@@ -44,15 +43,17 @@ serveur_t* creerServeur(char *nomDuServeur, uint64_t port)
 
 	SERVEUR.suivServeur->identifiant = SERVEUR.serv_addr;
 	SERVEUR.suivServeur->name = SERVEUR.name;
-	SERVEUR.suivServeur->idSocket = 0;
-
+	SERVEUR.suivServeur->h=0;
+	SERVEUR.suivServeur->taille_hashtab=0;
+	
 	SERVEUR.precServeur->identifiant = SERVEUR.serv_addr;
 	SERVEUR.precServeur->name = SERVEUR.name;
-	SERVEUR.precServeur->idSocket = 0;
+	SERVEUR.precServeur->h=0;
+	SERVEUR.precServeur->taille_hashtab=0;
 
-	SERVEUR.firstKey = 0;
-	SERVEUR.nextKey = 0;
-	SERVEUR.precKey = 0;
+/*	SERVEUR.firstKey = 0;*/
+/*	SERVEUR.nextKey = 0;*/
+/*	SERVEUR.precKey = 0;*/
 
 	// evite le message d'erreur "Address already in use" lors d'un bind
 	if (setsockopt (SERVEUR.idSocket, SOL_SOCKET, SO_REUSEADDR, &yes,sizeof(int)) == -1) {
@@ -92,7 +93,7 @@ void *talk_to_client(void *idSocket)
 	case GET:
 		recevoirCle(&K,sockClient);
 		printf("la cle reçue est %s\n",K);
-		printf("son hash= %lld\n",hash(K));
+		printf("son hash= %ld\n",hash(K));
 		D = getHashTable(K,SERVEUR.tabl); 
 		if(D==NULL){
 			envoyerOctet(0,sockClient);
@@ -120,41 +121,39 @@ void *talk_to_client(void *idSocket)
 	}
 
 }
-
+/**
+* Corps de la fonction de routine lors de la création de pthread
+* (apparition d'un client
+*/
 void *talk_to_server(void *idSocket)
 {
 	//ce socket va nous permettre de communiquer avec le client
 	socket_t sockServer = *(socket_t*)idSocket;
 	char reponse;
-	printf("talk_to_server()\n");
-	/**
-     	* Corps de la fonction de routine lors de la création de pthread
-     	* (apparition d'un client
-     	*/
+	char *nom;
+	struct idConnexion id_connexion;
 	requete_t type_requete;
+	
+#ifdef DEBUG_SERVEUR_IMPL
+	printf("########debut du thread#########\n");
+#endif
+	
 	recevoirTypeMessage(&type_requete, sockServer);
-
 	switch (type_requete) {
-
-		struct sockaddr_in id_connexion;
-		char *nom;
+	
 
 	case CONNECT:
+	
+		printf("SERVER CONNECT\n");
 		recevoirOctet(&reponse, sockServer);
 
 		if (reponse == 0) {
-			printf("SERVER CONNECT\n");
-			envoyerIdent(SERVEUR.serv_addr, sockServer);
-			envoyerChaine(SERVEUR.name, sockServer);
-
-			envoyerIdent(SERVEUR.suivServeur->identifiant,sockServer);
-			envoyerChaine(SERVEUR.suivServeur->name, sockServer);
-
-			recevoirIdent(&(SERVEUR.suivServeur->identifiant),sockServer);
-			recevoirChaine(&(SERVEUR.suivServeur->name),sockServer);
+			envoyerIdent(get_my_idConnexion(), sockServer);
+			envoyerIdent(*SERVEUR.suivServeur,sockServer);
+			recevoirIdent(SERVEUR.suivServeur,sockServer);
+			
 		} else if (reponse == 1) {
-			recevoirIdent(&SERVEUR.precServeur->identifiant,sockServer);
-			recevoirChaine(&SERVEUR.precServeur->name, sockServer);
+			recevoirIdent(SERVEUR.precServeur,sockServer);
 		}
 
 	#ifdef DEBUG_SERVEUR_IMPL
@@ -165,136 +164,42 @@ void *talk_to_server(void *idSocket)
 		afficherIdentConnexion(SERVEUR.suivServeur);
 		printf("\n");
 	#endif
-		shutdown(sockServer, SHUT_RDWR);
-		pthread_exit(NULL);
+		
 		break;
 
-	case DISCONNECT:
+	case IDENT:
+	
+		printf("IDENT\n");
+		id_connexion= get_my_idConnexion();
+		envoyerIdent(id_connexion,sockServer);
+		break;
+		
+		
+	case WHOIS_NEXT_SERVER:
+	
+		printf("WHOIS_NEXT_SERVER\n");
+		envoyerIdent(*(SERVEUR.suivServeur),sockServer);
+		break;
+		
+		
+/*	case DISCONNECT:*/
 
-		printf("un serveur souhaite ma mort\n");
-		recevoirIdent(&(SERVEUR.precServeur->identifiant), sockServer);
-		recevoirChaine(&(SERVEUR.precServeur->name), sockServer);
-		shutdown(sockServer, SHUT_RDWR);
-		pthread_exit(NULL);
-		printf("c'est fait!\n");
-		return NULL;
+/*		printf("un serveur souhaite ma mort\n");*/
+/*		recevoirIdent(&(SERVEUR.precServeur->identifiant), sockServer);*/
+/*		recevoirChaine(&(SERVEUR.precServeur->name), sockServer);*/
+/*		printf("c'est fait!\n");*/
+/*		return NULL;*/
 	default:
 		printf("message incinnu");
 		break;
 
 	}
-
+	
+	/* fermeture de la communication et mort ddu thread*/
+	
+	printf("########fin du thread#########\n");
+	shutdown(sockServer, SHUT_RDWR);
+	pthread_exit(NULL);
 }
 
-socket_t connect2server(char *to_serveur, uint64_t port)
-{
-
-	struct hostent *hostinfo = NULL;
-	struct sockaddr_in server_info;
-	socket_t idSocket;
-
-	hostinfo = gethostbyname(to_serveur);
-	if (hostinfo == NULL) {
-		printf("erreur gethostbyname():le serveur %s est inconnu\n",
-		       to_serveur);
-		return 0;
-	}
-	printf("connexion au serveur sur port %lld\n", port);
-
-	server_info.sin_family = AF_INET;
-	server_info.sin_port = htons(port);
-	server_info.sin_addr = *(struct in_addr *)hostinfo->h_addr;
-
-	idSocket = socket(AF_INET, SOCK_STREAM, 0);
-	if (idSocket < 0) {
-		perror("socket()");
-		return 0;
-	}
-
-	if (connect
-	    (idSocket, (struct sockaddr *)&server_info,
-	     sizeof(struct sockaddr_in)) == -1) {
-		perror("connect()");
-		return 0;
-	}
-
-	return idSocket;
-}
-
-    /*
-     * Fermeture de la socket
-     */
-
-   // shutdown(sockClient, 2);
-
-    /*
-     * On peut utiliser pthread_exit pour renvoyer une valeur (d'erreur ou autre) 
-     * => voir pthread_join
-     */
-    //pthread_exit(NULL);
-
-/*int put_h(serveur_t s, cle_t cle, valeur_t valeur, uint64_t taille)*/
-/*{*/
-/*	char str[taille];*/
-/*	hash_t *curr, *prec, *newCell;*/
-/*	int i;*/
-/*	uint64_t key_l = cle - s.firstKey;*/
-/*	newCell =*/
-/*	    malloc(sizeof(char) * taille + sizeof(taille) + sizeof(hash_t *));*/
-/*	for (i = 0; i < taille; i++) {*/
-/*		str[i] = valeur[i];*/
-/*	}*/
-/*	prec = s.tabl[key_l];*/
-/*	curr = prec;*/
-/*	while (curr != NULL) {*/
-/*		prec = curr;*/
-/*		curr = curr->suiv;*/
-/*	}*/
-/*	newCell->size = taille;*/
-/*	newCell->value = str;*/
-/*	newCell->suiv = NULL;*/
-/*	return 0;*/
-/*}*/
-
-/*uint64_t get_h(serveur_t s, uint64_t cle, char *valeur)*/
-/*{*/
-/*	uint64_t key_l = cle - s.firstKey;*/
-/*	hash_t *curr = s.tabl[key_l];*/
-/*	while (curr != NULL && strcmp(curr->value, valeur)) {*/
-/*		curr = curr->suiv;*/
-/*	}*/
-/*	if (curr == NULL) {*/
-/*		valeur = NULL;*/
-/*		return 0;*/
-/*	} else {*/
-/*		valeur = curr->value;*/
-/*		return curr->size;*/
-/*	}*/
-/*}*/
-
-/*int remove_h(serveur_t s, uint64_t cle, char *valeur, uint64_t taille)*/
-/*{*/
-/*	int key_l = cle - s.firstKey;*/
-/*	hash_t *curr, *prec;*/
-/*	curr = s.tabl[key_l];*/
-/*	if (curr != NULL && curr->size == taille*/
-/*	    && !strcmp(curr->value, valeur)) {*/
-/*		s.tabl[key_l] = curr->suiv;*/
-/*		free(curr);*/
-/*		return 0;*/
-/*	} else {*/
-/*		while (curr != NULL && curr->size != taille*/
-/*		       && !strcmp(curr->value, valeur)) {*/
-/*			prec = curr;*/
-/*			curr = curr->suiv;*/
-/*		}*/
-/*		if (curr == NULL) {*/
-/*			return -1;*/
-/*		} else {*/
-/*			prec->suiv = curr->suiv;*/
-/*			free(curr);*/
-/*			return 0;*/
-/*		}*/
-/*	}*/
-/*}*/
 
