@@ -19,6 +19,7 @@ int main(int argc, char *argv[])
     char ip[20];
     int po;
     origine_t from;
+    pthread_t client_thread;
 
     //creation d'un serveur
     serveur_ptr = creerServeur(argv[1], atoi(argv[2]));
@@ -58,13 +59,14 @@ int main(int argc, char *argv[])
             /*
              * remplissage du tableau permettant d'itentifier les clients connectés
              */
-            p = malloc(sizeof(tabClient_t));
+            p = malloc(sizeof(struct tableauClient));
             p->client.identifiant = cli_addr;
             p->client.idSocket = sockClient;
             nbClient++;
 
             printf("le client vient de se connecter au serveur\n");
-            pthread_t client_thread=p->client.thread;
+
+            client_thread=p->client.thread;
             
             p->suiv = serveur_ptr->tableauClient;
             serveur_ptr->tableauClient = p;

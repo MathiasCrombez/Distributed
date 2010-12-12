@@ -36,7 +36,7 @@
 /*
  * mettre son ip
  */
-#define SERVEURNAME "194.254.210.45"
+#define SERVEURNAME "127.0.0.1"
 
 
 
