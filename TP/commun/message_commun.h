@@ -334,7 +334,7 @@ static int envoyerIdent(idConnexion_t* ident, socket_t to)
 {
 
 	print_debug("******debut envoi de ident*****\n");
-	envoyerChaine(inet_ntoa(ident->identifiant.sin_addr), to);
+	envoyerUInt_32(ident->identifiant.sin_addr.s_addr, to);
 	envoyerUInt_32(ident->identifiant.sin_port, to);
 	envoyerUInt_32(ident->identifiant.sin_family,to);
 	envoyerChaine(ident->name,to);
@@ -349,7 +349,7 @@ static int envoyerIdent(idConnexion_t* ident, socket_t to)
  */
 static int recevoirIdent(idConnexion_t** ident, socket_t from)
 {
-	char *ip;
+	in_addr_t ip;
 	uint32_t port;
 	uint32_t protocol;
 	char *name;
@@ -362,13 +362,13 @@ static int recevoirIdent(idConnexion_t** ident, socket_t from)
 		exit(-1);
 	}
 	print_debug("*****debut reception de ident*****\n");
-	recevoirChaine(&ip,from);
+	recevoirUInt_32(&ip,from);
 	recevoirUInt_32(&port,from);
 	recevoirUInt_32(&protocol,from);
 	recevoirChaine(&name,from);
 	recevoirHash(&h,from);
 	recevoirUInt_32(&taille_hashtab,from);
-	(*ident)->identifiant.sin_addr.s_addr = inet_addr(ip);
+	(*ident)->identifiant.sin_addr.s_addr = ip;
 	(*ident)->identifiant.sin_port = port;
 	(*ident)->identifiant.sin_family = (short)protocol;
 	(*ident)->name= name;
