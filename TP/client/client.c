@@ -17,9 +17,12 @@ int main(int argc, char *argv[])
 	donnee_t d;
 	
 	client_ptr = creerClient(argv[1]);
-	sockServer = connect2server(argv[2], atoi(argv[3]));
+	sockServer = message_connect(
+                                     preConnect(argv[2], atoi(argv[3]))
+                                     );
 	
 	message_get("d",sockServer);
+        message_disconnect(sockServer);
 	
 	return 1;
 }

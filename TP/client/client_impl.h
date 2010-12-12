@@ -47,7 +47,8 @@ static client_t CLIENT;
 
 
 client_t* creerClient(const char *nom);
-socket_t connect2server(char* to_serveur,uint64_t port);
+idConnexion_t * preConnect(char *to_serveur, uint64_t port);
+socket_t connect2server(idConnexion_t * server);
 
 
 //uint32_t put(uint32_t cle, uint32_t valeur);/** Envoie un couple clé valeur **/

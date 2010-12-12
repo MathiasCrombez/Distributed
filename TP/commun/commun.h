@@ -121,7 +121,7 @@ static void afficherIdentConnexion(struct idConnexion *ident)
 		printf("\tPort conne: %d\n", ntohs(ident->identifiant.sin_port));
 		printf("\tProtocole : AF_INET=%d recu:%d\n",AF_INET ,ident->identifiant.sin_family);
 	#ifdef SERVEUR_IMPL_H
-		printf("\th         : %lu\n",ident->h);
+		printf("\th         : %llu\n",ident->h);
 		printf("\tsize hasht: %u\n",ident->taille_hashtab);
 	#endif
 	}

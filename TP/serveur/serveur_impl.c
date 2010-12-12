@@ -3,7 +3,7 @@
 #define SET_SERVEUR_NAME(NAME,PORT){				\
 	strcpy(SERVEUR.name,NAME);				\
 	strcat(SERVEUR.name,":");				\
-	sprintf(SERVEUR.name+strlen(NAME)+1,"%ld",PORT);        \
+	sprintf(SERVEUR.name+strlen(NAME)+1,"%llu",PORT);        \
 }
 
 
@@ -20,8 +20,8 @@ serveur_t* creerServeur(char *nomDuServeur, uint64_t port)
 	SET_SERVEUR_NAME(nomDuServeur, port);
 	SERVEUR.idSocket = socket(AF_INET, SOCK_STREAM, 0);
 	if (SERVEUR.idSocket < 0) {
-		perror("socket()");
-		exit(EXIT_FAILURE);
+            perror("socket()");
+            exit(EXIT_FAILURE);
 	}
 	//initialisation de la structure serveur
 	SERVEUR.serv_addr.sin_family = AF_INET;
@@ -31,15 +31,15 @@ serveur_t* creerServeur(char *nomDuServeur, uint64_t port)
 
 	SERVEUR.suivServeur =(struct idConnexion *)malloc(sizeof(struct idConnexion));
 	if (SERVEUR.suivServeur == NULL) {
-		perror("malloc()");
-		exit(EXIT_FAILURE);
+            perror("malloc()");
+            exit(EXIT_FAILURE);
 	}
 
 	SERVEUR.precServeur =
 	    (struct idConnexion *)malloc(sizeof(struct idConnexion));
 	if (SERVEUR.precServeur == NULL) {
-		perror("malloc()");
-		exit(EXIT_FAILURE);
+            perror("malloc()");
+            exit(EXIT_FAILURE);
 	}
 
 	SERVEUR.suivServeur->identifiant = SERVEUR.serv_addr;
@@ -83,83 +83,88 @@ void *talk_to_client(void *idSocket)
     donnee_t D;
     requete_t type_requete;
     socket_t sockClient = *(socket_t*) idSocket;
-    tabClient_t curr = SERVEUR.tableauClient, prev = SERVEUR.tableauClient;
-	
-
-    recevoirTypeMessage(&type_requete, sockClient);
-    switch (type_requete) {
-
-    case PUT:
-        recevoirCle(&K,sockClient);
-        printf("la cle reçue est %s\n",K);
-        printf("son hash= %ld\n",hash(K));
-        if(0){
-            envoyerOctet(0,sockClient);
-        } else {
-            envoyerOctet(1,sockClient);
-            recevoirDonnee(&D,sockClient);
-            putHashTable(D,SERVEUR.tabl);
-        }
-        break;
-
-    case GET:
-        recevoirCle(&K,sockClient);
-        printf("la cle reçue est %s\n",K);
-        printf("son hash= %ld\n",hash(K));
-        D = getHashTable(K,SERVEUR.tabl); 
-        if(D==NULL){
-            envoyerOctet(0,sockClient);
-        } else {
-            envoyerOctet(1,sockClient);
-            envoyerDonnee(D,sockClient);
-        }
-        break;
-
-    case REMOVEKEY:
-        recevoirCle(&K,sockClient);
-        printf("la cle reçue est %s\n",K);
-        printf("son hash= %ld\n",hash(K));
-        D = getHashTable(K,SERVEUR.tabl); 
-        if(D==NULL){
-            envoyerOctet(0,sockClient);
-        } else {
-            envoyerOctet(1,sockClient);
-            removeHashTable(K,SERVEUR.tabl);
-        }
-        break;
-    case IDENT:
-        break;
-
-    case CONNECT:
+    tabClient_t curr, prev;
+    while(1) {
+        recevoirTypeMessage(&type_requete, sockClient);
+        switch (type_requete) {
             
-        break;
-
-    case DISCONNECT:
-        if (curr->client.idSocket == sockClient) {
-            SERVEUR.tableauClient = curr->suiv;
-            free(curr);
-        }
-        else {
-            while(curr->client.idSocket != sockClient && curr) {
-                prev = curr;
-                curr = curr->suiv;                    
+        case PUT:
+            recevoirCle(&K,sockClient);
+            printf("la cle reçue est %s\n",K);
+            printf("son hash= %llu\n",hash(K));
+            if(0){
+                envoyerOctet(0,sockClient);
+                envoyerIdent(SERVEUR.suivServeur, sockClient);
+            } else {
+                envoyerOctet(1,sockClient);
+                recevoirDonnee(&D,sockClient);
+                putHashTable(D,SERVEUR.tabl);
             }
-            if (curr) {
-                prev->suiv = curr->suiv;
+            break;
+
+        case GET:
+            recevoirCle(&K,sockClient);
+            printf("la cle reçue est %s\n",K);
+            printf("son hash= %llu\n",hash(K));
+            D = getHashTable(K,SERVEUR.tabl); 
+            if(D==NULL){
+                envoyerOctet(0,sockClient);
+                envoyerIdent(SERVEUR.suivServeur, sockClient);
+            } else {
+                envoyerOctet(1,sockClient);
+                envoyerDonnee(D,sockClient);
+            }
+            break;
+
+        case REMOVEKEY:
+            recevoirCle(&K,sockClient);
+            printf("la cle reçue est %s\n",K);
+            printf("son hash= %llu\n",hash(K));
+            D = getHashTable(K,SERVEUR.tabl); 
+            if(D==NULL){
+                envoyerOctet(0,sockClient);
+                envoyerIdent(SERVEUR.suivServeur, sockClient);
+            } else {
+                envoyerOctet(1,sockClient);
+                removeHashTable(K,SERVEUR.tabl);
+            }
+            break;
+        case IDENT:
+            break;
+
+        case CONNECT:
+            envoyerOctet(1,sockClient);
+            break;
+            
+        case DISCONNECT:
+            curr = SERVEUR.tableauClient;
+            prev = SERVEUR.tableauClient;
+            if (curr->client.idSocket == sockClient) {
+                SERVEUR.tableauClient = curr->suiv;
                 free(curr);
             }
             else {
-                printf("Le client de la socket %d n'est pas dans la table du serveur.\n"
-                       , sockClient);
-                exit(1);
+                while(curr->client.idSocket != sockClient && curr) {
+                    prev = curr;
+                    curr = curr->suiv;                    
+                }
+                if (curr) {
+                    prev->suiv = curr->suiv;
+                    free(curr);
+                }
+                else {
+                    printf("Le client de la socket %d n'est pas dans la table du serveur.\n"
+                           , sockClient);
+                    exit(1);
+                }
             }
-        }
-
+            exit(0);
+            break;
 	default:
             break;
 
+        }
     }
-
 }
 /**
 * Corps de la fonction de routine lors de la création de pthread
