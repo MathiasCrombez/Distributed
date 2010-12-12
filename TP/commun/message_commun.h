@@ -57,6 +57,7 @@ typedef enum  {
 	WHOIS_NEXT_SERVER,
 	CONNECT,
 	DISCONNECT,
+	DHT,
 	AUTH_SERVER,
 } requete_t;
 

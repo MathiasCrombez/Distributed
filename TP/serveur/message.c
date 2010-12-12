@@ -98,7 +98,6 @@ inline idConnexion_t* ___message_ident___(struct sockaddr_in serv_addr)
 
 
 
-
 inline int ___message_connect_to___(struct sockaddr_in server_info)
 {
 	socket_t new_socket;
@@ -174,6 +173,43 @@ inline int ___message_connect_to___(struct sockaddr_in server_info)
 }
 
 
+/*
+ * transfere la dht depuis from_server vers le serveur actuel.
+ * La serveur actuel va s'occuper de la table de taille taille est des donnés
+ * de hash>h
+ * message= transfere moi une partie de ta table de hachage
+ */
+inline int ___message_transfer_DHT___(idConnexion_t from_server,uint32_t taille, uint64_t h,char flags)
+{
+	socket_t sock_server;
+	table_de_hachage_t* my_hashtab_ptr;
+	
+	my_hashtab_ptr = get_my_hashtab();
+	
+	
+ 	sock_server=___connect2server___(from_server.identifiant);
+	if (sock_server == 0) {
+		perror("echec de la connexion\n");
+		exit(-1);
+	}
+	envoyerOrigine(FROM_SERVEUR,sock_server);
+ 	envoyerTypeMessage(DHT,sock_server);
+ 	
+ 	envoyerOctet(flags,sockServer);
+ 	envoyerUInt_32(taille,sockServer);
+ 	envoyerHash(h,sockServer);
+ 	
+ 	uint32_t i = 0;
+ 	
+ 	for(i=h;i<h+taille;i++){
+ 	
+ 		
+ 		
+ 		
+ 	}
+ 	
+}
+
 
 
 //==============================================================================
@@ -220,7 +256,6 @@ int message_connect_2_server(char* ip,uint32_t port){
 			/*
 			 * on a fait le tour des serveurs.Il reste plus qu'à se connecter au serveur le plus chargé 
 			 */
-			
 			return ___message_connect_to___(server_most_charged->identifiant);
 		}
 	}
@@ -253,6 +288,8 @@ int message_ident(char* ip, uint32_t port){
 	afficherIdentConnexion(server_info);
 	return 1;
 }
+
+
 
 /*//coupe la socket passé en arg et indique au serveur de couper la communication*/
 /*int message_disconnect_from_server(socket_t sockClient){*/

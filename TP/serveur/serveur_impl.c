@@ -223,7 +223,12 @@ void *talk_to_server(void *idSocket)
 		envoyerIdent(SERVEUR.suivServeur,sockServer);
 		break;
 		
-		
+	case DHT:
+	
+	
+	
+	
+		break;
 /*	case DISCONNECT:*/
 
 /*		printf("un serveur souhaite ma mort\n");*/
@@ -263,4 +268,9 @@ idConnexion_t get_my_idConnexion()
 serveur_t* get_my_server()
 {
 	return &SERVEUR;
+}
+
+table_de_hachage_t* get_my_hashtab()
+{
+	return &SERVEUR.hashTab;
 }

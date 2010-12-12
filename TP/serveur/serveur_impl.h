@@ -110,5 +110,7 @@ idConnexion_t get_my_idConnexion();
 serveur_t* get_my_server();
 
 
+table_de_hachage_t* get_my_hashtab();
+
 #endif
 
