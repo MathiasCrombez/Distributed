@@ -277,5 +277,5 @@ serveur_t* get_my_server()
 
 table_de_hachage_t* get_my_hashtab()
 {
-	return &SERVEUR.hashTab;
+	return &SERVEUR.tabl;
 }

@@ -381,5 +381,6 @@ static int recevoirIdent(idConnexion_t** ident, socket_t from)
 	
 }
 
+
 #endif
 
