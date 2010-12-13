@@ -30,7 +30,7 @@ socket_t message_connect(idConnexion_t * server){
 donnee_t  message_get(cle_t K,socket_t from){
 
     donnee_t D;
-    char ack;
+    char ack, ack2;
     idConnexion_t * ident;
     socket_t new_from;
     
@@ -53,24 +53,29 @@ donnee_t  message_get(cle_t K,socket_t from){
         return message_get(K, new_from);
     }
     else if(ack==1){
-        recevoirDonnee(&D,from);
+        recevoirOctet(&ack2,from);
+        if (ack2==0) {
+            printf("La donnée est nulle : elle n'a pas été crée\n");
+        }
+        else {
+            recevoirDonnee(&D,from);
 #ifdef DEBUG_MESSAGE_CLIENT
-        afficherDonnee(D);
+            afficherDonnee(D);
 #endif
+        }
     }
     return D;
 }
 
-void  message_put(cle_t K,socket_t from){
-
-    donnee_t D;
+void  message_put(donnee_t D,socket_t from){
+    
     char ack;
     idConnexion_t * ident;
     socket_t new_from;
 	
     envoyerOrigine(FROM_CLIENT,from);
     envoyerTypeMessage(PUT,from);
-    envoyerCle(K,from);
+    envoyerCle(D->cle,from);
     recevoirOctet(&ack,from);
 	
     if(ack==0){
@@ -84,7 +89,7 @@ void  message_put(cle_t K,socket_t from){
         message_disconnect(from);
         shutdown(from, 2);
         new_from = message_connect(ident);
-        message_put(K, new_from);
+        message_put(D, new_from);
     }
     else if(ack==1){
         envoyerDonnee(D,from);
@@ -97,7 +102,7 @@ void  message_put(cle_t K,socket_t from){
 valeur_t message_remove(cle_t K,socket_t from){
 
     donnee_t D;
-    char ack;
+    char ack, ack2;
     valeur_t V;
     idConnexion_t * ident;
     socket_t new_from;
@@ -121,10 +126,16 @@ valeur_t message_remove(cle_t K,socket_t from){
         return message_remove(K, new_from);
     }
     else if(ack==1){
-        recevoirValeur(&V, from);
+        recevoirOctet(&ack2,from);
+        if (ack2==0) {
+            printf("La donnée est nulle : elle n'a pas été crée\n");
+        }
+        else {
+            recevoirValeur(&V, from);
 #ifdef DEBUG_MESSAGE_CLIENT
-        printf("Valeur supprime : %s\n", V);
+            printf("Valeur supprime : %s\n", V);
 #endif
+        }
         return V;
     }
 }
