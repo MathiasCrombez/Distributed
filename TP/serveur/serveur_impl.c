@@ -84,6 +84,7 @@ void *talk_to_client(void *idSocket)
     requete_t type_requete;
     socket_t sockClient = *(socket_t*) idSocket;
     tabClient_t curr, prev;
+    uint64_t h;
     while(1) {
         recevoirTypeMessage(&type_requete, sockClient);
         switch (type_requete) {
@@ -92,13 +93,15 @@ void *talk_to_client(void *idSocket)
             recevoirCle(&K,sockClient);
             printf("la cle reçue est %s\n",K);
             printf("son hash= %llu\n",hash(K));
-            if(0){
-                envoyerOctet(0,sockClient);
-                envoyerIdent(SERVEUR.suivServeur, sockClient);
-            } else {
+            h = hash(K);
+            if ( SERVEUR.h <= h && h <= (SERVEUR.h + SERVEUR.tabl.taille)){
                 envoyerOctet(1,sockClient);
                 recevoirDonnee(&D,sockClient);
                 putHashTable(D,SERVEUR.tabl);
+
+            } else {
+                envoyerOctet(1,sockClient);
+                recevoirDonnee(&D,sockClient);
             }
             break;
 
@@ -106,13 +109,20 @@ void *talk_to_client(void *idSocket)
             recevoirCle(&K,sockClient);
             printf("la cle reçue est %s\n",K);
             printf("son hash= %llu\n",hash(K));
-            D = getHashTable(K,SERVEUR.tabl); 
-            if(D==NULL){
+            h = hash(K);
+
+            if ( ! (SERVEUR.h <= h && h <= (SERVEUR.h + SERVEUR.tabl.taille))){
                 envoyerOctet(0,sockClient);
                 envoyerIdent(SERVEUR.suivServeur, sockClient);
             } else {
+                D = getHashTable(K,SERVEUR.tabl); 
                 envoyerOctet(1,sockClient);
-                envoyerDonnee(D,sockClient);
+                if (D==NULL) {
+                    envoyerOctet(0,sockClient);
+                } else {
+                    envoyerOctet(1,sockClient);
+                    envoyerDonnee(D,sockClient);
+                }
             }
             break;
 
@@ -120,13 +130,20 @@ void *talk_to_client(void *idSocket)
             recevoirCle(&K,sockClient);
             printf("la cle reçue est %s\n",K);
             printf("son hash= %llu\n",hash(K));
-            D = getHashTable(K,SERVEUR.tabl); 
-            if(D==NULL){
+            h = hash(K);
+
+            if ( ! (SERVEUR.h <= h && h <= (SERVEUR.h + SERVEUR.tabl.taille))){
                 envoyerOctet(0,sockClient);
                 envoyerIdent(SERVEUR.suivServeur, sockClient);
             } else {
+                D = getHashTable(K,SERVEUR.tabl); 
                 envoyerOctet(1,sockClient);
-                removeHashTable(K,SERVEUR.tabl);
+                if (D==NULL) {
+                    envoyerOctet(0,sockClient);
+                } else {
+                    envoyerOctet(1,sockClient);
+                    envoyerValeur(removeHashTable(K,SERVEUR.tabl), sockClient);
+                }
             }
             break;
         case IDENT:
