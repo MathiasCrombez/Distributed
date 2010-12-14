@@ -37,7 +37,7 @@ void libererHashTable(table_de_hachage_t hashTab)
 {
 	if (hashTab.table_de_hachage == NULL) {
 #ifdef DEBUG_MESSAGE
-		printf("libererHashTable: la table de hachage est deja vide\n");
+		printf("libererHashTable:Table vide\n");
 #endif
 		return;
 	} else {
@@ -97,7 +97,7 @@ void afficherLigneHashTable(table_de_hachage_t hashTab, uint64_t numeroLigne)
 
 	if (numeroLigne > hashTab.taille) {
 #ifdef DEBUG_MESSAGE
-		printf("afficherLigneHashTable: indice > %ld",
+		printf("afficherLigneHashTable:Ligne>Taille(%ld)",
 		       (long)hashTab.taille);
 #endif
 		return;
@@ -110,12 +110,12 @@ void afficherHashTable(table_de_hachage_t hashTab)
 {
 
 	int i = 0;
-	printf(":::::Table de hachage:::::\n");
+	printf("afficherHashTable:Debut\n");
 	for (i = 0; i < hashTab.taille; i++) {
-		printf("******Ligne %d*******\n", i);
+		printf("afficherHashTable:Ligne %d\n", i);
 		afficherLigneHashTable(hashTab, i);
 	}
-
+	printf("afficherHashTable:Fin\n");
 }
 
 //creer une table de hachage juste pour les testes

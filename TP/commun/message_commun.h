@@ -86,7 +86,7 @@ static int envoyerUInt_32(uint32_t I, socket_t to)
 		perror("send()");
 		exit(-1);
 	}
-	print_debug("envoi de: %u\n", I);
+	print_debug("envoyerUInt_32:%u\n", I);
 	free(s_I);
 	return 1;
 }
@@ -113,7 +113,7 @@ static int recevoirUInt_32(uint32_t * I, socket_t from)
 	//TODO EST CE QUIL FAUT FAIRE APPEL A ATOL PLUTOT?
 	*I = (uint32_t)atoi(s_I);
 	free(s_I);
-	print_debug("recep de: %u\n", *I);
+	print_debug("recevoirUInt_32:%u\n", *I);
 	return 1;
 }
 
@@ -141,9 +141,9 @@ static int envoyerUInt_64(uint64_t I, socket_t to)
 		exit(-1);
 	}
 #if __WORDSIZE == 64
-	print_debug("envoi de: %lu\n", I);
+	print_debug("envoyerUInt_64:%lu\n", I);
 #else
-	print_debug("envoi de: %llu\n", I);
+	print_debug("envoyerUInt_64:%llu\n", I);
 #endif
 	free(s_I);
 	return 1;
@@ -168,9 +168,9 @@ static int recevoirUInt_64(uint64_t * I, socket_t from)
 	
 	*I = atoll(s_I);
 #if __WORDSIZE == 64
-	print_debug("recep de: %lu\n", *I);
+	print_debug("recevoirUInt_64:%lu\n", *I);
 #else
-	print_debug("recep de: %llu\n", *I);
+	print_debug("recevoirUInt_64:%llu\n", *I);
 #endif
 	free(s_I);
 	return 1;
@@ -186,7 +186,7 @@ static int envoyerOctet(char O, socket_t to)
 		perror("send");
 		exit(-1);
 	}
-	print_debug("envoi de: %c\n", O);
+	print_debug("envoyerOctet:%c\n", O);
 	return 1;
 }
 
@@ -199,7 +199,7 @@ static int recevoirOctet(char *O, socket_t from)
 		perror("recv()");
 		exit(-1);
 	}
-	print_debug("recep de: %c\n", *O);
+	print_debug("recevoirOctet:%c\n", *O);
 	return 1;
 }
 
@@ -219,7 +219,7 @@ static int envoyerChaine(char *chaine, socket_t to)
 		perror("send()");
 		exit(-1);
 	}
-	print_debug("envoi de: %s\n", chaine);
+	print_debug("envoyerChaine:%s\n", chaine);
 	return 1;
 }
 
@@ -246,7 +246,7 @@ static int recevoirChaine(char **chaine, socket_t from)
 		exit(-1);
 	}
        
-	print_debug("recep  de: %s\n",*chaine);
+	print_debug("recevoirChaine:%s\n",*chaine);
 	return 1;
 }
 	
@@ -263,10 +263,10 @@ static int recevoirChaine(char **chaine, socket_t from)
  */
 static int envoyerDonnee(donnee_t D, socket_t to)
 {
-	print_debug("debut envoi de donnee\n");
+	print_debug("envoyerDonnee:Debut\n");
 	envoyerChaine(D->cle, to);
 	envoyerChaine(D->valeur, to);
-	print_debug("fin envoi de donnee\n");
+	print_debug("envoyerDonnee:Fin\n");
 	return 1;
 }
 
@@ -279,13 +279,13 @@ static int recevoirDonnee(donnee_t * D, socket_t from)
 	cle_t K;
 	valeur_t V;
 	
-	print_debug("debut reception de donnee\n");
+	print_debug("recevoirDonnee:Debut\n");
 	recevoirCle(&K, from);
 	recevoirValeur(&V, from);
 	*D = creerDonnee(K, V);
 	free(K);
 	free(V);
-	print_debug("fin reception de donnee\n");
+	print_debug("recevoirDonnee:Fin\n");
 	return 1;
 }
 
@@ -333,14 +333,14 @@ static int recevoirOrigine(origine_t * I, socket_t from)
 static int envoyerIdent(idConnexion_t* ident, socket_t to)
 {
 
-	print_debug("******debut envoi de ident*****\n");
+	print_debug("envoyerIdent:Debut\n");
 	envoyerUInt_32(ident->identifiant.sin_addr.s_addr, to);
 	envoyerUInt_32(ident->identifiant.sin_port, to);
 	envoyerUInt_32(ident->identifiant.sin_family,to);
 	envoyerChaine(ident->name,to);
 	envoyerHash(ident->h,to);
 	envoyerUInt_32(ident->taille_hashtab,to);
-	print_debug("******fin d'envoi de ident*****\n");
+	print_debug("envoyerIdent:Fin\n");
 	return 1;
 }
 
@@ -361,7 +361,7 @@ static int recevoirIdent(idConnexion_t** ident, socket_t from)
 		perror("calloc()");
 		exit(-1);
 	}
-	print_debug("*****debut reception de ident*****\n");
+	print_debug("recevoirIdent:Debut\n");
 	recevoirUInt_32(&ip,from);
 	recevoirUInt_32(&port,from);
 	recevoirUInt_32(&protocol,from);
@@ -374,7 +374,7 @@ static int recevoirIdent(idConnexion_t** ident, socket_t from)
 	(*ident)->name= name;
 	(*ident)->h= h;
 	(*ident)->taille_hashtab=taille_hashtab;
-	print_debug("*****fin de reception de ident******\n");
+	print_debug("recevoirIdent:Fin\n");
 	return 1;
 	
 	

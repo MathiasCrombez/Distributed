@@ -50,12 +50,4 @@ client_t* creerClient(const char *nom);
 idConnexion_t * preConnect(char *to_serveur, uint64_t port);
 socket_t connect2server(idConnexion_t * server);
 
-
-//uint32_t put(uint32_t cle, uint32_t valeur);/** Envoie un couple clé valeur **/
-//uint32_t get(uint32_t cle);/** Reçoit la valeur associé à la clé **/
-//uint32_t removeKey(uint32_t cle);/** Supprime une entrée de la DHT **/
-//uint32_t disconnect2server();
-
-
-//uint32_t quit(char * nomDuServeur);
 #endif

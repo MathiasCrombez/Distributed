@@ -32,7 +32,7 @@ typedef struct Table_De_Hachage {
 /* 
  * taille maximal d'une table de hachage 
  */
-#define MAX_TAILLE_HASH_TABLE 1<<4 //pour les tests, on prendra une petite valeur
+#define MAX_TAILLE_HASH_TABLE 1<<10 //pour les tests, on prendra une petite valeur
 
 
 

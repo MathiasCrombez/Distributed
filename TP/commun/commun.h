@@ -101,9 +101,9 @@ static inline void libererDonnee(donnee_t D){
 static void afficherDonnee(donnee_t D)
 {
 	if (D == NULL) {
-		printf("dada non init\n");
+		printf("afficherDonnee:Donnee nulle\n");
 	} else {
-		printf("cle: %s, valeur: %s\n", D->cle ,D->valeur);
+		printf("afficherDonnee:cle( %s ), valeur( %s )\n", D->cle ,D->valeur);
 	}
 }
 
@@ -111,10 +111,10 @@ static void afficherDonnee(donnee_t D)
 /********* methodes de debug *********/
 static void afficherIdentConnexion(struct idConnexion *ident)
 {
-	printf("identifiant connexion:\n");
+	printf("afficherIdentConnexion:\n");
 	
 	if(ident==NULL){
-		printf("identifiant non init\n");
+		printf("afficherIdentConnexion:Identifiant nul\n");
 	} else {
 		printf("\tNom       : %s\n", ident->name);
 		printf("\tAdresse Ip: %s\n", inet_ntoa(ident->identifiant.sin_addr));

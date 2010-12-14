@@ -42,7 +42,7 @@ inline struct sockaddr_in ___get_sockaddr_in___(char* ip , uint32_t port)
 	
 	hostinfo = gethostbyname(ip);
 	if (hostinfo == NULL) {
-		printf("erreur gethostbyname():le serveur %s est inconnu\n",ip);
+		printf("___get_sockaddr_in__:Erreur gethostbyname()\n",ip);
 		exit(-1);
 	}
 	
@@ -65,7 +65,7 @@ inline idConnexion_t* ___message_whois_next_server___(struct sockaddr_in serv_ad
  	
  	sock_next_server=___connect2server___(serv_addr);
 	if (sock_next_server == 0) {
-		perror("echec de la connexion\n");
+		printf("___message_whois_next_server__:Echec connexion\n");
 		exit(-1);
 	}
 		
@@ -86,7 +86,7 @@ inline idConnexion_t* ___message_ident___(struct sockaddr_in serv_addr)
  	
  	sock_next_server=___connect2server___(serv_addr);
 	if (sock_next_server == 0) {
-		perror("echec de la connexion\n");
+		perror("___message_ident___:Echec connexion\n");
 		exit(-1);
 	}
 	envoyerOrigine(FROM_SERVEUR,sock_next_server);
@@ -117,7 +117,7 @@ inline int ___message_connect_to___(struct sockaddr_in server_info)
 	 */
 	sockServer = ___connect2server___(server_info);
 	if (sockServer == 0) {
-		printf("echec de la connexion\n");
+		printf("___message_connect_to__:Echec connexion\n");
 		exit(-1);
 	}
 	
@@ -134,7 +134,7 @@ inline int ___message_connect_to___(struct sockaddr_in server_info)
 	 *on libere la connexion 
 	 */
 	if (shutdown(sockServer,SHUT_RDWR)) {
-        	printf("echec de la premiere deconnection du serveur\n");
+        	printf("___message_connect_to__:Echec de la premiere deconnexion du serveur\n");
          	exit(-1);
         }
 	
@@ -145,7 +145,7 @@ inline int ___message_connect_to___(struct sockaddr_in server_info)
 	 */
 	new_socket=___connect2server___(my_server_ptr->suivServeur->identifiant);
 	if (sockServer == 0) {
-		printf("echec de la connexion\n");
+		printf("___message_connect_to__:Echec connexion\n");
 		exit(-1);
 	}
 	
@@ -158,15 +158,15 @@ inline int ___message_connect_to___(struct sockaddr_in server_info)
 	 *on libere la connexion 
 	 */	
 	if (shutdown(new_socket,SHUT_RDWR)) {
-        	printf("echec de la deuxieme deconnection du serveur\n");
+        	printf("___message_connect_to__:Echec de la deuxieme deconnexion du serveur\n");
             	exit(-1);
         }
 
 #ifdef DEBUG_MESSAGE_SERVEUR
-	printf("****serveur precedent est:****\n");
+	printf("___message_connect_to__:Serveur precedent:\n");
 	afficherIdentConnexion(my_server_ptr->precServeur);
 	printf("\n");
-	printf("****serveur suivant est:****\n");
+	printf("___message_connect_to__:Serveur suivant:\n");
 	afficherIdentConnexion(my_server_ptr->suivServeur);
 	printf("\n");
 #endif

@@ -91,9 +91,8 @@ void *talk_to_client(void *idSocket)
             
         case PUT:
             recevoirCle(&K,sockClient);
-            printf("la cle reçue est %s\n",K);
-            printf("son hash= %llu\n",hash(K));
             h = hash(K);
+            printf("talk_to_client:PUT:cle(%s), hash(%llu)\n",K, h);
             if ( SERVEUR.h <= h && h <= (SERVEUR.h + SERVEUR.tabl.taille)){
                 envoyerOctet(1,sockClient);
                 recevoirDonnee(&D,sockClient);
@@ -107,10 +106,8 @@ void *talk_to_client(void *idSocket)
 
         case GET:
             recevoirCle(&K,sockClient);
-            printf("la cle reçue est %s\n",K);
-            printf("son hash= %llu\n",hash(K));
             h = hash(K);
-
+            printf("talk_to_client:GET:cle(%s), hash(%llu)\n",K, h);
             if ( ! (SERVEUR.h <= h && h <= (SERVEUR.h + SERVEUR.tabl.taille))){
                 envoyerOctet(0,sockClient);
                 envoyerIdent(SERVEUR.suivServeur, sockClient);
@@ -128,10 +125,8 @@ void *talk_to_client(void *idSocket)
 
         case REMOVEKEY:
             recevoirCle(&K,sockClient);
-            printf("la cle reçue est %s\n",K);
-            printf("son hash= %llu\n",hash(K));
             h = hash(K);
-
+            printf("talk_to_client:cle(%s), hash(%llu)\n",K, h);
             if ( ! (SERVEUR.h <= h && h <= (SERVEUR.h + SERVEUR.tabl.taille))){
                 envoyerOctet(0,sockClient);
                 envoyerIdent(SERVEUR.suivServeur, sockClient);
@@ -170,7 +165,7 @@ void *talk_to_client(void *idSocket)
                     free(curr);
                 }
                 else {
-                    printf("Le client de la socket %d n'est pas dans la table du serveur.\n"
+                    printf("talk_to_client:DISCONNECT:client de socket %d inconnu.\n"
                            , sockClient);
                     exit(1);
                 }
@@ -197,7 +192,7 @@ void *talk_to_server(void *idSocket)
 	requete_t type_requete;
 	
 #ifdef DEBUG_SERVEUR_IMPL
-	printf("########debut du thread#########\n");
+	printf("talk_to_server:Debut\n");
 #endif
 	
 	recevoirTypeMessage(&type_requete, sockServer);
@@ -206,7 +201,7 @@ void *talk_to_server(void *idSocket)
 
 	case CONNECT:
 	
-		printf("SERVER CONNECT\n");
+		printf("talk_to_server:CONNECT\n");
 		recevoirOctet(&reponse, sockServer);
 
 		if (reponse == 0) {
@@ -220,10 +215,10 @@ void *talk_to_server(void *idSocket)
 		}
 
 	#ifdef DEBUG_SERVEUR_IMPL
-		printf("****serveur precedent est:****\n");
+		printf("talk_to_server:Serveur precedent:\n");
 		afficherIdentConnexion(SERVEUR.precServeur);
 		printf("\n");
-		printf("****serveur suivant est:****\n");
+		printf("talk_to_server:Serveur suivant:\n");
 		afficherIdentConnexion(SERVEUR.suivServeur);
 		printf("\n");
 	#endif
@@ -232,16 +227,16 @@ void *talk_to_server(void *idSocket)
 
 	case IDENT:
 	
-		printf("IDENT\n");
-		id_connexion= get_my_idConnexion();
-		 printf("##### dht sizeest: %u\n",id_connexion.taille_hashtab);
-		envoyerIdent(&id_connexion,sockServer);
-		break;
+            printf("talk_to_server:IDENT\n");
+            id_connexion= get_my_idConnexion();
+            printf("talk_to_server:Taille dht(%u)\n",id_connexion.taille_hashtab);
+            envoyerIdent(&id_connexion,sockServer);
+            break;
 		
 		
 	case WHOIS_NEXT_SERVER:
 	
-		printf("WHOIS_NEXT_SERVER\n");
+		printf("talk_to_server:WHOIS_NEXT_SERVER\n");
 		envoyerIdent(SERVEUR.suivServeur,sockServer);
 		break;
 		
@@ -254,14 +249,14 @@ void *talk_to_server(void *idSocket)
 /*		printf("c'est fait!\n");*/
 /*		return NULL;*/
 	default:
-		printf("message incinnu");
+		printf("talk_to_serveur:Message inconnu");
 		break;
 
 	}
 	
 	/* fermeture de la communication et mort ddu thread*/
 	
-	printf("########fin du thread#########\n");
+	printf("talk_to_server:End\n");
 	shutdown(sockServer, SHUT_RDWR);
 	pthread_exit(NULL);
 }
