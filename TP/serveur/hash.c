@@ -21,11 +21,15 @@ inline uint64_t hash(cle_t K)
 table_de_hachage_t creerHashTable(uint64_t taille)
 {
 	table_de_hachage_t hashTab;
-
+        hashTab = (table_de_hachage_t) malloc(sizeof(struct Table_De_Hachage));
+        if(hashTab == NULL){
+                perror("malloc()");
+		exit(-1);
+        }
 	assert(taille <= MAX_TAILLE_HASH_TABLE);
-	hashTab.taille = taille;
-	hashTab.table_de_hachage = (liste_t *) calloc(taille, sizeof(liste_t));
-	if (hashTab.table_de_hachage == NULL) {
+	hashTab->taille = taille;
+	hashTab->table_de_hachage = (liste_t *) calloc(taille, sizeof(liste_t));
+	if (hashTab->table_de_hachage == NULL) {
 		perror("calloc()");
 		exit(-1);
 	}
@@ -35,7 +39,7 @@ table_de_hachage_t creerHashTable(uint64_t taille)
 
 void libererHashTable(table_de_hachage_t hashTab)
 {
-	if (hashTab.table_de_hachage == NULL) {
+	if (hashTab == NULL) {
 #ifdef DEBUG_MESSAGE
 		printf("libererHashTable: la table de hachage est deja vide\n");
 #endif
@@ -43,12 +47,12 @@ void libererHashTable(table_de_hachage_t hashTab)
 	} else {
 
 		int i = 0;
-		for (i = 0; i < hashTab.taille; i++) {
-			libererListe(hashTab.table_de_hachage + i);
+		for (i = 0; i < hashTab->taille; i++) {
+			libererListe(hashTab->table_de_hachage + i);
 		}
 	/** le coup de grace ... **/
-		hashTab.taille = 0;
-		free(hashTab.table_de_hachage);
+		free(hashTab->table_de_hachage);
+		free(hashTab);
 	}
 }
 
@@ -58,10 +62,10 @@ donnee_t getHashTable(cle_t cle, table_de_hachage_t hashTab)
 	uint64_t h;
 	liste_t liste;
 	assert(cle != NULL);
-	assert(hashTab.taille != 0);
-	assert(hashTab.table_de_hachage != NULL);
-	h = hash(cle) % hashTab.taille;
-	liste = hashTab.table_de_hachage[h];
+	assert(hashTab->taille != 0);
+	assert(hashTab->table_de_hachage != NULL);
+	h = hash(cle) % hashTab->taille;
+	liste = hashTab->table_de_hachage[h];
 	return getKey(liste, cle);
 }
 
@@ -70,14 +74,11 @@ void putHashTable(donnee_t D, table_de_hachage_t hashTab)
 	uint64_t h;
 	liste_t *liste_ptr;
 	assert(D != NULL);
-	assert(hashTab.taille != 0);
-	assert(hashTab.table_de_hachage != NULL);
-	h = hash(D->cle) % hashTab.taille;
-	liste_ptr = &hashTab.table_de_hachage[h];
-	if (!ajouterDonnee(liste_ptr, D)) {
-		perror("ajouterDonnee()");
-		return;
-	}
+	assert(hashTab->taille != 0);
+	assert(hashTab->table_de_hachage != NULL);
+	h = hash(D->cle) % hashTab->taille;
+	liste_ptr = &hashTab->table_de_hachage[h];
+	ajouterDonnee(liste_ptr, D);
 }
 
 valeur_t removeHashTable(cle_t cle, table_de_hachage_t hashTab)
@@ -85,24 +86,22 @@ valeur_t removeHashTable(cle_t cle, table_de_hachage_t hashTab)
 	uint64_t h;
 	liste_t *liste_ptr;
 	assert(cle != NULL);
-	assert(hashTab.taille != 0);
-	assert(hashTab.table_de_hachage != NULL);
-	h = hash(cle) % hashTab.taille;
-	liste_ptr = &hashTab.table_de_hachage[h];
+	assert(hashTab->taille != 0);
+	assert(hashTab->table_de_hachage != NULL);
+	h = hash(cle) % hashTab->taille;
+	liste_ptr = &hashTab->table_de_hachage[h];
 	return removeKey(liste_ptr, cle);
 }
 
 void afficherLigneHashTable(table_de_hachage_t hashTab, uint64_t numeroLigne)
 {
 
-	if (numeroLigne > hashTab.taille) {
+	if (numeroLigne > hashTab->taille) {
 #ifdef DEBUG_MESSAGE
-		printf("afficherLigneHashTable: indice > %ld",
-		       (long)hashTab.taille);
+		printf("afficherLigneHashTable: indice > %ld",(long)hashTab->taille);
 #endif
-		return;
 	} else {
-		afficherListe(hashTab.table_de_hachage[numeroLigne]);
+		afficherListe(hashTab->table_de_hachage[numeroLigne]);
 	}
 }
 
@@ -111,7 +110,7 @@ void afficherHashTable(table_de_hachage_t hashTab)
 
 	int i = 0;
 	printf(":::::Table de hachage:::::\n");
-	for (i = 0; i < hashTab.taille; i++) {
+	for (i = 0; i < hashTab->taille; i++) {
 		printf("******Ligne %d*******\n", i);
 		afficherLigneHashTable(hashTab, i);
 	}

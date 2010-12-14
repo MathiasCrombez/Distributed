@@ -6,7 +6,7 @@ int main()
 
 	table_de_hachage_t table;
 
-	table = creerHashTable(100);
+	table = creerHashTable(10);
 
 	donnee_t d1, d2, d3, d4, d5, d6, d7;
 
@@ -22,8 +22,8 @@ int main()
 	d7 = creerDonnee("yong", "souris");
 	afficherDonnee(getHashTable("yong", table));
 
-	uint64_t h = hash("yong") % table.taille;
-	afficherListe(table.table_de_hachage[h]);
+	uint64_t h = hash("yong") % table->taille;
+	afficherListe(table->table_de_hachage[h]);
 
 	printf("suppression d'un element pas dans la table\n");
 	removeHashTable("yong", table);
@@ -37,7 +37,7 @@ int main()
 	putHashTable(d6, table);
 
 	afficherDonnee(getHashTable("yong", table));
-	h = hash("ramzi") % table.taille;
+	h = hash("ramzi") % table->taille;
 	afficherLigneHashTable(table, h);
 
 	libererHashTable(table);

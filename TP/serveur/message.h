@@ -25,31 +25,41 @@
 //	                ENVOIS DES TYPES ELEMENTAIRES
 //============================================================================
 
-///*
-// * Envoi d'une ligne de la table de hachage vers un autre serveur
-// * La ligne sera vidé en meme temps
-// */
-//static int envoyerLigneHashTab(Liste_t L, socket_t to)
-//{
-//        donnee_t D;
-//        while(L!==NULL){
-//                D=removeTeteDeListe(&L);
-//                assert(D!=NULL);//aucune donné ne devrait etre nul
-//                envoyerOctet(1,to);
-//                envoyerDonnee(D,to);
-//                libererDonnee(D);
-//        }
-//        //fin d'envoi
-//        envoyerOctet(0,to);
-//        return 1;
-//}
+/*
+ * Envoi d'une ligne de la table de hachage vers un autre serveur
+ * La ligne sera vidé en meme temps
+ */
+static int envoyerLigneHashTab(liste_t L, socket_t to)
+{
+        donnee_t D;
+        while(L!=NULL){
+                D=removeTeteDeListe(&L);
+                assert(D!=NULL);//aucune donné ne devrait etre nul
+                envoyerOctet(1,to);
+                envoyerDonnee(D,to);
+                libererDonnee(D);
+        }
+        //fin d'envoi
+        envoyerOctet(0,to);
+        return 1;
+}
 
-//static int recevoirLigneHashTab(Liste_t* L_ptr, socket_t from)
-//{
-//        
-
-
-//}
+static int recevoirLigneHashTab(liste_t* L_ptr, socket_t from)
+{
+        L_ptr= NULL;
+        char reponse;
+        donnee_t D;
+        
+        recevoirOctet(&reponse,from);
+        
+        while(reponse){
+        
+                recevoirDonnee(&D,from);
+                ajouterDonnee(L_ptr,D);
+                recevoirOctet(&reponse,from);
+        }
+        return 1;
+}
 
 
 /*

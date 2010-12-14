@@ -20,7 +20,7 @@ typedef struct Table_De_Hachage {
      * sa table avec un autre processus serveur
      */
     liste_t *table_de_hachage;
-} table_de_hachage_t;
+}* table_de_hachage_t;
 
 
 
@@ -32,7 +32,7 @@ typedef struct Table_De_Hachage {
 /* 
  * taille maximal d'une table de hachage 
  */
-#define MAX_TAILLE_HASH_TABLE 1<<4 //pour les tests, on prendra une petite valeur
+#define MAX_TAILLE_HASH_TABLE 1<<20 //pour les tests, on prendra une petite valeur
 
 
 

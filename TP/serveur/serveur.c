@@ -37,8 +37,6 @@ int main(int argc, char *argv[])
         }
     } else {
         printf("vous êtes le premier serveur de la DHT\n");
-        serveur_ptr->tabl=TEST_HASH_TABLE();
-        printf("la taille de la dht est: %u\n",serveur_ptr->tabl.taille);
     }
 	
 

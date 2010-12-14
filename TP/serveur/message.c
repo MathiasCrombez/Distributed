@@ -27,9 +27,10 @@ inline socket_t ___connect2server___(struct sockaddr_in server_info)
 
         if (connect(idSocket, (struct sockaddr *)&server_info,sizeof(struct sockaddr_in)) == -1) {
                 perror("connect()");
-                return 0;
+                //TODO RESSAYER DE CE CONNECTER PLUS TARD .
+                //TODO NE PAS TERMINER PAR EXIT(-1) A LA PREMIERE TENTATIVE DE CONNEXION
+                exit(-1);
         }
-
         return idSocket;
 }
 
@@ -64,14 +65,11 @@ inline struct sockaddr_in ___get_sockaddr_in___(char* ip , uint32_t port)
 inline idConnexion_t* ___message_whois_next_server___(struct sockaddr_in serv_addr)
 {
 
-         idConnexion_t* next_server_info;
-         socket_t sock_next_server;
+        idConnexion_t* next_server_info;
+        socket_t sock_next_server;
 
-         sock_next_server=___connect2server___(serv_addr);
-        if (sock_next_server == 0) {
-                perror("echec de la connexion\n");
-                exit(-1);
-        }
+        sock_next_server=___connect2server___(serv_addr);
+       
 
          /* communication avec le serveur */
          envoyerOrigine(FROM_SERVEUR,sock_next_server);
@@ -93,21 +91,18 @@ inline idConnexion_t* ___message_ident___(struct sockaddr_in serv_addr)
         socket_t sock_next_server;
 
         sock_next_server=___connect2server___(serv_addr);
-        if (sock_next_server == 0) {
-                perror("echec de la connexion\n");
-                exit(-1);
-        }
+     
         envoyerOrigine(FROM_SERVEUR,sock_next_server);
-         envoyerTypeMessage(IDENT,sock_next_server);
+        envoyerTypeMessage(IDENT,sock_next_server);
 
-         recevoirIdent(&server_info, sock_next_server);
-         shutdown(sock_next_server,SHUT_RDWR);
-         return server_info;
+        recevoirIdent(&server_info, sock_next_server);
+        shutdown(sock_next_server,SHUT_RDWR);
+        return server_info;
 }
 
 
 /*
- * se connecte au sserveur indiqué par server_info
+ * se connecte au serveur indiqué par server_info
  */
 inline int ___message_connect_to___(struct sockaddr_in server_info)
 {
@@ -126,16 +121,11 @@ inline int ___message_connect_to___(struct sockaddr_in server_info)
          * recuperation des identifiants du serveur suivant dans le cercle
          */
         sockServer = ___connect2server___(server_info);
-        if (sockServer == 0) {
-                printf("echec de la connexion\n");
-                exit(-1);
-        }
 
         envoyerOrigine(FROM_SERVEUR,sockServer);
         envoyerTypeMessage(CONNECT,sockServer);
 
         envoyerOctet(0,sockServer);
-        printf("hjhkhkjhk\n");
         afficherIdentConnexion(my_server_ptr->precServeur);
         recevoirIdent(&my_server_ptr->precServeur, sockServer);
         recevoirIdent(&my_server_ptr->suivServeur, sockServer);
@@ -154,10 +144,7 @@ inline int ___message_connect_to___(struct sockaddr_in server_info)
          * envoi de mes identifiants au serveur suivant
          */
         new_socket=___connect2server___(my_server_ptr->suivServeur->identifiant);
-        if (sockServer == 0) {
-                printf("echec de la connexion\n");
-                exit(-1);
-        }
+
 
         envoyerOrigine(FROM_SERVEUR,new_socket);
         envoyerTypeMessage(CONNECT,new_socket);
@@ -190,50 +177,41 @@ inline int ___message_connect_to___(struct sockaddr_in server_info)
  * de hash>h
  * message= transfere moi une partie de ta table de hachage
  */
-inline int ___message_transfer_DHT___(idConnexion_t from_server, uint64_t h,char flags)
+inline int ___message_receive_DHT___(idConnexion_t from_server, uint64_t h)
 {
-        socket_t sock_server;
-        table_de_hachage_t* my_hashtab_ptr;
+
+        table_de_hachage_t hashTab;
         uint32_t taille;
-        
-        my_hashtab_ptr = get_my_hashtab();
-
+        char reponse;
+        socket_t sock_server;
+        liste_t L;
+        /*
+         * connexion au serveur
+         */
         sock_server=___connect2server___(from_server.identifiant);
-        if (sock_server == 0) {
-                perror("echec de la connexion\n");
-                exit(-1);
-        }
-        
-        //////////###############PROBLEME taille_hahtab= UINT32 et h =UINT64!!#######
-        taille = from_server.taille_hashtab-h;
-        from_server.taille_hashtab= h;
-        //TODO REALLOC DU TABLEAU DE HACHAGE DE FROM_SERVEUR
-        
-        
-        //debut de l'envoi
         envoyerOrigine(FROM_SERVEUR,sock_server);
-        envoyerTypeMessage(DHT,sock_server);
-
-        envoyerOctet(flags,sock_server);
-        envoyerUInt_32(taille,sock_server);
-      
-        uint64_t i = 0;
-
-        for(i=h;i<h+taille;i++){
+        envoyerTypeMessage(RECEIVE_DHT,sock_server);
+        /*
+         * Construction de la nouvelle table de hachage
+         */
+        taille = from_server.taille_hashtab-h;
+        hashTab = creerHashTable(taille);
         
-                donnee_t D;
-                while(L!==NULL){
-                        D=removeTeteDeListe(&L);
-                        assert(D!=NULL);//aucune donné ne devrait etre nul
-                        envoyerOctet(1,to);
-                        envoyerDonnee(D,to);
-                        libererDonnee(D);
-                }
-                //fin d'envoi
-                envoyerOctet(0,to);
-                return 1;
+        envoyerHash(h,sock_server);
+        
+        int i=0;
+        recevoirOctet(&reponse,sock_server);
+        
+        while(reponse){
+                recevoirLigneHashTab(&L,sock_server);
+                afficherLigneHashTable(L);
+                hashTab->table_de_hachage[i]= L;
+                recevoirOctet(&reponse,sock_server);
+                printf("%d \n",i);
+                i++;
         }
-
+        
+        afficherHashTable(hashTab);
 }
 
 
@@ -245,13 +223,14 @@ inline int ___message_transfer_DHT___(idConnexion_t from_server, uint64_t h,char
 
 /*
  * Connection au serveur d'adresse IP 'ip' sur le port 'port'.
- * Equilibrage de charge:Apres un parcour rapide de la dht, on se connecte au
- * serveu
+ * Equilibrage de charge:Apres un parcour de la dht, on se connecte au
+ * serveur le plus chargé
  */
 int message_connect_2_server(char* ip,uint32_t port){
 
         uint64_t taille_max;
-        struct sockaddr_in  serv_addr;
+        socket_t sockClient;
+        struct sockaddr_in serv_addr;
         idConnexion_t* iterator_server_info;
         idConnexion_t* server_most_charged;
 
@@ -265,23 +244,28 @@ int message_connect_2_server(char* ip,uint32_t port){
 
         while(1){
 
-
-                iterator_server_info=___message_whois_next_server___(serv_addr);
+                iterator_server_info= ___message_ident___(serv_addr);
                 afficherIdentConnexion(iterator_server_info);
                 assert(iterator_server_info!=NULL);
-                serv_addr = iterator_server_info->identifiant;
 
                 if(iterator_server_info->taille_hashtab > taille_max){
-                        printf("coucou");
+                printf("couocu\n");
                         taille_max = iterator_server_info->taille_hashtab ;
-                        server_most_charged =  iterator_server_info;
+                        server_most_charged = iterator_server_info;
                 }
+                iterator_server_info=___message_whois_next_server___(serv_addr);
+                serv_addr = iterator_server_info->identifiant;
+                shutdown(sockClient,SHUT_RDWR);
 
                 if( serv_addr.sin_port==htons(port) ) {
+                        printf("cacacac %d %d\n",serv_addr.sin_addr.s_addr,inet_addr(ip));
+                        
 
                         /*
-                         * on a fait le tour des serveurs.Il reste plus qu'à se connecter au serveur le plus chargé
-                         */
+                        * on a fait le tour des serveurs.Il reste plus qu'à se connecter au serveur le plus chargé
+                        */
+                        assert(server_most_charged!=NULL);
+                        afficherIdentConnexion(server_most_charged);
                         return ___message_connect_to___(server_most_charged->identifiant);
                 }
         }
