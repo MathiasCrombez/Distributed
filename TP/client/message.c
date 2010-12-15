@@ -15,56 +15,15 @@ socket_t message_connect(idConnexion_t * server){
     recevoirOctet(&ack, from);
     if(ack==0){
         // TODO répétition en cas d'echec : wait & while
-        printf("Echec de la connexion");
+        printf("message_connect:Echec de la connexion");
         return -1;
     }
     else if(ack==1){
 #ifdef DEBUG_MESSAGE_CLIENT
-        printf("connection success");
+        printf("message_connect:connection success");
 #endif
     }
     return from;
-}
-
-
-donnee_t  message_get(cle_t K,socket_t from){
-
-    donnee_t D;
-    char ack, ack2;
-    idConnexion_t * ident;
-    socket_t new_from;
-    
-    envoyerOrigine(FROM_CLIENT,from);
-    envoyerTypeMessage(GET,from);
-    envoyerCle(K,from);
-    recevoirOctet(&ack,from);
-	
-    if(ack==0){
-#ifdef DEBUG_MESSAGE_CLIENT
-        printf("la cle n'existe pas\n");
-#endif
-        /*
-         * On relance la fonction avec un nouveau serveur et une nouvelle socket
-         */
-        recevoirIdent(&ident, from);
-        message_disconnect(from);
-        shutdown(from, 2);
-        new_from = message_connect(ident);
-        return message_get(K, new_from);
-    }
-    else if(ack==1){
-        recevoirOctet(&ack2,from);
-        if (ack2==0) {
-            printf("La donnée est nulle : elle n'a pas été crée\n");
-        }
-        else {
-            recevoirDonnee(&D,from);
-#ifdef DEBUG_MESSAGE_CLIENT
-            afficherDonnee(D);
-#endif
-        }
-    }
-    return D;
 }
 
 void  message_put(donnee_t D,socket_t from){
@@ -73,14 +32,14 @@ void  message_put(donnee_t D,socket_t from){
     idConnexion_t * ident;
     socket_t new_from;
 	
-    envoyerOrigine(FROM_CLIENT,from);
+    //    envoyerOrigine(FROM_CLIENT,from);
     envoyerTypeMessage(PUT,from);
     envoyerCle(D->cle,from);
     recevoirOctet(&ack,from);
 	
     if(ack==0){
 #ifdef DEBUG_MESSAGE_CLIENT
-        printf("la cle n'existe pas\n");
+        printf("message_put:serveur suivant\n");
 #endif
         /*
          * On relance la fonction avec un nouveau serveur et une nouvelle socket
@@ -94,9 +53,51 @@ void  message_put(donnee_t D,socket_t from){
     else if(ack==1){
         envoyerDonnee(D,from);
 #ifdef DEBUG_MESSAGE_CLIENT
+        printf("message_put:\n");
         afficherDonnee(D);
 #endif
     }
+}
+
+donnee_t  message_get(cle_t K,socket_t from){
+
+    donnee_t D;
+    char ack, ack2;
+    idConnexion_t * ident;
+    socket_t new_from;
+    
+    //    envoyerOrigine(FROM_CLIENT,from);
+    envoyerTypeMessage(GET,from);
+    envoyerCle(K,from);
+    recevoirOctet(&ack,from);
+	
+    if(ack==0){
+#ifdef DEBUG_MESSAGE_CLIENT
+        printf("message_get:serveur suivant\n");
+#endif
+        /*
+         * On relance la fonction avec un nouveau serveur et une nouvelle socket
+         */
+        recevoirIdent(&ident, from);
+        message_disconnect(from);
+        shutdown(from, 2);
+        new_from = message_connect(ident);
+        return message_get(K, new_from);
+    }
+    else if(ack==1){
+        recevoirOctet(&ack2,from);
+        if (ack2==0) {
+            printf("message_get:cle inconnue\n");
+        }
+        else {
+            recevoirDonnee(&D,from);
+#ifdef DEBUG_MESSAGE_CLIENT
+            printf("message_get:\n");
+            afficherDonnee(D);
+#endif
+        }
+    }
+    return D;
 }
 
 valeur_t message_remove(cle_t K,socket_t from){
@@ -107,14 +108,14 @@ valeur_t message_remove(cle_t K,socket_t from){
     idConnexion_t * ident;
     socket_t new_from;
 	
-    envoyerOrigine(FROM_CLIENT,from);
+    //    envoyerOrigine(FROM_CLIENT,from);
     envoyerTypeMessage(REMOVEKEY,from);
     envoyerCle(K,from);
     recevoirOctet(&ack,from);
 	
     if(ack==0){
 #ifdef DEBUG_MESSAGE_CLIENT
-        printf("la cle n'existe pas\n");
+        printf("message_remove:serveur suivant\n");
 #endif
         /*
          * On relance la fonction avec un nouveau serveur et une nouvelle socket
@@ -128,12 +129,12 @@ valeur_t message_remove(cle_t K,socket_t from){
     else if(ack==1){
         recevoirOctet(&ack2,from);
         if (ack2==0) {
-            printf("La donnée est nulle : elle n'a pas été crée\n");
+            printf("message_remove;cle inconnue\n");
         }
         else {
             recevoirValeur(&V, from);
 #ifdef DEBUG_MESSAGE_CLIENT
-            printf("Valeur supprime : %s\n", V);
+            printf("message_remove:donnee supprimee %s\n",V);           
 #endif
         }
         return V;
@@ -141,6 +142,9 @@ valeur_t message_remove(cle_t K,socket_t from){
 }
 
 void message_disconnect(socket_t from){
-    envoyerOrigine(FROM_CLIENT,from);
+    //    envoyerOrigine(FROM_CLIENT,from);
     envoyerTypeMessage(DISCONNECT,from);
+#ifdef DEBUG_MESSAGE_CLIENT
+    printf("message_disconnect:deconnexion\n");
+#endif    
 }

@@ -89,18 +89,17 @@ static  valeur_t removeKey(liste_t * L_ptr, cle_t K)
         suivant_ptr = NULL;
 
 
-        if (*L_ptr == NULL) {
-        #ifdef DEBUG_MESSAGE
-                printf("removeKey d'une liste vide\n");
-        #endif
-                return NULL;
-        }
-
+	if (*L_ptr == NULL) {
+	#ifdef DEBUG_MESSAGE
+		printf("removeKey:Liste vide\n");
+	#endif
+		return NULL;
+	}
 
         /** on vérifie si le premier maillon contient la clé **/
         if (strcmp((*L_ptr)->data->cle, K) == 0) {
 #ifdef DEBUG_MESSAGE
-                printf("reloveKey: element enleve en tete de liste\n");
+		printf("removeKey:Tete de liste\n");
 #endif
                 valeur = (*L_ptr)->data->valeur;
                 l = *L_ptr;
@@ -124,7 +123,7 @@ static  valeur_t removeKey(liste_t * L_ptr, cle_t K)
                         iterateur_ptr = &((*iterateur_ptr)->suiv);
                 }
 #ifdef DEBUG_MESSAGE
-                printf("removeKey: la cle n'est pas dans la liste");
+		printf("removeKey:cle inconnue");
 #endif
                 return NULL;
 
@@ -175,14 +174,17 @@ static donnee_t removeTeteDeListe(liste_t* L_ptr)
 
 static void afficherListe(liste_t L)
 {
-        liste_t iterateur;
-        if (L == NULL) {
-                printf("la liste à afficher est nul!!\n");
-                return;
-        }
-        for (iterateur = L; iterateur != NULL; iterateur = iterateur->suiv) {
-                afficherDonnee(iterateur->data);
-        }
+        printf("****debut afficherListe*****\n");
+	liste_t iterateur;
+	if (L == NULL) {
+		printf("afficherListe:Liste nulle\n");
+		return;
+	}
+	for (iterateur = L; iterateur != NULL; iterateur = iterateur->suiv) {
+		afficherDonnee(iterateur->data);
+	}
+	printf("****fin afficherListe*****\n");
+
 }
 
 

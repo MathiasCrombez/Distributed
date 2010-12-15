@@ -72,8 +72,8 @@ typedef struct serveur {
 	table_de_hachage_t tabl;
 	
 	tabClient_t tableauClient;
-	idConnexion_t *suivServeur;
-	idConnexion_t *precServeur;
+	idConnexion_t suivServeur;
+	//idConnexion_t *precServeur;
 
 } serveur_t;
 
@@ -111,7 +111,9 @@ idConnexion_t get_my_idConnexion();
 serveur_t* get_my_server();
 
 
-table_de_hachage_t* get_my_hashtab();
+table_de_hachage_t get_my_hashtab();
 
+
+void afficherInfoHashTable();
 #endif
 

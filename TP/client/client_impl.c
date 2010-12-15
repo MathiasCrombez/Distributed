@@ -20,7 +20,7 @@ idConnexion_t * preConnect(char *to_serveur, uint64_t port) {
 
 	hostinfo = gethostbyname(hostname);
 	if (hostinfo == NULL) {
-		printf("erreur gethostbyname():le serveur %s est inconnu\n", to_serveur);
+		printf("preConnect:erreur gethostbyname()\n", to_serveur);
 		exit(-1);
 	}
 
@@ -76,9 +76,9 @@ socket_t connect2server(idConnexion_t *server)
 	}
 	
 	if (connect(CLIENT.idSocket, (struct sockaddr *)&CLIENT.serv_addr,sizeof(struct sockaddr_in)) < 0) {
-	#ifdef DEBUG_CLIENT_IMPL
-		printf("Echec de la connexion suivante\n");
-	#endif
+            //	#ifdef DEBUG_CLIENT_IMPL
+		printf("connect2server:Echec de la connexion\n");
+                //	#endif
 		exit(-1);
 	}
 	return CLIENT.idSocket;

@@ -15,48 +15,20 @@ serveur_t* creerServeur(char *nomDuServeur, uint64_t port)
 
         int yes = 1;
 
-//TODO  //## MODIFIER LE CHAMP NOM:METTRE UN POINTEUR######//
-        //## SOURCE DE SEGFAULt SI LE NOM EST TROP GRAND###//
         SET_SERVEUR_NAME(nomDuServeur, port);
         SERVEUR.idSocket = socket(AF_INET, SOCK_STREAM, 0);
         if (SERVEUR.idSocket < 0) {
             perror("socket()");
             exit(EXIT_FAILURE);
         }
+        
         //initialisation de la structure serveur
         SERVEUR.serv_addr.sin_family = AF_INET;
-        //SERVEUR.serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
         SERVEUR.serv_addr.sin_addr.s_addr = inet_addr(SERVEURNAME);
         SERVEUR.serv_addr.sin_port = htons(port);
 
-        SERVEUR.suivServeur =(struct idConnexion *)malloc(sizeof(struct idConnexion));
-        if (SERVEUR.suivServeur == NULL) {
-            perror("malloc()");
-            exit(EXIT_FAILURE);
-        }
-
-        SERVEUR.precServeur =
-            (struct idConnexion *)malloc(sizeof(struct idConnexion));
-        if (SERVEUR.precServeur == NULL) {
-            perror("malloc()");
-            exit(EXIT_FAILURE);
-        }
-
-        SERVEUR.tabl= creerHashTable(HASH_TABLE_SIZE);
         
-        SERVEUR.suivServeur->identifiant = SERVEUR.serv_addr;
-        SERVEUR.suivServeur->name = SERVEUR.name;
-        SERVEUR.suivServeur->h=0;
-        SERVEUR.suivServeur->taille_hashtab=HASH_TABLE_SIZE;
-        
-        SERVEUR.precServeur->identifiant = SERVEUR.serv_addr;
-        SERVEUR.precServeur->name = SERVEUR.name;
-        SERVEUR.precServeur->h=0;
-        SERVEUR.precServeur->taille_hashtab=HASH_TABLE_SIZE;
-
-/*        SERVEUR.firstKey = 0;*/
-/*        SERVEUR.nextKey = 0;*/
-/*        SERVEUR.precKey = 0;*/
+        SERVEUR.suivServeur = setIdConnexion(SERVEUR.name,SERVEUR.serv_addr,0,0);
 
         // evite le message d'erreur "Address already in use" lors d'un bind
         if (setsockopt (SERVEUR.idSocket, SOL_SOCKET, SO_REUSEADDR, &yes,sizeof(int)) == -1) {
@@ -93,10 +65,10 @@ void *talk_to_client(void *idSocket)
             
         case PUT:
             recevoirCle(&K,sockClient);
-            printf("la cle reçue est %s\n",K);
-            printf("son hash= %llu\n",hash(K));
             h = hash(K);
-            if ( SERVEUR.h <= h && h <= (SERVEUR.h + SERVEUR.tabl->taille)){
+
+            printf("talk_to_client:PUT:cle(%s), hash(%llu)\n",K, h);
+            if ( SERVEUR.h <= h && h <= (SERVEUR.h + SERVEUR.tabl.taille)){
                 envoyerOctet(1,sockClient);
                 recevoirDonnee(&D,sockClient);
                 putHashTable(D,SERVEUR.tabl);
@@ -109,11 +81,10 @@ void *talk_to_client(void *idSocket)
 
         case GET:
             recevoirCle(&K,sockClient);
-            printf("la cle reçue est %s\n",K);
-            printf("son hash= %llu\n",hash(K));
             h = hash(K);
 
-            if ( ! (SERVEUR.h <= h && h <= (SERVEUR.h + SERVEUR.tabl->taille))){
+            printf("talk_to_client:GET:cle(%s), hash(%llu)\n",K, h);
+            if ( ! (SERVEUR.h <= h && h <= (SERVEUR.h + SERVEUR.tabl.taille))){
                 envoyerOctet(0,sockClient);
                 envoyerIdent(SERVEUR.suivServeur, sockClient);
             } else {
@@ -130,11 +101,10 @@ void *talk_to_client(void *idSocket)
 
         case REMOVEKEY:
             recevoirCle(&K,sockClient);
-            printf("la cle reçue est %s\n",K);
-            printf("son hash= %llu\n",hash(K));
             h = hash(K);
 
-            if ( ! (SERVEUR.h <= h && h <= (SERVEUR.h + SERVEUR.tabl->taille))){
+            printf("talk_to_client:cle(%s), hash(%llu)\n",K, h);
+            if ( ! (SERVEUR.h <= h && h <= (SERVEUR.h + SERVEUR.tabl.taille))){
                 envoyerOctet(0,sockClient);
                 envoyerIdent(SERVEUR.suivServeur, sockClient);
             } else {
@@ -172,7 +142,7 @@ void *talk_to_client(void *idSocket)
                     free(curr);
                 }
                 else {
-                    printf("Le client de la socket %d n'est pas dans la table du serveur.\n"
+                    printf("talk_to_client:DISCONNECT:client de socket %d inconnu.\n"
                            , sockClient);
                     exit(1);
                 }
@@ -195,12 +165,12 @@ void *talk_to_server(void *idSocket)
         socket_t sockServer = *(socket_t*)idSocket;
         char reponse;
         char *nom;
-        struct idConnexion id_connexion;
+        idConnexion_t id_connexion;
         requete_t type_requete;
         donnee_t D;
         liste_t L;
         uint64_t h;
-        table_de_hachage_t* my_hashtab_ptr;
+        table_de_hachage_t my_hashtab;
         uint32_t taille;
 #ifdef DEBUG_SERVEUR_IMPL
         printf("########debut du thread#########\n");
@@ -213,22 +183,12 @@ void *talk_to_server(void *idSocket)
         case CONNECT:
         
                 printf("SERVER CONNECT\n");
-                recevoirOctet(&reponse, sockServer);
-
-                if (reponse == 0) {
-                        id_connexion = get_my_idConnexion();
-                        envoyerIdent(&id_connexion, sockServer);
-                        envoyerIdent(SERVEUR.suivServeur,sockServer);
-                        recevoirIdent(&SERVEUR.suivServeur,sockServer);
-                        
-                } else if (reponse == 1) {
-                        recevoirIdent(&SERVEUR.precServeur,sockServer);
-                }
+                id_connexion = get_my_idConnexion();
+                envoyerIdent(SERVEUR.suivServeur, sockServer);
+                recevoirIdent(&SERVEUR.suivServeur,sockServer);
 
         #ifdef DEBUG_SERVEUR_IMPL
-                printf("****serveur precedent est:****\n");
-                afficherIdentConnexion(SERVEUR.precServeur);
-                printf("\n");
+
                 printf("****serveur suivant est:****\n");
                 afficherIdentConnexion(SERVEUR.suivServeur);
                 printf("\n");
@@ -240,9 +200,8 @@ void *talk_to_server(void *idSocket)
         
                 printf("IDENT\n");
                 id_connexion= get_my_idConnexion();
-                printf("##### dht sizeest: %u\n",id_connexion.taille_hashtab);
-                  afficherIdentConnexion(&id_connexion);
-                envoyerIdent(&id_connexion,sockServer);
+                afficherIdentConnexion(id_connexion);
+                envoyerIdent(id_connexion,sockServer);
                 break;
                 
                 
@@ -257,27 +216,33 @@ void *talk_to_server(void *idSocket)
         case RECEIVE_DHT:
         
                 printf("TRANSFER DHT\n");
-                my_hashtab_ptr = get_my_hashtab();
-              
-                uint64_t i = 0;
+                my_hashtab = get_my_hashtab();
+                liste_t L;
+                uint64_t i;
                 donnee_t D;
                 recevoirHash(&h,sockServer);                  
-               
-                 
-/*                while(L!=NULL){*/
-/*                        D=removeTeteDeListe(&L);*/
-/*                        assert(D!=NULL);//aucune donné ne devrait etre nul*/
-/*                        envoyerOctet(1,to);*/
-/*                        envoyerDonnee(D,to);*/
-/*                        libererDonnee(D);*/
-/*                }*/
                 
-                                
-                //fin d'envoi
+                for(i=h;i<my_hashtab.taille;i++){
+                
+                        L=my_hashtab.table_de_hachage[i];
+                        
+                        while(L!=NULL){
+                                D=removeTeteDeListe(&L);
+                                assert(D!=NULL);//aucune donné ne devrait etre nul
+                                envoyerOctet(1,sockServer);
+                                envoyerDonnee(D,sockServer);
+                                libererDonnee(D);
+                        }
+                }
+        //fin d'envoi
                 envoyerOctet(0,sockServer);
-                realloc(SERVEUR.tabl->table_de_hachage,h);
-                SERVEUR.tabl->taille=h;       
+                     
+                SERVEUR.tabl.taille/=2;
+                SERVEUR.tabl.table_de_hachage=realloc(SERVEUR.tabl.table_de_hachage,SERVEUR.tabl.taille);
+                SERVEUR.suivServeur.h=h;
+                SERVEUR.suivServeur.taille_hashtab=SERVEUR.tabl.taille;
         
+                afficherInfoHashTable();
                 break;
 /*        case DISCONNECT:*/
 
@@ -297,6 +262,7 @@ void *talk_to_server(void *idSocket)
         printf("########fin du thread#########\n");
         shutdown(sockServer, SHUT_RDWR);
         pthread_exit(NULL);
+
 }
 
 
@@ -304,14 +270,11 @@ void *talk_to_server(void *idSocket)
 
 idConnexion_t get_my_idConnexion()
 {
-        idConnexion_t  id_connexion;
-        
-        id_connexion.identifiant=SERVEUR.serv_addr;
-        id_connexion.name = SERVEUR.name;        
-        id_connexion.h=SERVEUR.h;
-        id_connexion.taille_hashtab= SERVEUR.tabl->taille;
-        
-        return id_connexion;
+        return setIdConnexion( SERVEUR.name,
+                                  SERVEUR.serv_addr,
+                                  SERVEUR.h,
+                                  SERVEUR.tabl.taille
+                                 );
 }
 
 
@@ -320,7 +283,20 @@ serveur_t* get_my_server()
         return &SERVEUR;
 }
 
-table_de_hachage_t* get_my_hashtab()
+table_de_hachage_t get_my_hashtab()
 {
-        return &SERVEUR.tabl;
+        return SERVEUR.tabl;
+}
+
+/*
+ * methode de debug
+ */
+ 
+void afficherInfoHashTable(){
+
+        printf("Info sur hash table\n");
+        
+        printf("****\n\tma taille: %d\n",SERVEUR.tabl.taille);
+        printf("\tmon h: %d\n",SERVEUR.h);
+        printf("\t h de suiv: %d\n",SERVEUR.suivServeur.h);
 }
