@@ -13,7 +13,7 @@
 /*
  *permet de supprimer ou afficher les messages de debug
  */
-#define DEBUG_CLIENT_IMPL
+//#define DEBUG_CLIENT_IMPL
 #undef DEBUG_CLIENT_IMPL
 
 
@@ -37,7 +37,7 @@ typedef struct client {
 //			VARIABLE GLOBAL
 //==============================================================================
 
-static client_t CLIENT;
+//static client_t CLIENT;
 
 
 
@@ -46,8 +46,8 @@ static client_t CLIENT;
 //==============================================================================
 
 
-client_t* creerClient(const char *nom);
+client_t creerClient(const char *nom);
 idConnexion_t * preConnect(char *to_serveur, uint64_t port);
-socket_t connect2server(idConnexion_t * server);
+socket_t connect2server(idConnexion_t * server, client_t client);
 
 #endif

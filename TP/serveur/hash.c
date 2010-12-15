@@ -18,12 +18,13 @@ inline uint64_t hash(cle_t K)
 	return hash;
 }
 
-table_de_hachage_t creerHashTable(uint64_t taille)
+table_de_hachage_t creerHashTable(uint64_t taille, uint64_t h)
 {
 	table_de_hachage_t hashTab;
 
 	assert(taille <= MAX_TAILLE_HASH_TABLE);
 	hashTab.taille = taille;
+        hashTab.h = h;
 	hashTab.table_de_hachage = (liste_t *) calloc(taille, sizeof(liste_t));
 	if (hashTab.table_de_hachage == NULL) {
 		perror("calloc()");
@@ -60,7 +61,7 @@ donnee_t getHashTable(cle_t cle, table_de_hachage_t hashTab)
 	assert(cle != NULL);
 	assert(hashTab.taille != 0);
 	assert(hashTab.table_de_hachage != NULL);
-	h = hash(cle) % hashTab.taille;
+	h = (hash(cle) % MAX_TAILLE_HASH_TABLE) - hashTab.h;
 	liste = hashTab.table_de_hachage[h];
 	return getKey(liste, cle);
 }
@@ -72,7 +73,7 @@ void putHashTable(donnee_t D, table_de_hachage_t hashTab)
 	assert(D != NULL);
 	assert(hashTab.taille != 0);
 	assert(hashTab.table_de_hachage != NULL);
-	h = hash(D->cle) % hashTab.taille;
+	h = (hash(D->cle) %MAX_TAILLE_HASH_TABLE) - hashTab.h;
 	liste_ptr = &hashTab.table_de_hachage[h];
 	if (!ajouterDonnee(liste_ptr, D)) {
 		perror("ajouterDonnee()");
@@ -87,7 +88,7 @@ valeur_t removeHashTable(cle_t cle, table_de_hachage_t hashTab)
 	assert(cle != NULL);
 	assert(hashTab.taille != 0);
 	assert(hashTab.table_de_hachage != NULL);
-	h = hash(cle) % hashTab.taille;
+	h = (hash(cle) %MAX_TAILLE_HASH_TABLE) - hashTab.h;
 	liste_ptr = &hashTab.table_de_hachage[h];
 	return removeKey(liste_ptr, cle);
 }
@@ -122,7 +123,7 @@ void afficherHashTable(table_de_hachage_t hashTab)
 table_de_hachage_t TEST_HASH_TABLE()
 {
 
-	table_de_hachage_t tablh = creerHashTable(MAX_TAILLE_HASH_TABLE);
+    table_de_hachage_t tablh = creerHashTable(MAX_TAILLE_HASH_TABLE, 0);
 
 	donnee_t d1, d2, d3, d4, d5, d6, d7, d8, d9, d10;
 	donnee_t d11, d12, d13, d14, d15, d16, d17, d18, d19, d20;

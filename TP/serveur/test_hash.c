@@ -6,7 +6,7 @@ int main()
 
 	table_de_hachage_t table;
 
-	table = creerHashTable(100);
+	table = creerHashTable(100, 0);
 
 	donnee_t d1, d2, d3, d4, d5, d6, d7;
 

@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
         switch (from) {
 
         case FROM_CLIENT:
-
+            printf("Client recupéré \n");
             /*
              * remplissage du tableau permettant d'itentifier les clients connectés
              */

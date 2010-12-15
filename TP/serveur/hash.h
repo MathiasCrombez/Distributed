@@ -13,6 +13,8 @@
 
 typedef struct Table_De_Hachage {
     uint32_t taille;
+    uint32_t h;
+    //    uint32_t g_taille;
     /**
      * L'utilisation d'un pointeur permet d'avoir une table de hachage
      * de taille dynamique.C'est utile car dans une dht , chaque processus
@@ -32,7 +34,7 @@ typedef struct Table_De_Hachage {
 /* 
  * taille maximal d'une table de hachage 
  */
-#define MAX_TAILLE_HASH_TABLE 1<<10 //pour les tests, on prendra une petite valeur
+#define MAX_TAILLE_HASH_TABLE 1000000 //pour les tests, on prendra une petite valeur
 
 
 
@@ -43,7 +45,7 @@ typedef struct Table_De_Hachage {
 /*
  * creer et liberer une table de hachage 
  */
-table_de_hachage_t creerHashTable(uint64_t taille);
+table_de_hachage_t creerHashTable(uint64_t taille, uint64_t h);
 void libererHashTable(table_de_hachage_t hashTab);
 
 

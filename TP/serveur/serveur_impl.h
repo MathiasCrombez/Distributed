@@ -26,7 +26,7 @@
 /*
  * NB de Client accepté
  */
-#define LENGTH_LISTEN_QUEUE 10
+#define LENGTH_LISTEN_QUEUE 10000
 
 /*
  *permet de supprimer ou afficher les messages de debug

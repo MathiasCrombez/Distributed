@@ -102,7 +102,8 @@ static  valeur_t removeKey(liste_t * L_ptr, cle_t K)
 #ifdef DEBUG_MESSAGE
 		printf("removeKey:Tete de liste\n");
 #endif
-		valeur = (*L_ptr)->data->valeur;
+                valeur = malloc(strlen((*L_ptr)->data->valeur));
+		strncpy(valeur, (*L_ptr)->data->valeur,strlen((*L_ptr)->data->valeur));
 		l = *L_ptr;
 		*L_ptr = l->suiv;
 		libererDonnee(l->data);
@@ -129,6 +130,7 @@ static  valeur_t removeKey(liste_t * L_ptr, cle_t K)
 		return NULL;
 
  suite:
+                valeur = malloc(strlen((*iterateur_ptr)->data->valeur));
 		valeur = (*iterateur_ptr)->data->valeur;
 		suivant_ptr = &((*iterateur_ptr)->suiv);
 
