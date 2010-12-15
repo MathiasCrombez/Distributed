@@ -242,9 +242,9 @@ int message_connect_2_server(char* ip,uint32_t port){
                         */
              
                         h=(server_most_charged.h+taille_max/2);
-                        afficherIdentConnexion(server_most_charged);
                         ___message_connect_to___(server_most_charged.identifiant);
                         ___message_receive_DHT_from___(server_most_charged,h);
+                        afficherHashTable(get_my_hashtab());
                         return 1;
                 }
         }

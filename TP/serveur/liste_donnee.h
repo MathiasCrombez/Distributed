@@ -101,35 +101,38 @@ static  valeur_t removeKey(liste_t * L_ptr, cle_t K)
 #ifdef DEBUG_MESSAGE
 		printf("removeKey:Tete de liste\n");
 #endif
-                valeur = (*L_ptr)->data->valeur;
-                l = *L_ptr;
-                *L_ptr = l->suiv;
-                libererDonnee(l->data);
-                free(l);
-                return valeur;
-        } else {
+		l = *L_ptr;
+		valeur = (valeur_t)malloc(strlen(l->data->valeur));
+		strcpy(valeur, l->data->valeur);
+		*L_ptr = l->suiv;
+		libererDonnee(l->data);
+		free(l);
+		return valeur;
+	} else {
 
-                precedent_ptr = L_ptr;
-                iterateur_ptr = &(*L_ptr)->suiv;
+		precedent_ptr = L_ptr;
+		iterateur_ptr = &(*L_ptr)->suiv;
 
-                /** parcour de la liste et reperage du maillon à enlever **/
-                while (*iterateur_ptr != NULL) {
-                        assert((*iterateur_ptr)->data != NULL);
-                        if (strcmp((*iterateur_ptr)->data->cle, K) == 0) {
-                                /** le maillon à supprimer est trouve **/
-                                goto suite;
-                        }
-                        precedent_ptr = iterateur_ptr;
-                        iterateur_ptr = &((*iterateur_ptr)->suiv);
-                }
+		/** parcour de la liste et reperage du maillon à enlever **/
+		while (*iterateur_ptr != NULL) {
+			assert((*iterateur_ptr)->data != NULL);
+			if (strcmp((*iterateur_ptr)->data->cle, K) == 0) {
+				/** le maillon à supprimer est trouve **/
+				goto suite;
+			}
+			precedent_ptr = iterateur_ptr;
+			iterateur_ptr = &((*iterateur_ptr)->suiv);
+		}
 #ifdef DEBUG_MESSAGE
 		printf("removeKey:cle inconnue");
 #endif
                 return NULL;
 
  suite:
-                valeur = (*iterateur_ptr)->data->valeur;
-                suivant_ptr = &((*iterateur_ptr)->suiv);
+
+                valeur = malloc(strlen((*iterateur_ptr)->data->valeur));
+		valeur = (*iterateur_ptr)->data->valeur;
+		suivant_ptr = &((*iterateur_ptr)->suiv);
 
                 libererDonnee((*iterateur_ptr)->data);
                 free(*iterateur_ptr);
@@ -159,10 +162,10 @@ static donnee_t removeTeteDeListe(liste_t* L_ptr)
 {
         liste_t l;
         donnee_t D=NULL;
-        
-        if(L_ptr!=NULL){
+        assert(L_ptr!=NULL);
 
-                l = *L_ptr;
+        l = *L_ptr;
+        if(l!=NULL){
                 *L_ptr = l->suiv;
                 D=l->data;
                 free(l);

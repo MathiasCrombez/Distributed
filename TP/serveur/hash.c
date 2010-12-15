@@ -87,8 +87,7 @@ void afficherLigneHashTable(table_de_hachage_t hashTab, uint64_t numeroLigne)
 
 	if (numeroLigne > hashTab.taille) {
 #ifdef DEBUG_MESSAGE
-		printf("afficherLigneHashTable:Ligne>Taille(%ld)",
-		       (long)hashTab.taille);
+		printf("afficherLigneHashTable:Ligne>Taille(%ld)",(long)hashTab.taille);
 #endif
 	} else {
 		afficherListe(hashTab.table_de_hachage[numeroLigne]);
@@ -97,10 +96,10 @@ void afficherLigneHashTable(table_de_hachage_t hashTab, uint64_t numeroLigne)
 
 void afficherHashTable(table_de_hachage_t hashTab)
 {
-
 	int i = 0;
 
 	printf("afficherHashTable:Debut\n");
+	printf("\tHashTab size= %d\n",hashTab.taille);
 	for (i = 0; i < hashTab.taille; i++) {
 		printf("afficherHashTable:Ligne %d\n", i);
 		afficherLigneHashTable(hashTab, i);
@@ -112,7 +111,7 @@ void afficherHashTable(table_de_hachage_t hashTab)
 table_de_hachage_t TEST_HASH_TABLE()
 {
 
-	table_de_hachage_t tablh = creerHashTable(MAX_TAILLE_HASH_TABLE);
+    table_de_hachage_t tablh = creerHashTable(MAX_TAILLE_HASH_TABLE);
 
 	donnee_t d1, d2, d3, d4, d5, d6, d7, d8, d9, d10;
 	donnee_t d11, d12, d13, d14, d15, d16, d17, d18, d19, d20;
@@ -162,25 +161,22 @@ table_de_hachage_t TEST_HASH_TABLE()
 	return tablh;
 }
 
-void segmenterHashTable(uint64_t indice,
-			table_de_hachage_t * hash_tab1_ptr,
-			table_de_hachage_t * hash_tab2_ptr)
+
+
+void reallocHashTable(table_de_hachage_t* hashTab,uint32_t new_size)
 {
-	/*  assert(indice <= TAILLE_HASH_TABLE); */
-
-	/*  *hash_tab1_ptr = creerHashTable(indice); */
-	/*  *hash_tab2_ptr = creerHashTable(TAILLE_HASH_TABLE - indice); */
-
-	/*  int i = 0; */
-	/*  for (i = 0; i < indice; i++) { */
-	/*          hash_tab1_ptr->table_de_hachage[i] = TABLE_DE_HACHAGE[i]; */
-	/*  } */
-	/*  for (i = indice; i < TAILLE_HASH_TABLE; i++) { */
-	/*          hash_tab2_ptr->table_de_hachage[i] = TABLE_DE_HACHAGE[i]; */
-	/*  } */
-
-	/*  hash_tab2_ptr->taille = TAILLE_HASH_TABLE - indice; */
-	/*  hash_tab1_ptr->taille = indice; */
-	/*  free(TABLE_DE_HACHAGE); */
+        assert(hashTab!=NULL);
+        assert(new_size<hashTab->taille);
+        liste_t* new_hash_tab;
+        
+        
+        new_hash_tab= (liste_t*)realloc(hashTab->table_de_hachage,new_size*sizeof(liste_t));
+        if(new_hash_tab==NULL){
+        
+                perror("realloc()");
+                exit(-1);
+        }
+        
+        hashTab->table_de_hachage= new_hash_tab;
+        hashTab->taille = new_size;
 }
-

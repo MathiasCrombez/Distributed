@@ -10,6 +10,7 @@ int main(int argc, char *argv[])
                 exit(0);
         }
 
+
         int nbClient = 0;
         tabClient_t p;
         serveur_t *serveur_ptr;

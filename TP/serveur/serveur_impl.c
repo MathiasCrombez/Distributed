@@ -65,24 +65,23 @@ void *talk_to_client(void *idSocket)
             
         case PUT:
             recevoirCle(&K,sockClient);
-            h = hash(K);
 
+            h = hash(K) % MAX_TAILLE_HASH_TABLE;
             printf("talk_to_client:PUT:cle(%s), hash(%llu)\n",K, h);
-            if ( SERVEUR.h <= h && h <= (SERVEUR.h + SERVEUR.tabl.taille)){
-                envoyerOctet(1,sockClient);
-                recevoirDonnee(&D,sockClient);
-                putHashTable(D,SERVEUR.tabl);
-
+            if ( ! (SERVEUR.h <= h && h <= (SERVEUR.h + SERVEUR.tabl.taille))){
+                envoyerOctet(0,sockClient);
+                envoyerIdent(SERVEUR.suivServeur, sockClient);
             } else {
                 envoyerOctet(1,sockClient);
                 recevoirDonnee(&D,sockClient);
+                putHashTable(D,SERVEUR.tabl);
             }
             break;
 
         case GET:
             recevoirCle(&K,sockClient);
-            h = hash(K);
 
+            h = hash(K) % MAX_TAILLE_HASH_TABLE;
             printf("talk_to_client:GET:cle(%s), hash(%llu)\n",K, h);
             if ( ! (SERVEUR.h <= h && h <= (SERVEUR.h + SERVEUR.tabl.taille))){
                 envoyerOctet(0,sockClient);
@@ -101,8 +100,8 @@ void *talk_to_client(void *idSocket)
 
         case REMOVEKEY:
             recevoirCle(&K,sockClient);
-            h = hash(K);
 
+            h = hash(K) % MAX_TAILLE_HASH_TABLE;
             printf("talk_to_client:cle(%s), hash(%llu)\n",K, h);
             if ( ! (SERVEUR.h <= h && h <= (SERVEUR.h + SERVEUR.tabl.taille))){
                 envoyerOctet(0,sockClient);
@@ -113,8 +112,10 @@ void *talk_to_client(void *idSocket)
                 if (D==NULL) {
                     envoyerOctet(0,sockClient);
                 } else {
+                    valeur_t V = removeHashTable(K,SERVEUR.tabl);
                     envoyerOctet(1,sockClient);
-                    envoyerValeur(removeHashTable(K,SERVEUR.tabl), sockClient);
+                    envoyerValeur(V, sockClient);
+                    free(V);
                 }
             }
             break;
@@ -144,10 +145,12 @@ void *talk_to_client(void *idSocket)
                 else {
                     printf("talk_to_client:DISCONNECT:client de socket %d inconnu.\n"
                            , sockClient);
-                    exit(1);
+                    close(sockClient);
+                    pthread_exit(NULL);
                 }
             }
-            exit(0);
+            close(sockClient);
+            pthread_exit(NULL);
             break;
         default:
             break;
@@ -222,7 +225,7 @@ void *talk_to_server(void *idSocket)
                 donnee_t D;
                 recevoirHash(&h,sockServer);                  
                 
-                for(i=h;i<my_hashtab.taille;i++){
+                for(i=h-SERVEUR.h;i<my_hashtab.taille;i++){
                 
                         L=my_hashtab.table_de_hachage[i];
                         
@@ -237,12 +240,11 @@ void *talk_to_server(void *idSocket)
         //fin d'envoi
                 envoyerOctet(0,sockServer);
                      
-                SERVEUR.tabl.taille/=2;
-                SERVEUR.tabl.table_de_hachage=realloc(SERVEUR.tabl.table_de_hachage,SERVEUR.tabl.taille);
+                reallocHashTable(&SERVEUR.tabl,SERVEUR.tabl.taille/2);
                 SERVEUR.suivServeur.h=h;
-                SERVEUR.suivServeur.taille_hashtab=SERVEUR.tabl.taille;
         
                 afficherInfoHashTable();
+                afficherHashTable(SERVEUR.tabl);
                 break;
 /*        case DISCONNECT:*/
 

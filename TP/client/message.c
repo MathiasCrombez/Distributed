@@ -1,32 +1,32 @@
 #include"message.h"
-#include "client_impl.h"
+
 
 
 #define DEBUG_MESSAGE_CLIENT
 
-socket_t message_connect(idConnexion_t * server){
+socket_t message_connect(idConnexion_t * server, client_t client){
     char ack;
     socket_t from; 
 
-    from = connect2server(server);
+    from = connect2server(server, client);
         
     envoyerOrigine(FROM_CLIENT,from);
     envoyerTypeMessage(CONNECT,from);
     recevoirOctet(&ack, from);
     if(ack==0){
         // TODO répétition en cas d'echec : wait & while
-        printf("message_connect:Echec de la connexion");
+        printf("message_connect:Echec de la connexion\n");
         return -1;
     }
     else if(ack==1){
 #ifdef DEBUG_MESSAGE_CLIENT
-        printf("message_connect:connection success");
+        printf("message_connect:connection success\n");
 #endif
     }
     return from;
 }
 
-void  message_put(donnee_t D,socket_t from){
+void  message_put(donnee_t D,socket_t from, client_t client){
     
     char ack;
     idConnexion_t * ident;
@@ -45,10 +45,10 @@ void  message_put(donnee_t D,socket_t from){
          * On relance la fonction avec un nouveau serveur et une nouvelle socket
          */
         recevoirIdent(&ident, from);
-        message_disconnect(from);
+        message_disconnect(from,client);
         shutdown(from, 2);
-        new_from = message_connect(ident);
-        message_put(D, new_from);
+        new_from = message_connect(ident, client);
+        message_put(D, new_from,client);
     }
     else if(ack==1){
         envoyerDonnee(D,from);
@@ -59,7 +59,7 @@ void  message_put(donnee_t D,socket_t from){
     }
 }
 
-donnee_t  message_get(cle_t K,socket_t from){
+donnee_t  message_get(cle_t K,socket_t from, client_t client){
 
     donnee_t D;
     char ack, ack2;
@@ -79,10 +79,10 @@ donnee_t  message_get(cle_t K,socket_t from){
          * On relance la fonction avec un nouveau serveur et une nouvelle socket
          */
         recevoirIdent(&ident, from);
-        message_disconnect(from);
+        message_disconnect(from,client);
         shutdown(from, 2);
-        new_from = message_connect(ident);
-        return message_get(K, new_from);
+        new_from = message_connect(ident,client);
+        return message_get(K, new_from,client);
     }
     else if(ack==1){
         recevoirOctet(&ack2,from);
@@ -100,7 +100,7 @@ donnee_t  message_get(cle_t K,socket_t from){
     return D;
 }
 
-valeur_t message_remove(cle_t K,socket_t from){
+valeur_t message_remove(cle_t K,socket_t from, client_t client){
 
     donnee_t D;
     char ack, ack2;
@@ -121,10 +121,10 @@ valeur_t message_remove(cle_t K,socket_t from){
          * On relance la fonction avec un nouveau serveur et une nouvelle socket
          */
         recevoirIdent(&ident, from);
-        message_disconnect(from);
+        message_disconnect(from, client);
         shutdown(from, 2);
-        new_from = message_connect(ident);
-        return message_remove(K, new_from);
+        new_from = message_connect(ident,client);
+        return message_remove(K, new_from, client);
     }
     else if(ack==1){
         recevoirOctet(&ack2,from);
@@ -134,16 +134,17 @@ valeur_t message_remove(cle_t K,socket_t from){
         else {
             recevoirValeur(&V, from);
 #ifdef DEBUG_MESSAGE_CLIENT
-            printf("message_remove:donnee supprimee %s\n",V);           
+            printf("message_remove:valeur supprimee:%s\n",V);           
 #endif
         }
         return V;
     }
 }
 
-void message_disconnect(socket_t from){
+void message_disconnect(socket_t from, client_t client){
     //    envoyerOrigine(FROM_CLIENT,from);
     envoyerTypeMessage(DISCONNECT,from);
+    close(from);
 #ifdef DEBUG_MESSAGE_CLIENT
     printf("message_disconnect:deconnexion\n");
 #endif    

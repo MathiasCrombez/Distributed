@@ -4,12 +4,12 @@
 
 
 
-client_t* creerClient(const char *nom)
+client_t creerClient(const char *nom)
 {
-	
+    client_t client;
 	/**initialisation des champs du client**/
-	CLIENT.monNom = nom;
-	return &CLIENT;
+    client.monNom = nom;
+    return client;
 }
 
 idConnexion_t * preConnect(char *to_serveur, uint64_t port) {
@@ -63,25 +63,25 @@ idConnexion_t * preConnect(char *to_serveur, uint64_t port) {
 /* } */
 
 
-socket_t connect2server(idConnexion_t *server)
+socket_t connect2server(idConnexion_t *server, client_t client)
 {
-	CLIENT.serv_addr.sin_family = server->identifiant.sin_family;
-	CLIENT.serv_addr.sin_port = server->identifiant.sin_port;
-	CLIENT.serv_addr.sin_addr = server->identifiant.sin_addr;
+	client.serv_addr.sin_family = server->identifiant.sin_family;
+	client.serv_addr.sin_port = server->identifiant.sin_port;
+	client.serv_addr.sin_addr = server->identifiant.sin_addr;
 	
-	CLIENT.idSocket = socket(AF_INET, SOCK_STREAM, 0);
-	if (CLIENT.idSocket < 0) {
+	client.idSocket = socket(AF_INET, SOCK_STREAM, 0);
+	if (client.idSocket < 0) {
 		perror("socket()");
 		exit(-1);
 	}
 	
-	if (connect(CLIENT.idSocket, (struct sockaddr *)&CLIENT.serv_addr,sizeof(struct sockaddr_in)) < 0) {
+	if (connect(client.idSocket, (struct sockaddr *)&client.serv_addr,sizeof(struct sockaddr_in)) < 0) {
             //	#ifdef DEBUG_CLIENT_IMPL
 		printf("connect2server:Echec de la connexion\n");
                 //	#endif
 		exit(-1);
 	}
-	return CLIENT.idSocket;
+	return client.idSocket;
 }
 
 

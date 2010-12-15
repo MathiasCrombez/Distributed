@@ -29,7 +29,7 @@
 
 
 #define DEBUG_MESSAGE_H
-//#undef  DEBUG_MESSAGE_H
+#undef  DEBUG_MESSAGE_H
 
 #ifdef DEBUG_MESSAGE_H
 #   define print_debug(chaine, args...)   printf(chaine,##args)

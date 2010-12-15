@@ -5,16 +5,14 @@ int main()
 {
 
 	table_de_hachage_t table;
-
 	table = TEST_HASH_TABLE();
+
 
 	donnee_t d1, d2, d3, d4, d5, d6, d7;
 
 	d1 = creerDonnee("ramzi", "souris");
-	d2 = creerDonnee("ramziiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii",
-			 "souris");
-	d3 = creerDonnee("ramzi",
-			 "souriiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiis");
+	d2 = creerDonnee("ramziiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii","souris");
+	d3 = creerDonnee("ramzi","souriiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiis");
 	d4 = creerDonnee("ramzi", "verte");
 	d5 = creerDonnee("ramzi", "je t'attrape'");
 	d6 = creerDonnee("ramzi", "par la queue");
@@ -39,8 +37,11 @@ int main()
 	afficherDonnee(getHashTable("yong", table));
 	h = hash("ramzi") % table.taille;
 	afficherLigneHashTable(table, h);
-
-	libererHashTable(table);
-	afficherLigneHashTable(table, h);
+        afficherHashTable(table);
+        
+        
+	printf("\n********affichage du tableu realloué**********\n");
+	reallocHashTable(&table,5);
+	afficherHashTable(table);
 }
 
