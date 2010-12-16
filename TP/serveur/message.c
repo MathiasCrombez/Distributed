@@ -244,7 +244,10 @@ int message_connect_2_server(char* ip,uint32_t port){
                         h=(server_most_charged.h+taille_max/2);
                         ___message_connect_to___(server_most_charged.identifiant);
                         ___message_receive_DHT_from___(server_most_charged,h);
+                #ifdef DEBUG_MESSAGE_SERVEUR
                         afficherHashTable(get_my_hashtab());
+                        
+                #endif
                         return 1;
                 }
         }
@@ -253,28 +256,32 @@ int message_connect_2_server(char* ip,uint32_t port){
 
 
 
-int message_whois_next_server(char* ip, uint32_t port){
+int message_whois_next_server(char* ip, uint32_t port)
+{
 
         struct sockaddr_in serv_addr;
         idConnexion_t server_info;
 
         serv_addr=___get_sockaddr_in___(ip,port);
         server_info=___message_whois_next_server___(serv_addr);
-
+#ifdef DEBUG_MESSAGE_SERVEUR
         afficherIdentConnexion(server_info);
+#endif
         return 1;
 }
 
 
-int message_ident(char* ip, uint32_t port){
+int message_ident(char* ip, uint32_t port)
+{
 
         struct sockaddr_in serv_addr;
         idConnexion_t server_info;
 
         serv_addr=___get_sockaddr_in___(ip,port);
         server_info=___message_ident___(serv_addr);
-
+#ifdef DEBUG_MESSAGE_SERVEUR
         afficherIdentConnexion(server_info);
+#endif
         return 1;
 }
 

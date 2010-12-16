@@ -56,10 +56,7 @@ donnee_t getHashTable(cle_t clef,table_de_hachage_t hashTab);
 void putHashTable(donnee_t data,table_de_hachage_t hashTab);
 valeur_t removeHashTable(cle_t cle,table_de_hachage_t hashTab);
 
-/*
- * fonction de hachage 
- */
-inline uint64_t hash(cle_t K);
+
 
 /*
  * partage une table de hachage 

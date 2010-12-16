@@ -8,12 +8,13 @@ inline uint64_t hash(cle_t K)
 {
 	uint64_t hash = 5381;
 	assert(K != NULL);
-
+        printf("cle: %s ",K);
 	while (*K != '\0') {
 		int c = *K;
 		hash = ((hash << 5) + hash) + c;
 		K++;
 	}
+	printf("h: %d\n",hash%MAX_TAILLE_HASH_TABLE);
 	return hash %MAX_TAILLE_HASH_TABLE;
 }
 

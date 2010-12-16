@@ -1,6 +1,5 @@
 #include "serveur_impl.h"
 
-extern table_de_hachage_t TEST_HASH_TABLE();
 
 int main(int argc, char *argv[])
 {

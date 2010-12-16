@@ -1,24 +1,36 @@
-
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include "../commun/commun.h"
+#include "commun.h"
 #include "client_impl.h"
 #include "message.h"
 
 
-#define MAX_CMD_TAILLE 1000000
+#define MAX_CMD_TAILLE 100
 #define MAX_NB_ARG 10
 #define PROMPT ">"
 
 /* a modifier lors d'un ajout de commande */
-#define NB_CMD 6
-static char *commands[NB_CMD] = { "help", "connect", "put", "get", "removekey","exit" };
+#define NB_CMD 7
+static char *commands[NB_CMD] = { 
+    "help", 
+    "connect", 
+    "disconnect", 
+    "put", 
+    "get", 
+    "removekey",
+    "exit" 
+};
 
 
-
-
-typedef enum { _HELP, _CONNECT, _PUT, _GET, _REMOVEKEY, _EXIT, _ERROR,_VIDE } COMMAND;
+typedef enum { 
+    _HELP, 
+    _CONNECT,
+    _DISCONNECT,
+    _PUT, 
+    _GET, 
+    _REMOVEKEY, 
+    _EXIT, 
+    _ERROR,
+    _VIDE 
+}COMMAND;
 
 
 
@@ -41,7 +53,7 @@ void help()
  * token : chaine correspondant a la commande uniquement
  * cmd : emplacement ou disposer la commande eventuellement identifiee
  */
-COMMAND get_command(char *token)
+inline COMMAND get_command(char *token)
 {
     int i=0;
     COMMAND cmd;
@@ -111,15 +123,31 @@ COMMAND read_command(char*** args)
 }
 
 
-int main()
+
+//==============================================================================
+//                              INTERPRETEUR
+//==============================================================================
+
+
+
+
+void interpreteur()
 {
 
     COMMAND cmd;
     char** args ;
     donnee_t D;
-    client_t* client_ptr = NULL;
+    valeur_t V;
     socket_t sockServer;
+    int IS_CONNECTED=0;
+    char name[20];
 
+    /* creation d'un client */
+    printf("Entrez le nom du client (20 car max!)\n");
+    fgets(name,19,stdin);
+    creerClient(name);
+    printf("Creation client ok\n");
+    
     while (1) {
 #ifdef DEBUG
         printf("main: debut de la boucle de l'interpreteur\n");	
@@ -129,33 +157,78 @@ int main()
 
         cmd = read_command(&args);
         switch (cmd) {
+        
+        
         case _CONNECT:
-            printf("_CONNECT %s %s %s\n", args[1], args[2], args[3]);
-            //            if (client_ptr) {
-                client_ptr = creerClient(args[1]);
-                sockServer = message_connect(preConnect(args[2], atoi(args[3])));
-                /*            }
-            else {
-            }*/
+        
+            if(IS_CONNECTED==0){
+            
+                printf("_CONNECT %s %s\n", args[1], args[2]);
+                sockServer = message_connect(args[1], atoi(args[2]));
+                IS_CONNECTED=1;
+            } else {
+                
+                printf("Vous êtes deja connecté à un serveur.\n");
+            }
             break;
+        
+            
         case _PUT:
+        
+            if(IS_CONNECTED==0){
+            
+                printf("Impossible vous êtes déconnecté!\n");
+                break;
+            }
             D = creerDonnee(args[1],args[2]);
             message_put(D,sockServer);
             break;
+        
+            
         case _GET:
-            afficherDonnee(message_get(args[1],sockServer));                
+        
+            if(IS_CONNECTED==0){
+            
+                printf("Impossible vous êtes déconnecté!\n");
+                break;
+            }
+            D= message_get(args[1],sockServer);
+            afficherDonnee(D);                
             break;
+            
         case _REMOVEKEY:
-            printf("Valeur supprimee:%s\n", message_remove(args[1],sockServer));
-            break;		
+        
+            if(IS_CONNECTED==0){
+             
+                printf("Impossible vous êtes déconnecté!\n");
+                break;
+            }
+            
+            V = message_remove(args[1],sockServer);
+            printf("Valeur supprimee:%s\n", V);
+            break;
+            
+        case _DISCONNECT:
+        
+            if(IS_CONNECTED==1){
+            
+                printf("deconnexion du client\n");
+                message_disconnect(sockServer);
+                printf("deconnexion réussie");
+                IS_CONNECTED=0;
+            } else {
+            
+                printf("le client est deja deconnecté\n");
+            }
+            break;
+            
         case _HELP:
+        
             help();
             break;
-
+            
         case _EXIT:
-            message_disconnect(sockServer);
-            //      goto end;
-            exit(0);
+        
             break;
         case _ERROR:
 

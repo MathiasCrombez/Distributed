@@ -1,10 +1,11 @@
 #include "serveur_impl.h"
 
-#define SET_SERVEUR_NAME(NAME,PORT){                                \
-        strcpy(SERVEUR.name,NAME);                                \
-        strcat(SERVEUR.name,":");                                \
-        sprintf(SERVEUR.name+strlen(NAME)+1,"%llu",PORT);        \
-}
+#define SET_SERVEUR_NAME(NAME,PORT)                                     \
+        do{                                                             \
+                strcpy(SERVEUR.name,NAME);                              \
+                strcat(SERVEUR.name,":");                               \
+                sprintf(SERVEUR.name+strlen(NAME)+1,"%llu",PORT);       \
+        }while(0)
 
 
 /*
@@ -60,6 +61,7 @@ void *talk_to_client(void *idSocket)
     tabClient_t curr, prev;
     uint64_t h;
     while(1) {
+        
         recevoirTypeMessage(&type_requete, sockClient);
         switch (type_requete) {
             
@@ -123,7 +125,7 @@ void *talk_to_client(void *idSocket)
             break;
 
         case CONNECT:
-            envoyerOctet(1,sockClient);
+            //envoyerOctet(1,sockClient);
             break;
             
         case DISCONNECT:
@@ -166,15 +168,8 @@ void *talk_to_server(void *idSocket)
 {
         //ce socket va nous permettre de communiquer avec le client
         socket_t sockServer = *(socket_t*)idSocket;
-        char reponse;
-        char *nom;
-        idConnexion_t id_connexion;
         requete_t type_requete;
-        donnee_t D;
-        liste_t L;
-        uint64_t h;
-        table_de_hachage_t my_hashtab;
-        uint32_t taille;
+        idConnexion_t id_connexion;
 #ifdef DEBUG_SERVEUR_IMPL
         printf("########debut du thread#########\n");
 #endif
@@ -184,7 +179,7 @@ void *talk_to_server(void *idSocket)
         
 
         case CONNECT:
-        
+                
                 printf("SERVER CONNECT\n");
                 id_connexion = get_my_idConnexion();
                 envoyerIdent(SERVEUR.suivServeur, sockServer);
@@ -200,7 +195,7 @@ void *talk_to_server(void *idSocket)
                 break;
 
         case IDENT:
-        
+                
                 printf("IDENT\n");
                 id_connexion= get_my_idConnexion();
                 afficherIdentConnexion(id_connexion);
@@ -209,7 +204,7 @@ void *talk_to_server(void *idSocket)
                 
                 
         case WHOIS_NEXT_SERVER:
-        
+                
                 printf("WHOIS_NEXT_SERVER\n");
                 envoyerIdent(SERVEUR.suivServeur,sockServer);
                 break;
@@ -219,10 +214,11 @@ void *talk_to_server(void *idSocket)
         case RECEIVE_DHT:
         
                 printf("TRANSFER DHT\n");
-                my_hashtab = get_my_hashtab();
+                table_de_hachage_t my_hashtab = get_my_hashtab();
                 liste_t L;
                 uint64_t i;
                 donnee_t D;
+                uint64_t h;
                 recevoirHash(&h,sockServer);                  
                 
                 for(i=h-SERVEUR.h;i<my_hashtab.taille;i++){
@@ -237,14 +233,15 @@ void *talk_to_server(void *idSocket)
                                 libererDonnee(D);
                         }
                 }
-        //fin d'envoi
+                //fin d'envoi
                 envoyerOctet(0,sockServer);
                      
                 reallocHashTable(&SERVEUR.tabl,SERVEUR.tabl.taille/2);
                 SERVEUR.suivServeur.h=h;
-        
+        #ifdef DEBUG_SERVEUR_IMPL
                 afficherInfoHashTable();
                 afficherHashTable(SERVEUR.tabl);
+        #endif
                 break;
 /*        case DISCONNECT:*/
 

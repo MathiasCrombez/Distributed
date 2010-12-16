@@ -24,7 +24,7 @@
 
 
 typedef struct client {
-	const char *monNom;
+	char name[20];
 
 	struct sockaddr_in serv_addr;
 	socket_t idSocket;
@@ -37,7 +37,7 @@ typedef struct client {
 //			VARIABLE GLOBAL
 //==============================================================================
 
-//static client_t CLIENT;
+static client_t CLIENT;
 
 
 
@@ -46,8 +46,8 @@ typedef struct client {
 //==============================================================================
 
 
-client_t creerClient(const char *nom);
-idConnexion_t * preConnect(char *to_serveur, uint64_t port);
-socket_t connect2server(idConnexion_t * server, client_t client);
+client_t* creerClient(const char *nom);
+
+socket_t ___connect2server___(struct sockaddr_in server_info);
 
 #endif

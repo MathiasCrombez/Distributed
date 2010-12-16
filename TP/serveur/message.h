@@ -9,7 +9,7 @@
 //==============================================================================
 
 
-//#define DEBUG_MESSAGE_SERVEUR
+#define DEBUG_MESSAGE_SERVEUR
 //#undef  DEBUG_MESSAGE_SERVEUR
 
 #ifdef DEBUG_MESSAGE_SERVEUR
