@@ -49,6 +49,24 @@ serveur_t* creerServeur(char *nomDuServeur, uint64_t port)
         return &SERVEUR;
 }
 
+pthread_t preconnect_serv2cli(struct sockaddr_in cli_addr, socket_t sockClient
+                              , serveur_t **serveur_ptr) {
+        pthread_t client_thread;
+        tabClient_t p;
+
+        p = malloc(sizeof(struct tableauClient));
+        p->client.identifiant = cli_addr;
+        p->client.idSocket = sockClient;
+
+        client_thread = p->client.thread;
+
+        p->suiv = (*serveur_ptr)->tableauClient;
+        (*serveur_ptr)->tableauClient = p;
+
+        return client_thread;
+
+}
+
 /**
  *A chaque connection d'un client, un thread est créé et talk_to_client est appelée.
  */
@@ -63,6 +81,7 @@ void *talk_to_client(void *idSocket)
     while(1) {
         
         recevoirTypeMessage(&type_requete, sockClient);
+        printf("reçu %d de %d\n", type_requete, sockClient);
         switch (type_requete) {
             
         case PUT:
@@ -125,7 +144,7 @@ void *talk_to_client(void *idSocket)
             break;
 
         case CONNECT:
-            //envoyerOctet(1,sockClient);
+            envoyerOctet(1,sockClient);
             break;
             
         case DISCONNECT:
@@ -151,8 +170,11 @@ void *talk_to_client(void *idSocket)
                     pthread_exit(NULL);
                 }
             }
+            
+            envoyerOctet(1, sockClient);
             close(sockClient);
-            pthread_exit(NULL);
+            //pthread_exit(NULL);
+            exit(0);
             break;
         default:
             break;
@@ -296,6 +318,6 @@ void afficherInfoHashTable(){
         printf("Info sur hash table\n");
         
         printf("****\n\tma taille: %d\n",SERVEUR.tabl.taille);
-        printf("\tmon h: %d\n",SERVEUR.h);
-        printf("\t h de suiv: %d\n",SERVEUR.suivServeur.h);
+        printf("\tmon h: %lld\n",SERVEUR.h);
+        printf("\t h de suiv: %lld\n",SERVEUR.suivServeur.h);
 }

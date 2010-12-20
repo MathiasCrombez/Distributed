@@ -4,101 +4,98 @@
 int main(int argc, char *argv[])
 {
 
-        if (argc < 3) {
-                printf("Usage: %s nomDuServeur Port\n", argv[0]);
-                exit(0);
+    if (argc < 3) {
+        printf("Usage: %s nomDuServeur Port\n", argv[0]);
+        exit(0);
+    }
+
+
+    int nbClient = 0;
+    serveur_t *serveur_ptr;
+    socket_t sockClient;
+    struct sockaddr_in cli_addr;
+    socklen_t cli_len = sizeof(struct sockaddr_in);
+    char ip[20];
+    int po;
+    origine_t from;
+    pthread_t client_thread;
+
+    //creation d'un serveur
+    serveur_ptr = creerServeur(argv[1], atoi(argv[2]));
+
+    //connexion à un serveur pour participer à la DHT
+    printf("se connecter à un serveur?[o|n]\n");
+    if (getchar() == 'o') {
+        printf("entrer le port du serveur'\n");
+        // scanf("%s", ip);
+        scanf("%d", &po);
+        //printf("ip: %s et port: %d'\n", ip, po);
+
+        if (!message_connect_2_server("localhost", po)) {
+            exit(-1);
         }
+    } else {
+        printf("vous êtes le premier serveur de la DHT\n");
+        serveur_ptr->tabl = TEST_HASH_TABLE();
+    }
 
+    while (nbClient < LENGTH_LISTEN_QUEUE) {
+        /* 
+         * creation d'un thread à chaque fois que la demande de connexion 
+         * d'un client est acceptée
+         */
+        printf("serveur en ecoute\n");
+        sockClient = accept(serveur_ptr->idSocket, (struct sockaddr *)&cli_addr,&cli_len);
+        recevoirOrigine(&from, sockClient);
 
-        int nbClient = 0;
-        tabClient_t p;
-        serveur_t *serveur_ptr;
-        socket_t sockClient;
-        struct sockaddr_in cli_addr;
-        socklen_t cli_len = sizeof(struct sockaddr_in);
-        char ip[20];
-        int po;
-        origine_t from;
-        pthread_t client_thread;
+        switch (from) {
 
-        //creation d'un serveur
-        serveur_ptr = creerServeur(argv[1], atoi(argv[2]));
+        case FROM_CLIENT:
 
-        //connexion à un serveur pour participer à la DHT
-        printf("se connecter à un serveur?[o|n]\n");
-        if (getchar() == 'o') {
-                printf("entrer le port du serveur'\n");
-                // scanf("%s", ip);
-                scanf("%d", &po);
-                //printf("ip: %s et port: %d'\n", ip, po);
+            /*
+             * remplissage du tableau permettant d'itentifier les clients connectés
+             */
 
-                if (!message_connect_2_server("localhost", po)) {
-                        exit(-1);
-                }
-        } else {
-                printf("vous êtes le premier serveur de la DHT\n");
-                serveur_ptr->tabl = TEST_HASH_TABLE();
-        }
+            client_thread = preconnect_serv2cli(cli_addr, sockClient, &serveur_ptr);
 
-        while (nbClient < LENGTH_LISTEN_QUEUE) {
-                /* 
-                 * creation d'un thread à chaque fois que la demande de connexion 
-                 * d'un client est acceptée
-                 */
-                printf("serveur en ecoute\n");
-                sockClient = accept(serveur_ptr->idSocket, (struct sockaddr *)&cli_addr,&cli_len);
-                recevoirOrigine(&from, sockClient);
+            nbClient++;
 
-                switch (from) {
+            printf("le client vient de se connecter au serveur\n");
 
-                case FROM_CLIENT:
+            if (pthread_create(&client_thread, NULL, *talk_to_client, (void *)&sockClient)
+                < 0) {
+                perror("Creation d'un nouveau pthread impossible \n");
+                break;
+            }
+            printf("le client est validé : pthread crée\n");
+            break;
 
-                        /*
-                         * remplissage du tableau permettant d'itentifier les clients connectés
-                         */
-                        p = malloc(sizeof(struct tableauClient));
-                        p->client.identifiant = cli_addr;
-                        p->client.idSocket = sockClient;
-                        nbClient++;
+        case FROM_SERVEUR:
 
-                        printf("le client vient de se connecter au serveur\n");
+            printf("un serveur vient de se connecter au serveur\n");
 
-                        client_thread = p->client.thread;
+            /* creation d'un thread pour repondre aux requetes du serveur */
+            pthread_t server_thread;
+            if (pthread_create(&server_thread, NULL, *talk_to_server,(void *)&sockClient)
+                < 0) {
+                perror("Creation d'un nouveau pthread impossible \n");
+                break;
+            }
+            printf("le serveur est validé : pthread crée\n");
+            break;
 
-                        p->suiv = serveur_ptr->tableauClient;
-                        serveur_ptr->tableauClient = p;
+        default:
 
-                        if (pthread_create(&client_thread, NULL, *talk_to_client, (void *)&sockClient) < 0) {
-                                perror("Creation d'un nouveau pthread impossible \n");
-                                break;
-                        }
-                        printf("le client est validé : pthread crée\n");
-                        break;
-
-                case FROM_SERVEUR:
-
-                        printf("un serveur vient de se connecter au serveur\n");
-
-                        /* creation d'un thread pour repondre aux requetes du serveur */
-                        pthread_t server_thread;
-                        if (pthread_create(&server_thread, NULL, *talk_to_server,(void *)&sockClient) < 0) {
-                                perror("Creation d'un nouveau pthread impossible \n");
-                                break;
-                        }
-                        printf("le serveur est validé : pthread crée\n");
-                        break;
-
-                default:
-
-                        printf("type d'expediteur inconnu\n");
-
-                }
+            printf("type d'expediteur inconnu\n");
 
         }
 
-        printf("votre serveur n'accepte pas plus de %d connexions à la fois\n",LENGTH_LISTEN_QUEUE);
+    }
 
-        return 0;
+    printf("votre serveur n'accepte pas plus de %d connexions à la fois\n"
+           ,LENGTH_LISTEN_QUEUE);
+
+    return 0;
 
 }
 

@@ -94,6 +94,10 @@ static serveur_t SERVEUR;
 /** on creer un serveur.Il ne partage pas la DHT encor donc pas besoin de
  ** first_k, las_k et next en argument					**/
 serveur_t* creerServeur(char *nomDuServeur, uint64_t port);
+
+pthread_t preconnect_serv2cli(struct sockaddr_in cli_addr, socket_t sockClient
+                              , serveur_t **serveur_ptr);
+
 void *talk_to_client(void *sockClient);
 void *talk_to_server(void *sockServer);
 

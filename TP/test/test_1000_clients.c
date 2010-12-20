@@ -3,12 +3,10 @@
 
 int main(int argc, char *argv[])
 {
-
-        creerClient(argv[1]);
-        message_connect("localhost",4242);
-
-        while(1){
-                /* consomme moins de charge cpu*/
-                sleep(1000);
-        }
+    socket_t f;
+    creerClient(argv[1]);
+    f = message_connect("localhost",4242);
+    sleep(2);
+    message_disconnect(f);
+    return 0;
 }

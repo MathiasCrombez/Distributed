@@ -26,12 +26,6 @@ inline struct sockaddr_in ___get_sockaddr_in___(char *ip, uint32_t port)
 }
 
 
-
-
-
-
-
-
 socket_t message_connect(char* ip, uint32_t port)
 {
 
@@ -44,6 +38,7 @@ socket_t message_connect(char* ip, uint32_t port)
 
         envoyerOrigine(FROM_CLIENT,sockServer);
         envoyerTypeMessage(CONNECT,sockServer);
+        recevoirOctet(&ack,sockServer);
         return sockServer;
 }
 
@@ -132,7 +127,7 @@ valeur_t message_remove(cle_t K, socket_t from)
         //    envoyerOrigine(FROM_CLIENT,from);
         envoyerTypeMessage(REMOVEKEY, from);
         envoyerCle(K, from);
-        recevoirOctet(&ack, from);
+        //        recevoirOctet(&ack, from);
 
         if (ack == 0) {
 #ifdef DEBUG_MESSAGE_CLIENT
@@ -162,7 +157,9 @@ valeur_t message_remove(cle_t K, socket_t from)
 
 void message_disconnect(socket_t from)
 {
+    char ack;
         envoyerTypeMessage(DISCONNECT, from);
+        recevoirOctet(&ack, from);
         close(from);
 #ifdef DEBUG_MESSAGE_CLIENT
         printf("message_disconnect:deconnexion\n");

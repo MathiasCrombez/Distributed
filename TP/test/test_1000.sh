@@ -19,14 +19,15 @@ SERVEUR=test_1000_serveur
 
 for i in `seq 1 $1` ;
 do
-
-        echo $i
-        ./$CLIENT "Client"$i "localhost" "4242" &
-        
+        ./$CLIENT Client$i localhost 4242 &
+#        sleep 1
 done
 
 
 echo "FIN DU TEST"
 
+sleep 30
+echo kill serveur
 killall --quiet $SERVEUR
-killall --quiet $CLIENT
+#killall --quiet $CLIENT
+

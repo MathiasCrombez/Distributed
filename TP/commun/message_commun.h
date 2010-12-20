@@ -28,7 +28,7 @@
 #define T_DONNEE(donnee)   T_CHAINE(donnee->cle) + T_CHAINE(donnee->valeur)
 
 
-#define DEBUG_MESSAGE_H
+//#define DEBUG_MESSAGE_H
 #undef  DEBUG_MESSAGE_H
 
 #ifdef DEBUG_MESSAGE_H
@@ -70,6 +70,32 @@ typedef enum  {
 
 
 /*
+ *envoi d'un octet
+ */
+static int envoyerOctet(char O, socket_t to)
+{
+	if (send(to, &O, T_OCTET, 0) == -1) {
+		perror("envoyerOctet:send()");
+		exit(-1);
+	}
+	print_debug("envoyerOctet:%c\n", O);
+	return 1;
+}
+
+/*
+ *reception d'un octet
+ */
+static int recevoirOctet(char *O, socket_t from)
+{
+	if (recv(from, O, T_OCTET, 0) == -1) {
+		perror("recevoirOctet:recv()");
+		exit(-1);
+	}
+	print_debug("recevoirOctet:%c\n", *O);
+	return 1;
+}
+
+/*
  *envoi d'un entier sur 32 bits.
  *L'entier est converti en chaine de caractere , puis envoyé
  */
@@ -77,18 +103,20 @@ static int envoyerUInt_32(uint32_t I, socket_t to)
 {
 
 	char *s_I = calloc(T_INT_32,T_OCTET);
+        char ack;
 	if (s_I == NULL) {
-		perror("calloc()");
+		perror("envoyerUInt_32:calloc()");
 		exit(-1);
 	}
 	sprintf(s_I, "%u", I);
 
 	if (send(to, s_I, T_INT_32, 0) == -1) {
-		perror("send()");
+		perror("envoyerUInt_32:send()");
 		exit(-1);
 	}
-	print_debug("envoyerUInt_32:%u\n", I);
+	print_debug("envoyerUInt_32:%u\n", I);        
 	free(s_I);
+        recevoirOctet(&ack, to);
 	return 1;
 }
 
@@ -103,18 +131,19 @@ static int recevoirUInt_32(uint32_t * I, socket_t from)
 
 	char *s_I = calloc(T_INT_32,T_OCTET);
 	if (s_I == NULL) {
-		perror("calloc()");
+		perror("recevoirUInt_32:calloc()");
 		exit(-1);
 	}
 
 	if (recv(from, s_I, T_INT_32, 0) == -1) {
-		perror("recv()");
+		perror("recevoirUInt_32:recv()");
 		exit(-1);
 	}
 	//TODO EST CE QUIL FAUT FAIRE APPEL A ATOL PLUTOT?
 	*I = (uint32_t)atoi(s_I);
 	free(s_I);
 	print_debug("recevoirUInt_32:%u\n", *I);
+        envoyerOctet((char)1, from);
 	return 1;
 }
 
@@ -127,8 +156,9 @@ static int envoyerUInt_64(uint64_t I, socket_t to)
 {
 
 	char *s_I = calloc(T_INT_64,T_OCTET);
+        char ack;
 	if (s_I == NULL) {
-		perror("calloc()");
+		perror("envoyerUInt_64:calloc()");
 		exit(-1);
 	}
 	
@@ -138,7 +168,7 @@ static int envoyerUInt_64(uint64_t I, socket_t to)
 	sprintf(s_I, "%llu", I);
 #endif
 	if (send(to, s_I, T_INT_64, 0) == -1) {
-		perror("send()");
+		perror("envoyerUInt_64:send()");
 		exit(-1);
 	}
 #if __WORDSIZE == 64
@@ -147,6 +177,7 @@ static int envoyerUInt_64(uint64_t I, socket_t to)
 	print_debug("envoyerUInt_64:%llu\n", I);
 #endif
 	free(s_I);
+        recevoirOctet(&ack, to);
 	return 1;
 }
 /*
@@ -158,11 +189,11 @@ static int recevoirUInt_64(uint64_t * I, socket_t from)
 {
 	char *s_I = calloc(T_INT_64,T_OCTET);
 	if (s_I == NULL) {
-		perror("calloc()");
+		perror("recevoirUInt_64:calloc()");
 		exit(-1);
 	}
 	if (recv(from, s_I, T_INT_64, 0) == -1) {
-		perror("recv()");
+		perror("recevoirUInt_64:recv()");
 		exit(-1);
 	}
 	//TODO UN PEU OPTIMISTE ON SUPPOSE QUE ATOLL RECOI BIEN UN NETIER EN CHAINE
@@ -174,33 +205,7 @@ static int recevoirUInt_64(uint64_t * I, socket_t from)
 	print_debug("recevoirUInt_64:%llu\n", *I);
 #endif
 	free(s_I);
-	return 1;
-}
-
-
-/*
- *envoi d'un octet
- */
-static int envoyerOctet(char O, socket_t to)
-{
-	if (send(to, &O, T_OCTET, 0) == -1) {
-		perror("send");
-		exit(-1);
-	}
-	print_debug("envoyerOctet:%c\n", O);
-	return 1;
-}
-
-/*
- *reception d'un octet
- */
-static int recevoirOctet(char *O, socket_t from)
-{
-	if (recv(from, O, T_OCTET, 0) == -1) {
-		perror("recv()");
-		exit(-1);
-	}
-	print_debug("recevoirOctet:%c\n", *O);
+        envoyerOctet((char)1, from);
 	return 1;
 }
 
@@ -210,6 +215,7 @@ static int recevoirOctet(char *O, socket_t from)
  */
 static int envoyerChaine(char *chaine, socket_t to)
 {
+    char ack;
 	uint32_t taille_chaine = T_CHAINE(chaine);
 	print_debug("\t:");
 	if (!envoyerUInt_32(taille_chaine, to)) {
@@ -217,10 +223,11 @@ static int envoyerChaine(char *chaine, socket_t to)
 	}
 	print_debug("\t:");
 	if (send(to, chaine, taille_chaine, 0) == -1) {
-		perror("send()");
+		perror("envoyerChaine:send()");
 		exit(-1);
 	}
 	print_debug("envoyerChaine:%s\n", chaine);
+        recevoirOctet(&ack, to);
 	return 1;
 }
 
@@ -243,11 +250,12 @@ static int recevoirChaine(char **chaine, socket_t from)
 		exit(-1);
 	}
 	if (recv(from, *chaine, taille_chaine, 0) == -1) {
-		perror("recv()");
+		perror("recevoirChaine:recv()");
 		exit(-1);
 	}
        
 	print_debug("recevoirChaine:%s\n",*chaine);
+        envoyerOctet((char)1, from);
 	return 1;
 }
 	
