@@ -144,7 +144,7 @@ void *talk_to_client(void *idSocket)
             break;
 
         case CONNECT:
-            envoyerOctet(1,sockClient);
+            //            envoyerOctet(1,sockClient);
             break;
             
         case DISCONNECT:
@@ -273,7 +273,7 @@ void *talk_to_server(void *idSocket)
 /*                printf("c'est fait!\n");*/
 /*                return NULL;*/
         default:
-                printf("message incinnu");
+                printf("message inconnu");
                 break;
 
         }
