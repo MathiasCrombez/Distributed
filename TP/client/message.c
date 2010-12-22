@@ -6,9 +6,7 @@
  * renvoi une structure sockaddr_in avec l'ip et le port de connexion
  * protocole TCP/IP
  */
-inline struct sockaddr_in ___get_sockaddr_in___(char *ip, uint32_t port)
-{
-
+inline struct sockaddr_in ___get_sockaddr_in___(char *ip, uint32_t port) {
     struct hostent *hostinfo;
     struct sockaddr_in serv_addr;
 
@@ -26,16 +24,13 @@ inline struct sockaddr_in ___get_sockaddr_in___(char *ip, uint32_t port)
 }
 
 
-socket_t message_connect(char* ip, uint32_t port)
-{
-
+socket_t message_connect(char* ip, uint32_t port) {
     struct sockaddr_in server_info;
     char ack;
     socket_t sockServer;
         
     server_info = ___get_sockaddr_in___(ip,port);
     sockServer  = ___connect2server___(server_info);
-
     envoyerOrigine(FROM_CLIENT,sockServer);
     envoyerTypeMessage(CONNECT,sockServer);
     //    recevoirOctet(&ack,sockServer);
@@ -163,6 +158,7 @@ void message_disconnect(socket_t from)
     char ack;
     envoyerTypeMessage(DISCONNECT, from);
     recevoirOctet(&ack, from);
+            shutdown(from, 2);
     close(from);
 #ifdef DEBUG_MESSAGE_CLIENT
     printf("message_disconnect:deconnexion\n");

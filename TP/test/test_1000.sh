@@ -14,20 +14,13 @@ SERVEUR=test_1000_serveur
 
 
 ##execution d'un serveur qui ecoute sur le port 4242
-./$SERVEUR $1 & 
-
-
-for i in `seq 1 $1` ;
-do
-        ./$CLIENT Client$i localhost 4242 &
+./$SERVEUR & 
+sleep 3
+./$CLIENT $1 &
 #        sleep 1
-done
 
-
-echo "FIN DU TEST"
-
-sleep 30
+sleep 10
 echo kill serveur
-killall --quiet $SERVEUR
+killall $SERVEUR
 #killall --quiet $CLIENT
 

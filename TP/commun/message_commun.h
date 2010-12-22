@@ -59,6 +59,7 @@ typedef enum  {
     DISCONNECT,
     RECEIVE_DHT,
     AUTH_SERVER,
+    QUIT
 } requete_t;
 
 
@@ -76,10 +77,10 @@ static int envoyerSynchro(socket_t to)
 {
     char O = 0;
     if (send(to, &O, T_OCTET, 0) == -1) {
-        perror("envoyerOctet:send()");
+        perror("envoyerSynchro:send()");
         exit(-1);
     }
-    print_debug("envoyerOctet:%c\n", O);
+    print_debug("envoyerSynchro:%d\n", (int)O);
     return 1;
 }
 
@@ -90,10 +91,10 @@ static int recevoirSynchro(socket_t from)
 {
     char O;
     if ( (recv(from, &O, T_OCTET, 0) == -1) && O != 0) {
-        perror("recevoirOctet:recv()");
+        perror("recevoirSynchro:recv()");
         exit(-1);
     }
-    print_debug("recevoirOctet:%c\n", *O);
+    print_debug("recevoirSynchro:%d\n", (int)*O);
     return 1;
 }
 
@@ -107,7 +108,7 @@ static int envoyerOctet(char O, socket_t to)
         perror("envoyerOctet:send()");
         exit(-1);
     }
-    print_debug("envoyerOctet:%c\n", O);
+    print_debug("envoyerOctet:%d\n", (int)O);
     return 1;
 }
 
@@ -121,7 +122,7 @@ static int recevoirOctet(char *O, socket_t from)
         perror("recevoirOctet:recv()");
         exit(-1);
     }
-    print_debug("recevoirOctet:%c\n", *O);
+    print_debug("recevoirOctet:%d\n", (int)*O);
     return 1;
 }
 
@@ -135,14 +136,12 @@ static int envoyerUInt_32(uint32_t I, socket_t to)
 
     char *s_I;
     char ack;
-    recevoirSynchro(to);
-    ;
+    recevoirSynchro(to);    
     if ( ( s_I = calloc(T_INT_32,T_OCTET) ) == NULL) {
         perror("envoyerUInt_32:calloc()");
         exit(-1);
     }
     sprintf(s_I, "%u", I);
-
     if (send(to, s_I, T_INT_32, 0) == -1) {
         perror("envoyerUInt_32:send()");
         exit(-1);

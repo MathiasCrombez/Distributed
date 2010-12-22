@@ -21,7 +21,7 @@
 /*
  * NB de clients auxquels peut repondre un server en meme temps
  */
-#define THREAD_MAX 5
+#define THREAD_MAX 10
 
 /*
  * NB de Client accepté
