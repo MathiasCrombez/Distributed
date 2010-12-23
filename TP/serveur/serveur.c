@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
 
             printf("le client vient de se connecter au serveur\n");
 
-            if (pthread_create(&client_thread, NULL, *talk_to_client, (void *)&sockClient)
+            if (pthread_create(&client_thread, NULL, *talk_to_client, (void *)sockClient)
                 < 0) {
                 perror("Creation d'un nouveau pthread impossible \n");
                 break;
@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
 
             /* creation d'un thread pour repondre aux requetes du serveur */
             pthread_t server_thread;
-            if (pthread_create(&server_thread, NULL, *talk_to_server,(void *)&sockClient)
+            if (pthread_create(&server_thread, NULL, *talk_to_server,(void *)sockClient)
                 < 0) {
                 perror("Creation d'un nouveau pthread impossible \n");
                 break;

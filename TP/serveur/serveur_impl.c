@@ -74,13 +74,13 @@ void *talk_to_client(void *idSocket)
     cle_t K;
     donnee_t D;
     requete_t type_requete;
-    socket_t sockClient = *(socket_t*) idSocket;
+    socket_t sockClient = (socket_t) idSocket;
     tabClient_t curr, prev;
     uint64_t h;
     while(1) {        
-        printf("%d:thread %u\n",sockClient,(unsigned int)pthread_self());
+        //        printf("%d:thread %u\n",sockClient,(unsigned int)pthread_self());
         recevoirTypeMessage(&type_requete, sockClient);      
-        printf("%d:thread %u => reception\n",sockClient,(unsigned int)pthread_self());
+        //        printf("%d:thread %u => reception\n",sockClient,(unsigned int)pthread_self());
         printf("%d:reçu %d\n", sockClient, type_requete);
         switch (type_requete) {            
         case PUT:
@@ -202,7 +202,7 @@ void *talk_to_client(void *idSocket)
 void *talk_to_server(void *idSocket)
 {
     //ce socket va nous permettre de communiquer avec le client
-    socket_t sockServer = *(socket_t*)idSocket;
+    socket_t sockServer = (socket_t)idSocket;
     requete_t type_requete;
     idConnexion_t id_connexion;
 #ifdef DEBUG_SERVEUR_IMPL

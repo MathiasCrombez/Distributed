@@ -75,12 +75,12 @@ typedef enum  {
  */
 static int envoyerSynchro(socket_t to)
 {
-    char O = 0;
-    if (send(to, &O, T_OCTET, 0) == -1) {
-        perror("envoyerSynchro:send()");
-        exit(-1);
-    }
-    print_debug("envoyerSynchro:%d\n", (int)O);
+    /* char O = 0; */
+    /* if (send(to, &O, T_OCTET, 0) == -1) { */
+    /*     perror("envoyerSynchro:send()"); */
+    /*     exit(-1); */
+    /* } */
+    /* print_debug("envoyerSynchro:%d\n", (int)O); */
     return 1;
 }
 
@@ -89,12 +89,12 @@ static int envoyerSynchro(socket_t to)
  */
 static int recevoirSynchro(socket_t from)
 {
-    char O;
-    if ( (recv(from, &O, T_OCTET, 0) == -1) && O != 0) {
-        perror("recevoirSynchro:recv()");
-        exit(-1);
-    }
-    print_debug("recevoirSynchro:%d\n", (int)*O);
+    /* char O; */
+    /* if ( (recv(from, &O, T_OCTET, 0) == -1) && O != 0) { */
+    /*     perror("recevoirSynchro:recv()"); */
+    /*     exit(-1); */
+    /* } */
+    /* print_debug("recevoirSynchro:%d\n", (int)*O); */
     return 1;
 }
 
