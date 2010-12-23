@@ -3,7 +3,7 @@
 
 #define SET_CLIENT_NAME(NAME)                                           \
         do {                                                            \
-                strcpy(CLIENT.name,NAME);                               \
+            strcpy(CLIENT.name,NAME);                                   \
         } while(0)
 
 
@@ -25,13 +25,12 @@ client_t *creerClient(const char *nom)
 socket_t ___connect2server___(struct sockaddr_in server_info)
 {
         socket_t idSocket;
-        
+
         idSocket = socket(AF_INET, SOCK_STREAM, 0);
         if (idSocket < 0) {
                 perror("socket()");
                 exit(-1);
         }
-
         if (connect(idSocket, (struct sockaddr *)&server_info,sizeof(struct sockaddr_in)) == -1) {
                 perror("connect2server:Echec de la connexion\n");
                 exit(-1);
@@ -43,5 +42,8 @@ socket_t ___connect2server___(struct sockaddr_in server_info)
 	
         return idSocket;
 }
+
+
+
 
 

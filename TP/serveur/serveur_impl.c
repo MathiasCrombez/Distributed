@@ -1,11 +1,11 @@
 #include "serveur_impl.h"
 
-#define SET_SERVEUR_NAME(NAME,PORT)                                     \
-        do{                                                             \
-                strcpy(SERVEUR.name,NAME);                              \
-                strcat(SERVEUR.name,":");                               \
-                sprintf(SERVEUR.name+strlen(NAME)+1,"%llu",PORT);       \
-        }while(0)
+#define SET_SERVEUR_NAME(NAME,PORT)                             \
+    do{                                                         \
+        strcpy(SERVEUR.name,NAME);                              \
+        strcat(SERVEUR.name,":");                               \
+        sprintf(SERVEUR.name+strlen(NAME)+1,"%llu",PORT);       \
+    }while(0)
 
 
 /*
@@ -14,39 +14,56 @@
 serveur_t* creerServeur(char *nomDuServeur, uint64_t port)
 {
 
-        int yes = 1;
+    int yes = 1;
 
-        SET_SERVEUR_NAME(nomDuServeur, port);
-        SERVEUR.idSocket = socket(AF_INET, SOCK_STREAM, 0);
-        if (SERVEUR.idSocket < 0) {
-            perror("socket()");
-            exit(EXIT_FAILURE);
-        }
+    SET_SERVEUR_NAME(nomDuServeur, port);
+    SERVEUR.idSocket = socket(AF_INET, SOCK_STREAM, 0);
+    if (SERVEUR.idSocket < 0) {
+        perror("socket()");
+        exit(EXIT_FAILURE);
+    }
         
-        //initialisation de la structure serveur
-        SERVEUR.serv_addr.sin_family = AF_INET;
-        SERVEUR.serv_addr.sin_addr.s_addr = inet_addr(SERVEURNAME);
-        SERVEUR.serv_addr.sin_port = htons(port);
+    //initialisation de la structure serveur
+    SERVEUR.serv_addr.sin_family = AF_INET;
+    SERVEUR.serv_addr.sin_addr.s_addr = inet_addr(SERVEURNAME);
+    SERVEUR.serv_addr.sin_port = htons(port);
 
         
-        SERVEUR.suivServeur = setIdConnexion(SERVEUR.name,SERVEUR.serv_addr,0,0);
+    SERVEUR.suivServeur = setIdConnexion(SERVEUR.name,SERVEUR.serv_addr,0,0);
 
-        // evite le message d'erreur "Address already in use" lors d'un bind
-        if (setsockopt (SERVEUR.idSocket, SOL_SOCKET, SO_REUSEADDR, &yes,sizeof(int)) == -1) {
-                perror("setsockopt()");
-                exit(EXIT_FAILURE);
-        }
+    // evite le message d'erreur "Address already in use" lors d'un bind
+    if (setsockopt (SERVEUR.idSocket, SOL_SOCKET, SO_REUSEADDR, &yes,sizeof(int)) == -1) {
+        perror("setsockopt()");
+        exit(EXIT_FAILURE);
+    }
 
-        if (bind(SERVEUR.idSocket, (struct sockaddr *)&SERVEUR.serv_addr, sizeof(SERVEUR.serv_addr)) < 0) {
-                perror("bind()");
-                exit(EXIT_FAILURE);
-        }
+    if (bind(SERVEUR.idSocket, (struct sockaddr *)&SERVEUR.serv_addr
+             , sizeof(SERVEUR.serv_addr)) < 0) {
+        perror("bind()");
+        exit(EXIT_FAILURE);
+    }
 
-        if (listen(SERVEUR.idSocket, LENGTH_LISTEN_QUEUE)) {
-                perror("liste()");
-                exit(EXIT_FAILURE);
-        }
-        return &SERVEUR;
+    if (listen(SERVEUR.idSocket, 5)) {
+        perror("listen()");
+        exit(EXIT_FAILURE);
+    }
+    return &SERVEUR;
+}
+pthread_t preconnect_serv2cli(struct sockaddr_in cli_addr, socket_t sockClient
+                              , serveur_t **serveur_ptr) {
+    pthread_t client_thread;
+    tabClient_t p;
+
+    p = malloc(sizeof(struct tableauClient));
+    p->client.identifiant = cli_addr;
+    p->client.idSocket = sockClient;
+
+    client_thread = p->client.thread;
+
+    p->suiv = (*serveur_ptr)->tableauClient;
+    (*serveur_ptr)->tableauClient = p;
+    return client_thread;
+
 }
 
 /**
@@ -57,9 +74,11 @@ void *talk_to_client(void *idSocket)
     cle_t K;
     donnee_t D;
     requete_t type_requete;
-    socket_t sockClient = *(socket_t*) idSocket;
+    socket_t sockClient = (socket_t) idSocket;
     tabClient_t curr, prev;
     uint64_t h;
+    
+    
     while(1) {
         
         pthread_mutex_lock(&MUTEX_NB_JOBS);
@@ -69,6 +88,7 @@ void *talk_to_client(void *idSocket)
         recevoirTypeMessage(&type_requete, sockClient);
         switch (type_requete) {
             
+
         case PUT:
              pthread_cond_signal(&condition_cond);
             recevoirCle(&K,sockClient);
@@ -136,6 +156,7 @@ void *talk_to_client(void *idSocket)
         case CONNECT:
                  pthread_cond_signal(&condition_cond);
             //envoyerOctet(1,sockClient);
+
             break;
             
             
@@ -193,10 +214,13 @@ void *talk_to_client(void *idSocket)
 /*            }*/
             shutdown(sockClient,SHUT_RDWR);
             pthread_exit(NULL);
+
             break;
-            
+       
+
        
         default:
+            printf("Message inconnu\n");
             break;
 
         }
@@ -211,59 +235,62 @@ void *talk_to_client(void *idSocket)
     }
 }
 /**
-* Corps de la fonction de routine lors de la création de pthread
-* (apparition d'un client
-*/
+ * Corps de la fonction de routine lors de la création de pthread
+ * (apparition d'un client
+ */
 void *talk_to_server(void *idSocket)
 {
-        //ce socket va nous permettre de communiquer avec le client
-        socket_t sockServer = *(socket_t*)idSocket;
-        requete_t type_requete;
-        idConnexion_t id_connexion;
-         uint64_t h;
+
+    //ce socket va nous permettre de communiquer avec le client
+    socket_t sockServer = (socket_t)idSocket;
+    requete_t type_requete;
+    idConnexion_t id_connexion;
+     uint64_t h;
 #ifdef DEBUG_SERVEUR_IMPL
-        printf("########debut du thread#########\n");
+    printf("########debut du thread#########\n");
 #endif
          pthread_mutex_lock(&MUTEX_NB_JOBS);
         NB_JOBS++;
         pthread_mutex_unlock(&MUTEX_NB_JOBS);
         recevoirTypeMessage(&type_requete, sockServer);
         switch (type_requete) {
+
         
 
-        case CONNECT:
+    case CONNECT:
                 
                 printf("SERVER CONNECT\n");
                 envoyerIdent(SERVEUR.suivServeur, sockServer);
                 recevoirIdent(&SERVEUR.suivServeur,sockServer);
 
-        #ifdef DEBUG_SERVEUR_IMPL
 
-                printf("****serveur suivant est:****\n");
-                afficherIdentConnexion(SERVEUR.suivServeur);
-                printf("\n");
-        #endif
-                
-                break;
+#ifdef DEBUG_SERVEUR_IMPL
 
-        case IDENT:
+        printf("****serveur suivant est:****\n");
+        afficherIdentConnexion(SERVEUR.suivServeur);
+        printf("\n");
+#endif
                 
-                printf("IDENT\n");
-                id_connexion= get_my_idConnexion();
-                afficherIdentConnexion(id_connexion);
-                envoyerIdent(id_connexion,sockServer);
-                break;
+        break;
+
+    case IDENT:
+                
+        printf("IDENT\n");
+        id_connexion= get_my_idConnexion();
+        afficherIdentConnexion(id_connexion);
+        envoyerIdent(id_connexion,sockServer);
+        break;
                 
                 
-        case WHOIS_NEXT_SERVER:
+    case WHOIS_NEXT_SERVER:
                 
-                printf("WHOIS_NEXT_SERVER\n");
-                envoyerIdent(SERVEUR.suivServeur,sockServer);
-                break;
+        printf("WHOIS_NEXT_SERVER\n");
+        envoyerIdent(SERVEUR.suivServeur,sockServer);
+        break;
         
         
         /* un serveur demande de partager la table de hachage*/
-        case RECEIVE_DHT:
+    case RECEIVE_DHT:
         
                 printf("TRANSFER DHT\n");
                 table_de_hachage_t my_hashtab = get_my_hashtab();
@@ -272,10 +299,11 @@ void *talk_to_server(void *idSocket)
                 donnee_t D;
                
                 recevoirHash(&h,sockServer);                  
+
                 
-                for(i=h-SERVEUR.h;i<my_hashtab.taille;i++){
+        for(i=h-SERVEUR.h;i<my_hashtab.taille;i++){
                 
-                        L=my_hashtab.table_de_hachage[i];
+            L=my_hashtab.table_de_hachage[i];
                         
                         while(L!=NULL){
                                 D=removeTeteDeListe(&L);
@@ -351,9 +379,10 @@ void *talk_to_server(void *idSocket)
                 printf("message incinnu");
                 break;
 
-        }
+
+    }
         
-        /* fermeture de la communication et mort ddu thread*/
+    /* fermeture de la communication et mort ddu thread*/
         
         pthread_mutex_lock(&MUTEX_NB_JOBS);
         NB_JOBS--;
@@ -363,9 +392,8 @@ void *talk_to_server(void *idSocket)
         pthread_mutex_unlock(&MUTEX_NB_JOBS);
         
         printf("########fin du thread#########\n");
-        shutdown(sockServer, SHUT_RDWR);
+        close(sockServer);
         pthread_exit(NULL);
-
 }
 
 
@@ -373,22 +401,22 @@ void *talk_to_server(void *idSocket)
 
 idConnexion_t get_my_idConnexion()
 {
-        return setIdConnexion( SERVEUR.name,
-                                  SERVEUR.serv_addr,
-                                  SERVEUR.h,
-                                  SERVEUR.tabl.taille
-                                 );
+    return setIdConnexion( SERVEUR.name,
+                           SERVEUR.serv_addr,
+                           SERVEUR.h,
+                           SERVEUR.tabl.taille
+                           );
 }
 
 
 serveur_t* get_my_server()
 {
-        return &SERVEUR;
+    return &SERVEUR;
 }
 
 table_de_hachage_t get_my_hashtab()
 {
-        return SERVEUR.tabl;
+    return SERVEUR.tabl;
 }
 
 /*
@@ -397,9 +425,9 @@ table_de_hachage_t get_my_hashtab()
  
 void afficherInfoHashTable(){
 
-        printf("Info sur hash table\n");
+    printf("Info sur hash table\n");
         
-        printf("****\n\tma taille: %d\n",SERVEUR.tabl.taille);
-        printf("\tmon h: %d\n",SERVEUR.h);
-        printf("\t h de suiv: %d\n",SERVEUR.suivServeur.h);
+    printf("****\n\tma taille: %d\n",SERVEUR.tabl.taille);
+    printf("\tmon h: %lld\n",SERVEUR.h);
+    printf("\t h de suiv: %lld\n",SERVEUR.suivServeur.h);
 }
