@@ -27,8 +27,7 @@
 #define T_CHAINE(string)   strlen(string)*T_OCTET
 #define T_DONNEE(donnee)   T_CHAINE(donnee->cle) + T_CHAINE(donnee->valeur)
 
-
-#define DEBUG_MESSAGE_H
+//#define DEBUG_MESSAGE_H
 #undef  DEBUG_MESSAGE_H
 
 #ifdef DEBUG_MESSAGE_H
@@ -36,7 +35,6 @@
 #else
 #   define print_debug(chaine, args...)
 #endif
-
 
 
 //============================================================================
@@ -49,16 +47,17 @@ typedef enum  {
 } origine_t;
 
 typedef enum  {
-	PUT,
-	GET,
-        REMOVEKEY,
-	ACK,
-	IDENT,
-	WHOIS_NEXT_SERVER,
-	CONNECT,
-	DISCONNECT,
-	RECEIVE_DHT,
-	AUTH_SERVER,
+	PUT=0,
+	GET=1,
+        REMOVEKEY=2,
+	ACK=3,
+	IDENT=4,
+	WHOIS_NEXT_SERVER=5,
+	CONNECT=6,
+	DISCONNECT=7,
+	RECEIVE_DHT=8,
+	AUTH_SERVER=9,
+	DISCONNECT_SERVEUR=10,
 } requete_t;
 
 
@@ -107,7 +106,7 @@ static int recevoirUInt_32(uint32_t * I, socket_t from)
 		exit(-1);
 	}
 
-	if (recv(from, s_I, T_INT_32, 0) == -1) {
+	if (recv(from, s_I, T_INT_32,  MSG_WAITALL) == -1) {
 		perror("recv()");
 		exit(-1);
 	}
@@ -196,7 +195,7 @@ static int envoyerOctet(char O, socket_t to)
  */
 static int recevoirOctet(char *O, socket_t from)
 {
-	if (recv(from, O, T_OCTET, 0) == -1) {
+	if (recv(from, O, T_OCTET,  MSG_WAITALL) == -1) {
 		perror("recv()");
 		exit(-1);
 	}
@@ -242,7 +241,7 @@ static int recevoirChaine(char **chaine, socket_t from)
 		perror("calloc");
 		exit(-1);
 	}
-	if (recv(from, *chaine, taille_chaine, 0) == -1) {
+	if (recv(from, *chaine, taille_chaine,  MSG_WAITALL) == -1) {
 		perror("recv()");
 		exit(-1);
 	}

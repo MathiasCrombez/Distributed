@@ -41,12 +41,21 @@ int main(int argc, char *argv[])
         }
 
         while (nbClient < LENGTH_LISTEN_QUEUE) {
-                /* 
-                 * creation d'un thread à chaque fois que la demande de connexion 
-                 * d'un client est acceptée
-                 */
+                 
                 printf("serveur en ecoute\n");
+                
+                if(SERVER_IS_DYING_VAR==1){
+                        printf("jdcfrfr\n");
+                        //exit(0);
+                }
+                
+                
                 sockClient = accept(serveur_ptr->idSocket, (struct sockaddr *)&cli_addr,&cli_len);
+                if(sockClient==-1){
+                        perror("accept()");
+                        exit(-1);
+                }
+                        
                 recevoirOrigine(&from, sockClient);
 
                 switch (from) {
@@ -60,11 +69,9 @@ int main(int argc, char *argv[])
                         p->client.identifiant = cli_addr;
                         p->client.idSocket = sockClient;
                         nbClient++;
-
                         printf("le client vient de se connecter au serveur\n");
 
                         client_thread = p->client.thread;
-
                         p->suiv = serveur_ptr->tableauClient;
                         serveur_ptr->tableauClient = p;
 
@@ -74,7 +81,7 @@ int main(int argc, char *argv[])
                         }
                         printf("le client est validé : pthread crée\n");
                         break;
-
+                        
                 case FROM_SERVEUR:
 
                         printf("un serveur vient de se connecter au serveur\n");
@@ -91,10 +98,12 @@ int main(int argc, char *argv[])
                 default:
 
                         printf("type d'expediteur inconnu\n");
-
                 }
+                
+                
 
         }
+
 
         printf("votre serveur n'accepte pas plus de %d connexions à la fois\n",LENGTH_LISTEN_QUEUE);
 

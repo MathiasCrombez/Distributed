@@ -26,12 +26,12 @@
 /*
  * NB de Client accepté
  */
-#define LENGTH_LISTEN_QUEUE 10000
+#define LENGTH_LISTEN_QUEUE 100
 
 /*
  *permet de supprimer ou afficher les messages de debug
  */
-#define DEBUG_SERVEUR_IMPL
+//#define DEBUG_SERVEUR_IMPL
 
 /*
  * mettre son ip
@@ -42,8 +42,29 @@
 #define HASH_TABLE_SIZE (1<<4)
 
 //==============================================================================
+//				VARIABLES DE SYNCHRO
+//==============================================================================
+
+
+/*
+ * à 1 si le serveur a recu un odre de quitter la dht
+ */
+static  int SERVER_IS_DYING_VAR =0;
+static pthread_mutex_t SERVER_IS_DYING= PTHREAD_MUTEX_INITIALIZER;
+
+/*
+ * nb de requete en cours
+ */
+static int  NB_JOBS=0;
+static pthread_mutex_t MUTEX_NB_JOBS = PTHREAD_MUTEX_INITIALIZER;
+static pthread_cond_t COND_NB_JOBS  = PTHREAD_COND_INITIALIZER;
+
+static pthread_cond_t condition_cond = PTHREAD_COND_INITIALIZER;
+static pthread_mutex_t condition_mutex = PTHREAD_MUTEX_INITIALIZER;
+
+//==============================================================================
 //				TYPES
-//=============================================================================
+//==============================================================================
 
 
 /*

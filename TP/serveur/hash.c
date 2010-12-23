@@ -8,13 +8,11 @@ inline uint64_t hash(cle_t K)
 {
 	uint64_t hash = 5381;
 	assert(K != NULL);
-        printf("cle: %s ",K);
 	while (*K != '\0') {
 		int c = *K;
 		hash = ((hash << 5) + hash) + c;
 		K++;
 	}
-	printf("h: %d\n",hash%MAX_TAILLE_HASH_TABLE);
 	return hash %MAX_TAILLE_HASH_TABLE;
 }
 
@@ -164,20 +162,33 @@ table_de_hachage_t TEST_HASH_TABLE()
 
 
 
-void reallocHashTable(table_de_hachage_t* hashTab,uint32_t new_size)
+void reallocHashTable(table_de_hachage_t* hashTab,uint32_t new_size, uint64_t h)
 {
         assert(hashTab!=NULL);
-        assert(new_size<hashTab->taille);
         liste_t* new_hash_tab;
         
-        
-        new_hash_tab= (liste_t*)realloc(hashTab->table_de_hachage,new_size*sizeof(liste_t));
-        if(new_hash_tab==NULL){
-        
-                perror("realloc()");
-                exit(-1);
+        if(new_size<=hashTab->taille){
+                printf("jkjk\n");
+                new_hash_tab= (liste_t*)realloc(hashTab->table_de_hachage,new_size*sizeof(liste_t));
+                if(new_hash_tab==NULL){
+                
+                        perror("realloc()");
+                        exit(-1);
+                }
+                
+               
         }
-        
+        else {
+                new_hash_tab = (liste_t* )calloc(new_size, sizeof(liste_t));
+                if(new_hash_tab==NULL){
+                
+                        perror("realloc()");
+                        exit(-1);
+                }
+                memcpy(new_hash_tab,hashTab->table_de_hachage+h%hashTab->taille,sizeof(liste_t)*hashTab->taille);
+                free(hashTab->table_de_hachage);
+                
+        }
         hashTab->table_de_hachage= new_hash_tab;
         hashTab->taille = new_size;
 }

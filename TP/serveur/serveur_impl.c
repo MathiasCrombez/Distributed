@@ -62,10 +62,15 @@ void *talk_to_client(void *idSocket)
     uint64_t h;
     while(1) {
         
+        pthread_mutex_lock(&MUTEX_NB_JOBS);
+        NB_JOBS++;
+        pthread_mutex_unlock(&MUTEX_NB_JOBS);
+        
         recevoirTypeMessage(&type_requete, sockClient);
         switch (type_requete) {
             
         case PUT:
+             pthread_cond_signal(&condition_cond);
             recevoirCle(&K,sockClient);
 
             h = hash(K) % MAX_TAILLE_HASH_TABLE;
@@ -78,9 +83,12 @@ void *talk_to_client(void *idSocket)
                 recevoirDonnee(&D,sockClient);
                 putHashTable(D,SERVEUR.tabl);
             }
+            //pour les testes
+            printf("put terminé\n");
             break;
 
         case GET:
+                 pthread_cond_signal(&condition_cond);
             recevoirCle(&K,sockClient);
 
             h = hash(K) % MAX_TAILLE_HASH_TABLE;
@@ -101,6 +109,7 @@ void *talk_to_client(void *idSocket)
             break;
 
         case REMOVEKEY:
+                 pthread_cond_signal(&condition_cond);
             recevoirCle(&K,sockClient);
 
             h = hash(K) % MAX_TAILLE_HASH_TABLE;
@@ -125,39 +134,80 @@ void *talk_to_client(void *idSocket)
             break;
 
         case CONNECT:
+                 pthread_cond_signal(&condition_cond);
             //envoyerOctet(1,sockClient);
             break;
             
+            
+        case DISCONNECT_SERVEUR :
+                
+                /*pthread_cond_signal(&condition_cond);!!!*/
+                printf("DISCONNECT_SERVEUR\n");
+                
+                pthread_mutex_lock(&SERVER_IS_DYING);
+                if(SERVER_IS_DYING_VAR==0){
+                        SERVER_IS_DYING_VAR=1;
+                        //envoyer octet 1;
+                }
+                else{
+                        printf("serveur is already dead");
+                        //envoyerOctet 0
+                }
+                pthread_mutex_unlock(&SERVER_IS_DYING);
+                
+                if(NB_JOBS!=1){
+                        printf("en attente que les requetes soient satisfaites\n");
+                        pthread_cond_wait(&COND_NB_JOBS,&MUTEX_NB_JOBS);
+                }
+                printf("le serveur est libre\n");
+                message_quit();        
+                       
+                 
+                break;
+                
+                
         case DISCONNECT:
-            curr = SERVEUR.tableauClient;
-            prev = SERVEUR.tableauClient;
-            if (curr->client.idSocket == sockClient) {
-                SERVEUR.tableauClient = curr->suiv;
-                free(curr);
-            }
-            else {
-                while(curr->client.idSocket != sockClient && curr) {
-                    prev = curr;
-                    curr = curr->suiv;                    
-                }
-                if (curr) {
-                    prev->suiv = curr->suiv;
-                    free(curr);
-                }
-                else {
-                    printf("talk_to_client:DISCONNECT:client de socket %d inconnu.\n"
-                           , sockClient);
-                    close(sockClient);
-                    pthread_exit(NULL);
-                }
-            }
-            close(sockClient);
+                pthread_cond_signal(&condition_cond);
+                printf("disconnect\n");
+/*            curr = SERVEUR.tableauClient;*/
+/*            prev = SERVEUR.tableauClient;*/
+/*            if (curr->client.idSocket == sockClient) {*/
+/*                SERVEUR.tableauClient = curr->suiv;*/
+/*                free(curr);*/
+/*            }*/
+/*            else {*/
+/*                while(curr->client.idSocket != sockClient && curr) {*/
+/*                    prev = curr;*/
+/*                    curr = curr->suiv;                    */
+/*                }*/
+/*                if (curr) {*/
+/*                    prev->suiv = curr->suiv;*/
+/*                    free(curr);*/
+/*                }*/
+/*                else {*/
+/*                    printf("talk_to_client:DISCONNECT:client de socket %d inconnu.\n"*/
+/*                           , sockClient);*/
+/*                    close(sockClient);*/
+/*                    pthread_exit(NULL);*/
+/*                }*/
+/*            }*/
+            shutdown(sockClient,SHUT_RDWR);
             pthread_exit(NULL);
             break;
+            
+       
         default:
             break;
 
         }
+        
+        pthread_mutex_lock(&MUTEX_NB_JOBS);
+        NB_JOBS--;
+        if(NB_JOBS==0){
+                pthread_cond_signal(&COND_NB_JOBS);
+        }
+        pthread_mutex_unlock(&MUTEX_NB_JOBS);
+       
     }
 }
 /**
@@ -170,10 +220,13 @@ void *talk_to_server(void *idSocket)
         socket_t sockServer = *(socket_t*)idSocket;
         requete_t type_requete;
         idConnexion_t id_connexion;
+         uint64_t h;
 #ifdef DEBUG_SERVEUR_IMPL
         printf("########debut du thread#########\n");
 #endif
-        
+         pthread_mutex_lock(&MUTEX_NB_JOBS);
+        NB_JOBS++;
+        pthread_mutex_unlock(&MUTEX_NB_JOBS);
         recevoirTypeMessage(&type_requete, sockServer);
         switch (type_requete) {
         
@@ -181,7 +234,6 @@ void *talk_to_server(void *idSocket)
         case CONNECT:
                 
                 printf("SERVER CONNECT\n");
-                id_connexion = get_my_idConnexion();
                 envoyerIdent(SERVEUR.suivServeur, sockServer);
                 recevoirIdent(&SERVEUR.suivServeur,sockServer);
 
@@ -218,7 +270,7 @@ void *talk_to_server(void *idSocket)
                 liste_t L;
                 uint64_t i;
                 donnee_t D;
-                uint64_t h;
+               
                 recevoirHash(&h,sockServer);                  
                 
                 for(i=h-SERVEUR.h;i<my_hashtab.taille;i++){
@@ -235,11 +287,11 @@ void *talk_to_server(void *idSocket)
                 }
                 //fin d'envoi
                 envoyerOctet(0,sockServer);
-                     
-                reallocHashTable(&SERVEUR.tabl,SERVEUR.tabl.taille/2);
+                reallocHashTable(&SERVEUR.tabl,SERVEUR.tabl.taille/2,SERVEUR.h);
                 SERVEUR.suivServeur.h=h;
-        #ifdef DEBUG_SERVEUR_IMPL
+                SERVEUR.suivServeur.taille_hashtab = SERVEUR.tabl.taille;
                 afficherInfoHashTable();
+        #ifdef DEBUG_SERVEUR_IMPL
                 afficherHashTable(SERVEUR.tabl);
         #endif
                 break;
@@ -250,6 +302,51 @@ void *talk_to_server(void *idSocket)
 /*                recevoirChaine(&(SERVEUR.precServeur->name), sockServer);*/
 /*                printf("c'est fait!\n");*/
 /*                return NULL;*/
+
+        case DISCONNECT_SERVEUR:
+        
+                printf("DISCONNECT_SERVEUR\n");
+                uint32_t taille_hashtab;
+                char reponse;
+                uint32_t new_size;
+                
+                recevoirUInt_32(&taille_hashtab,sockServer);
+                recevoirUInt_64(&h,sockServer);
+                if(taille_hashtab<SERVEUR.tabl.taille){
+                        new_size = SERVEUR.tabl.taille;
+                }
+                else if(taille_hashtab>SERVEUR.tabl.taille) {
+                
+                        new_size = taille_hashtab;
+                }
+                else {
+                
+                        new_size = 2*taille_hashtab;
+                }
+                
+                assert(taille_hashtab <= MAX_TAILLE_HASH_TABLE);
+        
+        
+                
+                recevoirOctet(&reponse,sockServer);
+                reallocHashTable(&SERVEUR.tabl,new_size,SERVEUR.h);
+                   
+                while(reponse){
+        
+                        recevoirDonnee(&D,sockServer);
+                        putHashTable(D,SERVEUR.tabl);
+                        recevoirOctet(&reponse,sockServer);
+                }
+                
+                //changer mon hash prendre le mininmin
+                SERVEUR.h = (h<SERVEUR.h)? h :SERVEUR.h ;
+                
+                
+                
+             
+       
+        
+           
         default:
                 printf("message incinnu");
                 break;
@@ -257,6 +354,13 @@ void *talk_to_server(void *idSocket)
         }
         
         /* fermeture de la communication et mort ddu thread*/
+        
+        pthread_mutex_lock(&MUTEX_NB_JOBS);
+        NB_JOBS--;
+        if(NB_JOBS==0){
+                pthread_cond_signal(&COND_NB_JOBS);
+        }
+        pthread_mutex_unlock(&MUTEX_NB_JOBS);
         
         printf("########fin du thread#########\n");
         shutdown(sockServer, SHUT_RDWR);

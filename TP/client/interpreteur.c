@@ -8,7 +8,7 @@
 #define PROMPT ">"
 
 /* a modifier lors d'un ajout de commande */
-#define NB_CMD 7
+#define NB_CMD 8
 static char *commands[NB_CMD] = { 
     "help", 
     "connect", 
@@ -16,7 +16,9 @@ static char *commands[NB_CMD] = {
     "put", 
     "get", 
     "removekey",
-    "exit" 
+    "quit" ,
+    "exit",
+    
 };
 
 
@@ -27,9 +29,11 @@ typedef enum {
     _PUT, 
     _GET, 
     _REMOVEKEY, 
+    _QUIT, 
     _EXIT, 
     _ERROR,
-    _VIDE 
+    _VIDE,
+    
 }COMMAND;
 
 
@@ -42,9 +46,11 @@ void help()
 {
     printf("Commandes disponibles :\n");
     printf("\thelp:affiche l'aide\n");
-    printf("\tput:");
-    printf("\tget:");
-    printf("\tremovekey:");
+    printf("\tput:\n");
+    printf("\tget:\n");
+    printf("\tremovekey:\n");
+    printf("\tconnect [ip du serveur] [port]\n");
+    printf("\tquit \n");
 }
 
 
@@ -117,7 +123,7 @@ COMMAND read_command(char*** args)
     }
     free(ligne);
 	
-    printf("command %s\n",*args [0]);
+   // printf("command %s\n",*args [0]);
 	
     return get_command(*args [0]);
 }
@@ -234,8 +240,13 @@ void interpreteur()
 
             printf("Commande incorrecte\n");
             break;
+            
+        case _QUIT:
+                printf("fermeture du serveur\n");
+                message_quit(sockServer);
+                break;
         default:
-            printf("Cas Impossible\n");
+         //   printf("Cas Impossible\n");
             break;
         }
 

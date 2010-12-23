@@ -35,6 +35,7 @@ inline struct sockaddr_in ___get_sockaddr_in___(char *ip, uint32_t port)
 socket_t message_connect(char* ip, uint32_t port)
 {
 
+        printf("connect to %s %d\n",ip,port);
         struct sockaddr_in server_info;
         char ack;
         socket_t sockServer;
@@ -60,7 +61,7 @@ void message_put(donnee_t D, socket_t from)
         envoyerTypeMessage(PUT, from);
         envoyerCle(D->cle, from);
         recevoirOctet(&ack, from);
-
+        printf("couocu\n");
         if (ack == 0) {
         #ifdef DEBUG_MESSAGE_CLIENT
                 printf("message_put:serveur suivant\n");
@@ -70,8 +71,14 @@ void message_put(donnee_t D, socket_t from)
                  */
                 recevoirIdent(&ident, from);
                 message_disconnect(from);
+/*                shutdown(from, 2);*/
+                printf("couocu\n");
                 new_from =___connect2server___(ident.identifiant);
+                printf("couocu\n");
+                envoyerOrigine(FROM_CLIENT,new_from);
+                printf("couocu\n");
                 message_put(D, new_from);
+                printf("couocu\n");
         } else if (ack == 1) {
                 envoyerDonnee(D, from);
         #ifdef DEBUG_MESSAGE_CLIENT
@@ -102,8 +109,8 @@ donnee_t message_get(cle_t K, socket_t from)
                  */
                 recevoirIdent(&ident, from);
                 message_disconnect(from);
-                shutdown(from, 2);
                 new_from = ___connect2server___(ident.identifiant);
+                envoyerOrigine(FROM_CLIENT,new_from);
                 return message_get(K, new_from);
         } else if (ack == 1) {
                 recevoirOctet(&ack2, from);
@@ -143,8 +150,8 @@ valeur_t message_remove(cle_t K, socket_t from)
                  */
                 recevoirIdent(&ident, from);
                 message_disconnect(from);
-                shutdown(from, 2);
                 new_from = ___connect2server___(ident.identifiant);
+                envoyerOrigine(FROM_CLIENT,new_from);
                 return message_remove(K, new_from);
         } else if (ack == 1) {
                 recevoirOctet(&ack2, from);
@@ -160,6 +167,8 @@ valeur_t message_remove(cle_t K, socket_t from)
         }
 }
 
+
+
 void message_disconnect(socket_t from)
 {
         envoyerTypeMessage(DISCONNECT, from);
@@ -169,3 +178,11 @@ void message_disconnect(socket_t from)
 #endif
 }
 
+
+
+
+void message_quit(socket_t from)
+{
+        envoyerTypeMessage(DISCONNECT_SERVEUR,from);
+       
+}

@@ -25,7 +25,7 @@ client_t *creerClient(const char *nom)
 socket_t ___connect2server___(struct sockaddr_in server_info)
 {
         socket_t idSocket;
-
+        
         idSocket = socket(AF_INET, SOCK_STREAM, 0);
         if (idSocket < 0) {
                 perror("socket()");
@@ -33,11 +33,14 @@ socket_t ___connect2server___(struct sockaddr_in server_info)
         }
 
         if (connect(idSocket, (struct sockaddr *)&server_info,sizeof(struct sockaddr_in)) == -1) {
-                printf("connect2server:Echec de la connexion\n");
-                // TODO répétition en cas d'echec : wait & while
+                perror("connect2server:Echec de la connexion\n");
                 exit(-1);
         }
         CLIENT.idSocket = idSocket;
+        
+        printf("\tAdresse Ip: %s\n", inet_ntoa(server_info.sin_addr));
+	printf("\tPort conne: %d\n", ntohs(server_info.sin_port));
+	
         return idSocket;
 }
 
