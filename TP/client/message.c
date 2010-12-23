@@ -122,7 +122,6 @@ valeur_t message_remove(cle_t K, socket_t from)
     idConnexion_t ident;
     socket_t new_from;
 
-    //    envoyerOrigine(FROM_CLIENT,from);
     envoyerTypeMessage(REMOVEKEY, from);
     envoyerCle(K, from);
     //        recevoirOctet(&ack, from);

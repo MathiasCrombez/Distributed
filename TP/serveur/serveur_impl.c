@@ -78,16 +78,19 @@ void *talk_to_client(void *idSocket)
     tabClient_t curr, prev;
     uint64_t h;
     while(1) {        
-        //        printf("%d:thread %u\n",sockClient,(unsigned int)pthread_self());
         recevoirTypeMessage(&type_requete, sockClient);      
-        //        printf("%d:thread %u => reception\n",sockClient,(unsigned int)pthread_self());
+#ifdef DEBUG_SERVEUR_IMPL
         printf("%d:reçu %d\n", sockClient, type_requete);
+#endif
         switch (type_requete) {            
         case PUT:
             recevoirCle(&K,sockClient);
 
             h = hash(K) % MAX_TAILLE_HASH_TABLE;
+#ifdef DEBUG_SERVEUR_IMPL
             printf("talk_to_client:PUT:cle(%s), hash(%llu)\n",K, h);
+#endif
+
             if ( ! (SERVEUR.h <= h && h <= (SERVEUR.h + SERVEUR.tabl.taille))){
                 envoyerOctet(0,sockClient);
                 envoyerIdent(SERVEUR.suivServeur, sockClient);
@@ -102,7 +105,9 @@ void *talk_to_client(void *idSocket)
             recevoirCle(&K,sockClient);
 
             h = hash(K) % MAX_TAILLE_HASH_TABLE;
+#ifdef DEBUG_SERVEUR_IMPL
             printf("talk_to_client:GET:cle(%s), hash(%llu)\n",K, h);
+#endif
             if ( ! (SERVEUR.h <= h && h <= (SERVEUR.h + SERVEUR.tabl.taille))){
                 envoyerOctet(0,sockClient);
                 envoyerIdent(SERVEUR.suivServeur, sockClient);
@@ -122,7 +127,9 @@ void *talk_to_client(void *idSocket)
             recevoirCle(&K,sockClient);
 
             h = hash(K) % MAX_TAILLE_HASH_TABLE;
+#ifdef DEBUG_SERVEUR_IMPL
             printf("talk_to_client:cle(%s), hash(%llu)\n",K, h);
+#endif
             if ( ! (SERVEUR.h <= h && h <= (SERVEUR.h + SERVEUR.tabl.taille))){
                 envoyerOctet(0,sockClient);
                 envoyerIdent(SERVEUR.suivServeur, sockClient);
@@ -172,7 +179,6 @@ void *talk_to_client(void *idSocket)
                 }
             }
             envoyerOctet(1, sockClient);
-            printf("%d:Fermeture du pthread %u\n",sockClient,(unsigned int)pthread_self());
             if (shutdown(sockClient, 2) != 0) {
                 printf("Echec shutdown socket \n");
                 exit(1);
