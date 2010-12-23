@@ -121,18 +121,18 @@ donnee_t message_get(cle_t K, socket_t from)
 
 valeur_t message_remove(cle_t K, socket_t from)
 {
-	donnee_t D;
-	char ack, ack2;
-	valeur_t V;
-	idConnexion_t ident;
-	socket_t new_from;
 
-	//    envoyerOrigine(FROM_CLIENT,from);
-	envoyerTypeMessage(REMOVEKEY, from);
-	envoyerCle(K, from);
-	//        recevoirOctet(&ack, from);
+    donnee_t D;
+    char ack, ack2;
+    valeur_t V;
+    idConnexion_t ident;
+    socket_t new_from;
 
-	if (ack == 0) {
+    envoyerTypeMessage(REMOVEKEY, from);
+    envoyerCle(K, from);
+    //        recevoirOctet(&ack, from);
+
+    if (ack == 0) {
 #ifdef DEBUG_MESSAGE_CLIENT
 		printf("message_remove:serveur suivant\n");
 #endif

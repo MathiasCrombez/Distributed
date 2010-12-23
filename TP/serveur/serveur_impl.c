@@ -86,15 +86,22 @@ void *talk_to_client(void *idSocket)
         pthread_mutex_unlock(&MUTEX_NB_JOBS);
         
         recevoirTypeMessage(&type_requete, sockClient);
+        #ifdef DEBUG_SERVEUR_IMPL
+        printf("%d:reçu %d\n", sockClient, type_requete);
+#endif
         switch (type_requete) {
             
+
 
         case PUT:
              pthread_cond_signal(&condition_cond);
             recevoirCle(&K,sockClient);
 
             h = hash(K) % MAX_TAILLE_HASH_TABLE;
+#ifdef DEBUG_SERVEUR_IMPL
             printf("talk_to_client:PUT:cle(%s), hash(%llu)\n",K, h);
+#endif
+
             if ( ! (SERVEUR.h <= h && h <= (SERVEUR.h + SERVEUR.tabl.taille))){
                 envoyerOctet(0,sockClient);
                 envoyerIdent(SERVEUR.suivServeur, sockClient);
@@ -112,7 +119,9 @@ void *talk_to_client(void *idSocket)
             recevoirCle(&K,sockClient);
 
             h = hash(K) % MAX_TAILLE_HASH_TABLE;
+#ifdef DEBUG_SERVEUR_IMPL
             printf("talk_to_client:GET:cle(%s), hash(%llu)\n",K, h);
+#endif
             if ( ! (SERVEUR.h <= h && h <= (SERVEUR.h + SERVEUR.tabl.taille))){
                 envoyerOctet(0,sockClient);
                 envoyerIdent(SERVEUR.suivServeur, sockClient);
@@ -133,7 +142,9 @@ void *talk_to_client(void *idSocket)
             recevoirCle(&K,sockClient);
 
             h = hash(K) % MAX_TAILLE_HASH_TABLE;
+#ifdef DEBUG_SERVEUR_IMPL
             printf("talk_to_client:cle(%s), hash(%llu)\n",K, h);
+#endif
             if ( ! (SERVEUR.h <= h && h <= (SERVEUR.h + SERVEUR.tabl.taille))){
                 envoyerOctet(0,sockClient);
                 envoyerIdent(SERVEUR.suivServeur, sockClient);
@@ -213,6 +224,7 @@ void *talk_to_client(void *idSocket)
 /*                }*/
 /*            }*/
             shutdown(sockClient,SHUT_RDWR);
+
             pthread_exit(NULL);
 
             break;
