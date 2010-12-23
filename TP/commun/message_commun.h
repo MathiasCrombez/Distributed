@@ -136,12 +136,12 @@ static int envoyerUInt_32(uint32_t I, socket_t to)
 
     char *s_I;
     char ack;
-    recevoirSynchro(to);    
     if ( ( s_I = calloc(T_INT_32,T_OCTET) ) == NULL) {
         perror("envoyerUInt_32:calloc()");
         exit(-1);
     }
     sprintf(s_I, "%u", I);
+    recevoirSynchro(to);    
     if (send(to, s_I, T_INT_32, 0) == -1) {
         perror("envoyerUInt_32:send()");
         exit(-1);
@@ -161,12 +161,11 @@ static int recevoirUInt_32(uint32_t * I, socket_t from)
 {
 
     char *s_I;
-    envoyerSynchro(from);
     if ( ( s_I = calloc(T_INT_32,T_OCTET) ) == NULL) {
         perror("recevoirUInt_32:calloc()");
         exit(-1);
     }
-    
+    envoyerSynchro(from);
     if (recv(from, s_I, T_INT_32, 0) == -1) {
         perror("recevoirUInt_32:recv()");
         exit(-1);
@@ -187,7 +186,6 @@ static int envoyerUInt_64(uint64_t I, socket_t to)
 
     char *s_I;
     char ack;
-    recevoirSynchro(to);
     if ( ( s_I = calloc(T_INT_64,T_OCTET) ) == NULL) {
         perror("envoyerUInt_64:calloc()");
         exit(-1);
@@ -198,6 +196,7 @@ static int envoyerUInt_64(uint64_t I, socket_t to)
 #else
     sprintf(s_I, "%llu", I);
 #endif
+    recevoirSynchro(to);
     if (send(to, s_I, T_INT_64, 0) == -1) {
         perror("envoyerUInt_64:send()");
         exit(-1);
@@ -218,11 +217,11 @@ static int envoyerUInt_64(uint64_t I, socket_t to)
 static int recevoirUInt_64(uint64_t * I, socket_t from)
 {
     char *s_I;
-    envoyerSynchro(from);
     if ( ( s_I = calloc(T_INT_64,T_OCTET) ) == NULL) {
         perror("recevoirUInt_64:calloc()");
         exit(-1);
     }
+    envoyerSynchro(from);
     if (recv(from, s_I, T_INT_64, 0) == -1) {
         perror("recevoirUInt_64:recv()");
         exit(-1);
@@ -248,13 +247,13 @@ static int envoyerChaine(char *chaine, socket_t to)
 {
     char ack;
     uint32_t taille_chaine;
-    recevoirSynchro(to);
     taille_chaine = T_CHAINE(chaine);
     print_debug("\t:");
     if (!envoyerUInt_32(taille_chaine, to)) {
         exit(-1);
     }
     print_debug("\t:");
+    recevoirSynchro(to);
     if (send(to, chaine, taille_chaine, 0) == -1) {
         perror("envoyerChaine:send()");
         exit(-1);
@@ -271,7 +270,6 @@ static int recevoirChaine(char **chaine, socket_t from)
 {
 
     uint32_t taille_chaine;
-    envoyerSynchro(from);
     print_debug("\t:");
     if (!recevoirUInt_32(&taille_chaine, from)) {
         exit(-1);
@@ -282,6 +280,7 @@ static int recevoirChaine(char **chaine, socket_t from)
         perror("calloc");
         exit(-1);
     }
+    envoyerSynchro(from);
     if (recv(from, *chaine, taille_chaine, 0) == -1) {
         perror("recevoirChaine:recv()");
         exit(-1);

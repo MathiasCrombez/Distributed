@@ -35,7 +35,7 @@ socket_t message_connect(char* ip, uint32_t port) {
     envoyerTypeMessage(CONNECT,sockServer);
     //    recevoirOctet(&ack,sockServer);
 #ifdef DEBUG_MESSAGE_CLIENT
-    printf("message_connexion:connexion\n");
+    printf("message_connexion:connexion:%d\n",sockServer);
 #endif
     return sockServer;
 }
@@ -156,12 +156,13 @@ valeur_t message_remove(cle_t K, socket_t from)
 void message_disconnect(socket_t from)
 {
     char ack;
+    int debug = (int)from;
     envoyerTypeMessage(DISCONNECT, from);
     recevoirOctet(&ack, from);
-            shutdown(from, 2);
+    shutdown(from, 2);
     close(from);
 #ifdef DEBUG_MESSAGE_CLIENT
-    printf("message_disconnect:deconnexion\n");
+    printf("message_disconnect:deconnexion:%d\n",debug);
 #endif
 }
 

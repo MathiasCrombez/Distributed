@@ -49,7 +49,6 @@ serveur_t* creerServeur(char *nomDuServeur, uint64_t port)
     }
     return &SERVEUR;
 }
-
 pthread_t preconnect_serv2cli(struct sockaddr_in cli_addr, socket_t sockClient
                               , serveur_t **serveur_ptr) {
     pthread_t client_thread;
@@ -63,7 +62,6 @@ pthread_t preconnect_serv2cli(struct sockaddr_in cli_addr, socket_t sockClient
 
     p->suiv = (*serveur_ptr)->tableauClient;
     (*serveur_ptr)->tableauClient = p;
-
     return client_thread;
 
 }
@@ -80,8 +78,10 @@ void *talk_to_client(void *idSocket)
     tabClient_t curr, prev;
     uint64_t h;
     while(1) {        
-        recevoirTypeMessage(&type_requete, sockClient);
-        printf("reçu %d de %d\n", type_requete, sockClient);
+        printf("%d:thread %u\n",sockClient,(unsigned int)pthread_self());
+        recevoirTypeMessage(&type_requete, sockClient);      
+        printf("%d:thread %u => reception\n",sockClient,(unsigned int)pthread_self());
+        printf("%d:reçu %d\n", sockClient, type_requete);
         switch (type_requete) {            
         case PUT:
             recevoirCle(&K,sockClient);
@@ -167,14 +167,22 @@ void *talk_to_client(void *idSocket)
                            , sockClient);
                     shutdown(sockClient, 2);
                     pthread_exit(NULL);
-                    exit(1);            
+
                     break;
                 }
             }
             envoyerOctet(1, sockClient);
-            shutdown(sockClient, 2);
-            close(sockClient);
+            printf("%d:Fermeture du pthread %u\n",sockClient,(unsigned int)pthread_self());
+            if (shutdown(sockClient, 2) != 0) {
+                printf("Echec shutdown socket \n");
+                exit(1);
+            }
+            if (close(sockClient) != 0) {
+                printf("Echec close socket \n");
+                exit(1);
+            }
             pthread_exit(NULL);
+
             break;
         case QUIT:
             // TODO

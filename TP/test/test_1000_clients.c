@@ -14,7 +14,6 @@ void * routine_t() {
 int main(int argc, char *argv[]) {
     int i;
     int num = atoi(argv[1]);
-    printf("%d\n ",num);
     for(i = 0; i < num; i++) {
         pthread_t client_thread;
         if (pthread_create(&client_thread, NULL, routine_t , NULL) != 0) {

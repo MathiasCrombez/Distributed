@@ -30,14 +30,12 @@ socket_t ___connect2server___(struct sockaddr_in server_info)
                 perror("socket()");
                 exit(-1);
         }
-        //        printf("sockect:::%d\n",idSocket);
         if (connect(idSocket, (struct sockaddr *)&server_info,sizeof(struct sockaddr_in)) == -1) {
                 printf("connect2server:Echec de la connexion\n");
                 // TODO répétition en cas d'echec : wait & while
                 exit(-1);
         }
         CLIENT.idSocket = idSocket;
-        printf("socket : %d\n", CLIENT.idSocket);
         return idSocket;
 }
 
