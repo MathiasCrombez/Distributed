@@ -3,7 +3,7 @@ all:serveur test_hash
 
 OBJECTS = serveur.o serveur_impl.o hash.o message.o
 CFLAGS = -p -g
-IFLAGS = -I ../commun/
+IFLAGS = 
 
 #####serveur#####
 serveur : $(OBJECTS)
@@ -20,7 +20,7 @@ message.o : message.c
 test_hash:test_hash.o hash.o
 	gcc  -g -o test_hash test_hash.o hash.o
 test_hash.o:test_hash.c
-	gcc -g -c test_hash.c -I ../commun
+	gcc -g -c test_hash.c $(IFLAGS)
 
 
 
