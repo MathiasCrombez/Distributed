@@ -38,7 +38,7 @@ socket_t ___connect2server___(struct sockaddr_in server_info)
         CLIENT.idSocket = idSocket;
         
         printf("\tAdresse Ip: %s\n", inet_ntoa(server_info.sin_addr));
-	printf("\tPort conne: %d\n", ntohs(server_info.sin_port));
+	printf("\tPort connecte: %d\n", ntohs(server_info.sin_port));
 	
         return idSocket;
 }

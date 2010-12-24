@@ -157,51 +157,55 @@ inline int ___message_connect_to___(struct sockaddr_in server_info)
 inline int ___message_receive_DHT_from___(idConnexion_t from_server, uint64_t h)
 {
 
-	table_de_hachage_t hashTab;
-	uint32_t taille;
-	char reponse;
-	socket_t sock_server;
-	liste_t L;
-	donnee_t D;
-	serveur_t *my_server_ptr = get_my_server();
-	/*
-	 * connexion au serveur
-	 */
-	sock_server = ___connect2server___(from_server.identifiant);
-	envoyerOrigine(FROM_SERVEUR, sock_server);
-	envoyerTypeMessage(RECEIVE_DHT, sock_server);
-	/*
-	 * Construction de la nouvelle table de hachage
-	 */
-	printf("connexion et reception de la table\n");
-	taille = from_server.taille_hashtab / 2;
-	assert(taille > 0);
+        table_de_hachage_t hashTab;
+        uint32_t taille;
+        char reponse;
+        socket_t sock_server;
+        liste_t L;
+        donnee_t D;
+        serveur_t* my_server_ptr = get_my_server();
+        int i;
+        /*
+         * connexion au serveur
+         */
+        sock_server=___connect2server___(from_server.identifiant);
+        envoyerOrigine(FROM_SERVEUR,sock_server);
+        envoyerTypeMessage(RECEIVE_DHT,sock_server);
+        /*
+         * Construction de la nouvelle table de hachage
+         */
+        printf("connexion et reception de la table\n");
+        taille = from_server.taille_hashtab/2;
+        assert(taille>0);
+        
+        hashTab = creerHashTable(taille);
+        
+        envoyerHash(h,sock_server);
+        
+        my_server_ptr->mutexTab = malloc(taille * sizeof(pthread_mutex_t));
+        for(i = 0; i< taille; i++) {
+                pthread_mutex_init(&(my_server_ptr->mutexTab[i]), NULL);
+        }
+        
+        
+        recevoirOctet(&reponse,sock_server);
+        
+        while(reponse){
+        
+                recevoirDonnee(&D,sock_server);
+                putHashTable(D,hashTab);
+                recevoirOctet(&reponse,sock_server);
+        }
+        
+        my_server_ptr->h=h;
+        libererHashTable(my_server_ptr->tabl);
+        my_server_ptr->tabl= hashTab;
 
-	hashTab = creerHashTable(taille);
-
-	envoyerHash(h, sock_server);
-
-	int i = 0;
-
-	recevoirOctet(&reponse, sock_server);
-
-	while (reponse) {
-
-		recevoirDonnee(&D, sock_server);
-		putHashTable(D, hashTab);
-		recevoirOctet(&reponse, sock_server);
-	}
-
-	my_server_ptr->h = h;
-	libererHashTable(my_server_ptr->tabl);
-	my_server_ptr->tabl = hashTab;
-
-	afficherInfoHashTable();
-	if (close(sock_server) < 0) {
-		printf
-		    ("___message_connect_to__:Echec de la premiere deconnexion du serveur\n");
-		exit(-1);
-	}
+        afficherInfoHashTable();
+        if (close(sock_server)<0) {
+        	printf("___message_connect_to__:Echec de la premiere deconnexion du serveur\n");
+         	exit(-1);
+        }
 }
 
 int ____message_transfer_DHT_to_next_server____()
@@ -349,6 +353,7 @@ int message_quit()
 		exit(0);	//TODO TUE LE TABLEAU
 	}
 	return 1;
+
 }
 
 

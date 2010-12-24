@@ -13,8 +13,8 @@
 /*
  *permet de supprimer ou afficher les messages de debug
  */
-#define DEBUG_CLIENT_IMPL
-//#undef DEBUG_CLIENT_IMPL
+//#define DEBUG_CLIENT_IMPL
+#undef DEBUG_CLIENT_IMPL
 
 
 

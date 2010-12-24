@@ -1,6 +1,10 @@
 #ifndef MESSAGE_H
 #define MESSAGE_H
-
+/**
+ * Ces fonctions sont les messages que le client envoit
+ *
+ *
+ */
 
 #include "message_commun.h"
 

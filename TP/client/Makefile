@@ -3,7 +3,7 @@ OBJECTS = client_impl.o message.o interpreteur.o client.o
 #OBJECTS = client_impl.o message.o client.o
 CFLAGS =  -p -g
 
-IFLAGS = -I ../commun/
+IFLAGS = 
 
 
 client : $(OBJECTS)

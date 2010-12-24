@@ -12,7 +12,7 @@ int main(int argc, char *argv[]) {
     pthread_t client_thread;
         socket_t  sockClient;
     //creation d'un serveur
-    serveur_ptr = creerServeur("localhost", 4242);
+    serveur_ptr = creerServeur("127.0.0.1", 4242);
     printf("Serveur opérationnel\n");
     while (nbClient < 100) {
         /* 
@@ -26,8 +26,8 @@ int main(int argc, char *argv[]) {
              < 0) {
             perror("accept()");
         }
-        printf("Un client se connecte avec la socket %d de %s:%d\n"
-               , sockClient, inet_ntoa(cli_addr.sin_addr), htons(cli_addr.sin_port));
+        /* printf("Un client se connecte avec la socket %d de %s:%d\n" */
+        /*        , sockClient, inet_ntoa(cli_addr.sin_addr), htons(cli_addr.sin_port)); */
         recevoirOrigine(&from, sockClient);
         switch (from) {
         case FROM_CLIENT:
@@ -40,7 +40,6 @@ int main(int argc, char *argv[]) {
                                (void *)sockClient) != 0) {
                 perror("KO \n");
             }
-            //            printf("Verif : socket %d, thread %u \n",*sockClient, (unsigned int)client_thread);
             break;               
         default:
             printf("type d'expediteur inconnu\n");

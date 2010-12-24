@@ -32,12 +32,7 @@
  *permet de supprimer ou afficher les messages de debug
  */
 //#define DEBUG_SERVEUR_IMPL
-
-/*
- * mettre son ip
- */
-#define SERVEURNAME "127.0.0.1"
-
+#undef DEBUG_SERVEUR_IMPL
 
 #define HASH_TABLE_SIZE (1<<4)
 
@@ -91,6 +86,7 @@ typedef struct serveur {
 
 	uint64_t h;
 	table_de_hachage_t tabl;
+        pthread_mutex_t * mutexTab;
 	
 	tabClient_t tableauClient;
 	struct sockaddr_in suivServeur;
@@ -114,7 +110,7 @@ static serveur_t SERVEUR;
 
 /** on creer un serveur.Il ne partage pas la DHT encor donc pas besoin de
  ** first_k, las_k et next en argument					**/
-serveur_t* creerServeur(char *nomDuServeur, uint64_t port);
+serveur_t* creerServeur(char *ipServeur, uint64_t port);
 
 pthread_t preconnect_serv2cli(struct sockaddr_in cli_addr, socket_t sockClient
                               , serveur_t **serveur_ptr);
