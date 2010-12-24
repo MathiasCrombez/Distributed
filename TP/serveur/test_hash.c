@@ -40,8 +40,12 @@ int main()
         afficherHashTable(table);
         
         
-	printf("\n********affichage du tableu realloué**********\n");
-	reallocHashTable(&table,5);
+	printf("\n********affichage du tableu realloué 1111**********\n");
+	reallocHashTable(&table,5,0);
+	afficherHashTable(table);
+	
+	printf("\n********affichage du tableu realloué 222**********\n");
+	reallocHashTable(&table,10,0);
 	afficherHashTable(table);
 }
 

@@ -7,6 +7,7 @@ int main(int argc, char *argv[]) {
     struct sockaddr_in cli_addr;
     socklen_t cli_len = sizeof(struct sockaddr_in);
  
+
     origine_t from;
     pthread_t client_thread;
         socket_t  sockClient;

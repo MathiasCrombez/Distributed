@@ -27,8 +27,6 @@ inline socket_t ___connect2server___(struct sockaddr_in server_info)
 
         if (connect(idSocket, (struct sockaddr *)&server_info,sizeof(struct sockaddr_in)) == -1) {
                 perror("connect()");
-                //TODO RESSAYER DE CE CONNECTER PLUS TARD .
-                //TODO NE PAS TERMINER PAR EXIT(-1) A LA PREMIERE TENTATIVE DE CONNEXION
                 exit(-1);
         }
         return idSocket;
@@ -62,10 +60,10 @@ inline struct sockaddr_in ___get_sockaddr_in___(char* ip , uint32_t port)
 /*
 * renvoi les infos de connexion du prochain serveur
 */
-inline idConnexion_t ___message_whois_next_server___(struct sockaddr_in serv_addr)
+inline struct sockaddr_in ___message_whois_next_server___(struct sockaddr_in serv_addr)
 {
  
- 	idConnexion_t next_server_info;
+ 	struct sockaddr_in next_server_info;
  	socket_t sock_next_server;
  	
  	sock_next_server=___connect2server___(serv_addr);
@@ -75,7 +73,8 @@ inline idConnexion_t ___message_whois_next_server___(struct sockaddr_in serv_add
  	envoyerOrigine(FROM_SERVEUR,sock_next_server);
  	envoyerTypeMessage(WHOIS_NEXT_SERVER,sock_next_server);
  	
- 	recevoirIdent(&next_server_info, sock_next_server);
+ 	recevoirSockAddr(&next_server_info, sock_next_server);
+ 	close(sock_next_server);
  	return next_server_info;
  }
 
@@ -87,15 +86,15 @@ inline idConnexion_t ___message_ident___(struct sockaddr_in serv_addr)
 {
 
         idConnexion_t server_info;
-        socket_t sock_next_server;
+        socket_t sock_server;
 
-        sock_next_server=___connect2server___(serv_addr);
+        sock_server=___connect2server___(serv_addr);
      
-        envoyerOrigine(FROM_SERVEUR,sock_next_server);
-        envoyerTypeMessage(IDENT,sock_next_server);
+        envoyerOrigine(FROM_SERVEUR,sock_server);
+        envoyerTypeMessage(IDENT,sock_server);
 
-        recevoirIdent(&server_info, sock_next_server);
-        shutdown(sock_next_server,SHUT_RDWR);
+        recevoirIdent(&server_info, sock_server);
+        close(sock_server);
         return server_info;
 }
 
@@ -112,8 +111,6 @@ inline int ___message_connect_to___(struct sockaddr_in server_info)
 	idConnexion_t id_connexion;
 	serveur_t* my_server_ptr;
 	
-	
-	id_connexion= get_my_idConnexion();
 	my_server_ptr= get_my_server();
 	
 	/* 
@@ -126,12 +123,12 @@ inline int ___message_connect_to___(struct sockaddr_in server_info)
 	envoyerOrigine(FROM_SERVEUR,sockServer);
 	envoyerTypeMessage(CONNECT,sockServer);
 	
-	recevoirIdent(&my_server_ptr->suivServeur, sockServer);
-	envoyerIdent(id_connexion,sockServer);
+	recevoirSockAddr(&(my_server_ptr->suivServeur), sockServer);
+	envoyerSockAddr(my_server_ptr->serv_addr,sockServer);
 	/*
 	 *on libere la connexion 
 	 */
-	if (shutdown(sockServer,SHUT_RDWR)) {
+	if (close(sockServer)<0) {
         	printf("___message_connect_to__:Echec de la premiere deconnexion du serveur\n");
          	exit(-1);
         }
@@ -173,7 +170,7 @@ inline int ___message_receive_DHT_from___(idConnexion_t from_server, uint64_t h)
          */
         printf("connexion et reception de la table\n");
         taille = from_server.taille_hashtab/2;
-        assert(taille!=0);
+        assert(taille>0);
         
         hashTab = creerHashTable(taille);
         
@@ -192,14 +189,63 @@ inline int ___message_receive_DHT_from___(idConnexion_t from_server, uint64_t h)
         }
         
         my_server_ptr->h=h;
-        afficherIdentConnexion(my_server_ptr->suivServeur);
         libererHashTable(my_server_ptr->tabl);
         my_server_ptr->tabl= hashTab;
+
         afficherInfoHashTable();
+        if (close(sock_server)<0) {
+        	printf("___message_connect_to__:Echec de la premiere deconnexion du serveur\n");
+         	exit(-1);
+        }
 }
 
 
+int ____message_transfer_DHT_to_next_server____(){
 
+
+        socket_t sock_server;
+        uint32_t taille_hashtab;
+        liste_t L;
+        int i;
+        uint64_t h;
+        donnee_t D;
+        struct sockaddr_in to_server; 
+        serveur_t* my_server_ptr = get_my_server();
+        to_server = my_server_ptr->suivServeur;
+        /*
+         * connexion au serveur
+         */
+        sock_server=___connect2server___(to_server);
+        envoyerOrigine(FROM_SERVEUR,sock_server);
+        envoyerTypeMessage(QUIT,sock_server);
+        
+        table_de_hachage_t my_hashtab = get_my_hashtab();
+        taille_hashtab = my_hashtab.taille;
+        h= my_server_ptr->h;
+        
+        envoyerUInt_32(taille_hashtab,sock_server);
+        envoyerUInt_64(h,sock_server);
+        
+        
+        for(i=0;i<taille_hashtab;i++){
+                
+                L=my_hashtab.table_de_hachage[i];
+                        
+                while(L!=NULL){
+                        D=removeTeteDeListe(&L);
+                        assert(D!=NULL);//aucune donné ne devrait etre nul
+                        envoyerOctet(1,sock_server);
+                        envoyerDonnee(D,sock_server);
+                        afficherDonnee(D);
+                        libererDonnee(D);
+                }
+        }
+        envoyerOctet(0,sock_server);
+        free(my_hashtab.table_de_hachage);
+        my_hashtab.taille = 0;
+        //prevenir le serveur qui est avant dans le cercle
+        
+}
 //==============================================================================
 //                        FONCTIONS DE COMMUNICATION SERVEUR-SERVEUR
 //==============================================================================
@@ -228,26 +274,26 @@ int message_connect_2_server(char* ip,uint32_t port){
         
         while(1){
 
+                iterator_server_info=___message_ident___(serv_addr);
+                
                 if(iterator_server_info.taille_hashtab > taille_max){
                         taille_max = iterator_server_info.taille_hashtab ;
                         server_most_charged=iterator_server_info;
                 }
                 
-                iterator_server_info=___message_whois_next_server___(serv_addr);
-                serv_addr = iterator_server_info.identifiant;
+                serv_addr=___message_whois_next_server___(serv_addr);
+                
                 if( serv_addr.sin_port==htons(port) ) {
 
                         /*
                         * on a fait le tour des serveurs.Il reste plus qu'à se connecter au serveur le plus chargé
                         */
-             
                         h=(server_most_charged.h+taille_max/2);
+                        printf("le serveur le plus chargé\n");
+                        afficherIdentConnexion(server_most_charged);
                         ___message_connect_to___(server_most_charged.identifiant);
                         ___message_receive_DHT_from___(server_most_charged,h);
-                #ifdef DEBUG_MESSAGE_SERVEUR
                         afficherHashTable(get_my_hashtab());
-                        
-                #endif
                         return 1;
                 }
         }
@@ -260,12 +306,11 @@ int message_whois_next_server(char* ip, uint32_t port)
 {
 
         struct sockaddr_in serv_addr;
-        idConnexion_t server_info;
+        struct sockaddr_in server_info;
 
         serv_addr=___get_sockaddr_in___(ip,port);
         server_info=___message_whois_next_server___(serv_addr);
 #ifdef DEBUG_MESSAGE_SERVEUR
-        afficherIdentConnexion(server_info);
 #endif
         return 1;
 }
@@ -286,18 +331,23 @@ int message_ident(char* ip, uint32_t port)
 }
 
 
+int message_quit()
+{
+        
+        struct sockaddr_in serv_addr;
+        serveur_t* my_server_ptr;
+        my_server_ptr = get_my_idConnexion;
+        
+        if(my_server_ptr->serv_addr.sin_port!=my_server_ptr->suivServeur.sin_port) {
+        
+                ____message_transfer_DHT_to_next_server____();
+        } else { 
+                //TODO SYNCHRO ATTENDRE QUE LES REQUETES SOIENT TT SATISFAITES
+                exit(0);//TODO TUE LE TABLEAU
+        }
+        return 1 ;
+}
 
-/*//coupe la socket passé en arg et indique au serveur de couper la communication*/
-/*int message_disconnect_from_server(socket_t sockClient){*/
-
-/*        envoyerOrigine(FROM_SERVEUR,sockClient);*/
-/*        envoyerTypeMessage(DISCONNECT,sockClient);*/
-/*        if(shutdown(sockClient,SHUT_RDWR)==-1){*/
-/*                perror("shutdown()");*/
-/*                return 0;*/
-/*        }*/
-/*        return 1;*/
-/*}*/
 
 
 

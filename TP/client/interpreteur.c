@@ -8,7 +8,7 @@
 #define PROMPT ">"
 
 /* a modifier lors d'un ajout de commande */
-#define NB_CMD 7
+#define NB_CMD 9
 static char *commands[NB_CMD] = { 
     "help", 
     "connect", 
@@ -16,7 +16,10 @@ static char *commands[NB_CMD] = {
     "put", 
     "get", 
     "removekey",
-    "exit" 
+    "quit" ,
+    "status",
+    "exit",
+    
 };
 
 
@@ -27,9 +30,12 @@ typedef enum {
     _PUT, 
     _GET, 
     _REMOVEKEY, 
+    _QUIT, 
+    _STATUS,
     _EXIT, 
     _ERROR,
-    _VIDE 
+    _VIDE,
+    
 }COMMAND;
 
 
@@ -42,9 +48,12 @@ void help()
 {
     printf("Commandes disponibles :\n");
     printf("\thelp:affiche l'aide\n");
-    printf("\tput:");
-    printf("\tget:");
-    printf("\tremovekey:");
+    printf("\tput:\n");
+    printf("\tget:\n");
+    printf("\tremovekey:\n");
+    printf("\tconnect [ip du serveur] [port]\n");
+    printf("\tquit \n");
+    printf("\tstatus \n");
 }
 
 
@@ -117,7 +126,7 @@ COMMAND read_command(char*** args)
     }
     free(ligne);
 	
-    printf("command %s\n",*args [0]);
+   // printf("command %s\n",*args [0]);
 	
     return get_command(*args [0]);
 }
@@ -141,7 +150,8 @@ void interpreteur()
     socket_t sockServer;
     int IS_CONNECTED=0;
     char name[20];
-
+    idConnexion_t ident;
+    
     /* creation d'un client */
     printf("Entrez le nom du client (20 car max!)\n");
     fgets(name,19,stdin);
@@ -182,6 +192,8 @@ void interpreteur()
             }
             D = creerDonnee(args[1],args[2]);
             message_put(D,sockServer);
+            afficherDonnee(D);
+            libererDonnee(D);
             break;
         
             
@@ -193,7 +205,8 @@ void interpreteur()
                 break;
             }
             D= message_get(args[1],sockServer);
-            afficherDonnee(D);                
+            afficherDonnee(D);
+            libererDonnee(D);                
             break;
             
         case _REMOVEKEY:
@@ -206,6 +219,7 @@ void interpreteur()
             
             V = message_remove(args[1],sockServer);
             printf("Valeur supprimee:%s\n", V);
+            free(V);
             break;
             
         case _DISCONNECT:
@@ -214,7 +228,7 @@ void interpreteur()
             
                 printf("deconnexion du client\n");
                 message_disconnect(sockServer);
-                printf("deconnexion réussie");
+                printf("deconnexion réussie\n");
                 IS_CONNECTED=0;
             } else {
             
@@ -234,8 +248,36 @@ void interpreteur()
 
             printf("Commande incorrecte\n");
             break;
+            
+        case _QUIT:
+        
+            if(IS_CONNECTED==1){
+            
+                printf("fermeture du serveur\n");
+                message_quit(sockServer);
+                printf("deconnexion réussie\n");
+                IS_CONNECTED=0;
+            } else {
+            
+                printf("le client est deconnecté\n");
+            }
+            
+            break;
+                
+        case _STATUS:
+        
+            printf("status\n");
+            
+            if(IS_CONNECTED==0){
+             
+                printf("Impossible vous êtes déconnecté!\n");
+                break;
+            }
+            
+            ident=message_status(sockServer);
+            afficherIdentConnexion(ident);
         default:
-            printf("Cas Impossible\n");
+         //   printf("Cas Impossible\n");
             break;
         }
 

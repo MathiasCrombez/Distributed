@@ -8,7 +8,8 @@ void * routine_t() {
     sleep(1);
     message_disconnect(f);
     pthread_exit(NULL);
-};
+}
+
 
 
 int main(int argc, char *argv[]) {
