@@ -50,9 +50,9 @@ Pour la connexion réseau, le choix a été fixé sur les sockets qui permettent
 
 Contrairement à ce qui été demandé, nous avons qu'une version du programme car nous avons rapidement choisi le module de l'équilibre de charge. 
 
-La méthode choisi est un parcours de la liste des serveurs par le nouveaux serveurs par des connexions et déconnexions qui permettent d'obtenir la table la plus chargé (DHT plus grande) et de la découpé en 2. Le nouveau prends la deuxième moitié. Cela se fait uniquement à chaque arrivée d'un nouveau serveur.
+La méthode choisi est un parcour de la liste des serveurs par le nouveau serveur par des connexions et déconnexions qui permettent d'obtenir la table la plus chargé (DHT plus grande) et de la découpé en 2. Le nouveau prend la deuxième moitié. Cela se fait uniquement à chaque arrivée d'un nouveau serveur.
 
-Un serveur crée un ``pthread'' à chaque arrivée de client et lui envoi la socket qui lui est dédié. Ainsi il est quasiment indépendant du programme principal. La routine permet de recevoir le type du message et d'appliquer la fonction.
+Un serveur crée un ``pthread'' à chaque arrivée de client et lui envoi la socket qui lui est dédié. Ainsi il est quasiment indépendant du programme principal. La routine permet de recevoir le type du message et d'appliquer la fonction.Ce pthread tourne tant que le client ne s'est pas deconnecté, ou que le serveur n'a pas quitté la DHT.
 
 Le message est composé de plusieurs parties : 
 \begin{itemize}
@@ -72,6 +72,7 @@ Le principal problème est ce que nous pensions être de la synchronisation. En 
 Après de nombreuses réflexions, nous avons plus ou moins localisé le problème : plusieurs ``pthread'' ont la même socket dédié (même si la socket donnée est la bonne). En fait, quand on crée une variable ``sockClient'' pour passer la socket à la routine, nous envoyons une adresse sur la valeur qui peut être écrasé par l'arrivée d'un autre client avant qu'on la récupère. Ce qui fait que plusieurs ``pthread'' avait la même socket. Après avoir corrigé ce problème en envoyant non pas une adresse mais la valeur (la socket et l'adresse sont tout deux des entiers), nous nous sommes aperçu que la synchronisation rajouté était inutile c'est-à-dire l'octet de synchronisation, nous l'avons donc supprimé (le code a été commenté).
 
 Ce bug nous a coûté énormément en ressources et s'est surtout compliqué par un manque d'informations sur sa localisation car son apparition provoqué un problème de synchronisation sur toute la suite du programme.
+
 
 \vspace{0.5cm}
 \large{\bf Conclusion} \normalsize
