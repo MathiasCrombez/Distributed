@@ -89,7 +89,7 @@ typedef struct serveur {
 	
 	tabClient_t tableauClient;
 	struct sockaddr_in suivServeur;
-	//idConnexion_t *precServeur;
+	struct sockaddr_in precServeur;
 
 } serveur_t;
 

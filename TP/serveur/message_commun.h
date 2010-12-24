@@ -54,6 +54,7 @@ typedef enum {
 	AUTH_SERVER = 9,
 	QUIT = 10,
 	STATUS = 11,
+	TRANSFER_DHT=12,
 
 } requete_t;
 
@@ -291,8 +292,8 @@ static int recevoirChaine(char **chaine, socket_t from)
 static int envoyerDonnee(donnee_t D, socket_t to)
 {
 	print_debug("envoyerDonnee:Debut\n");
-	envoyerChaine(D->cle, to);
-	envoyerChaine(D->valeur, to);
+	envoyerCle(D->cle, to);
+	envoyerValeur(D->valeur, to);
 	print_debug("envoyerDonnee:Fin\n");
 	return 1;
 }
@@ -394,10 +395,10 @@ static int envoyerIdent(idConnexion_t ident, socket_t to)
 	envoyerHash(ident.h, to);
 	envoyerUInt_32(ident.taille_hashtab, to);
 	envoyerSockAddr(ident.suiv_id, to);
+	envoyerSockAddr(ident.prec_id, to);
 	print_debug("envoyerIdent:Fin\n");
 	return 1;
 }
-
 
 /*
  *reception de l'identité du client ou serveur
@@ -408,16 +409,17 @@ static int recevoirIdent(idConnexion_t * ident, socket_t from)
 	uint64_t h;
 	uint32_t taille_hashtab;
 	struct sockaddr_in info;
-    struct sockaddr_in suiv_info;
-        
+	struct sockaddr_in suiv_info;
+    struct sockaddr_in prec_info;
 	print_debug("recevoirIdent:Debut\n");
 	recevoirSockAddr(&info, from);
 	recevoirChaine(&name, from);
 	recevoirHash(&h, from);
 	recevoirUInt_32(&taille_hashtab, from);
-        recevoirSockAddr(&suiv_info, from);
-        
-	*ident = setIdConnexion(name, info, h, taille_hashtab,suiv_info);
+	recevoirSockAddr(&suiv_info, from);
+    recevoirSockAddr(&prec_info, from);
+    
+	*ident = setIdConnexion(name, info, h, taille_hashtab, suiv_info,prec_info);
 	free(name);
 	print_debug("recevoirIdent:Fin\n");
 	return 1;

@@ -1,9 +1,5 @@
 #include "hash.h"
 
-
-
-
-
 inline uint64_t hash(cle_t K)
 {
 	uint64_t hash = 5381;
@@ -13,9 +9,8 @@ inline uint64_t hash(cle_t K)
 		hash = ((hash << 5) + hash) + c;
 		K++;
 	}
-	return hash %MAX_TAILLE_HASH_TABLE;
+	return hash % MAX_TAILLE_HASH_TABLE;
 }
-
 
 table_de_hachage_t creerHashTable(uint64_t taille)
 {
@@ -31,7 +26,6 @@ table_de_hachage_t creerHashTable(uint64_t taille)
 	return hashTab;
 }
 
-
 void libererHashTable(table_de_hachage_t hashTab)
 {
 
@@ -40,7 +34,7 @@ void libererHashTable(table_de_hachage_t hashTab)
 		libererListe(hashTab.table_de_hachage[i]);
 	}
 	/** le coup de grace ... **/
-	hashTab.taille=0;
+	hashTab.taille = 0;
 	free(hashTab.table_de_hachage);
 }
 
@@ -86,7 +80,8 @@ void afficherLigneHashTable(table_de_hachage_t hashTab, uint64_t numeroLigne)
 
 	if (numeroLigne > hashTab.taille) {
 #ifdef DEBUG_MESSAGE
-		printf("afficherLigneHashTable:Ligne>Taille(%ld)",(long)hashTab.taille);
+		printf("afficherLigneHashTable:Ligne>Taille(%ld)",
+		       (long)hashTab.taille);
 #endif
 	} else {
 		afficherListe(hashTab.table_de_hachage[numeroLigne]);
@@ -98,7 +93,7 @@ void afficherHashTable(table_de_hachage_t hashTab)
 	int i = 0;
 
 	printf("afficherHashTable:Debut\n");
-	printf("\tHashTab size= %d\n",hashTab.taille);
+	printf("\tHashTab size= %d\n", hashTab.taille);
 	for (i = 0; i < hashTab.taille; i++) {
 		printf("afficherHashTable:Ligne %d\n", i);
 		afficherLigneHashTable(hashTab, i);
@@ -110,7 +105,7 @@ void afficherHashTable(table_de_hachage_t hashTab)
 table_de_hachage_t TEST_HASH_TABLE()
 {
 
-    table_de_hachage_t tablh = creerHashTable(MAX_TAILLE_HASH_TABLE);
+	table_de_hachage_t tablh = creerHashTable(MAX_TAILLE_HASH_TABLE);
 
 	donnee_t d1, d2, d3, d4, d5, d6, d7, d8, d9, d10;
 	donnee_t d11, d12, d13, d14, d15, d16, d17, d18, d19, d20;
@@ -199,3 +194,4 @@ void reallocHashTable(table_de_hachage_t* hashTab,uint32_t new_size, uint64_t h)
                 pthread_mutex_init(hashTab->mutexTab[i], NULL);
         }
 }
+

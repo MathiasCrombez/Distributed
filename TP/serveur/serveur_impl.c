@@ -27,7 +27,7 @@ serveur_t *creerServeur(char *ipServeur, uint64_t port)
 	SERVEUR.serv_addr.sin_port = htons(port);
 
 	SERVEUR.suivServeur = SERVEUR.serv_addr;
-
+        SERVEUR.precServeur = SERVEUR.serv_addr;
 	// evite le message d'erreur "Address already in use" lors d'un bind
 	if (setsockopt
 	    (SERVEUR.idSocket, SOL_SOCKET, SO_REUSEADDR, &yes,
@@ -190,6 +190,7 @@ void *talk_to_client(void *idSocket)
 			/*pthread_cond_signal(&condition_cond);!!! */
 #ifdef DEBUG_SERVEUR_IMPL
 			printf("QUIT\n");
+
 #endif
 			pthread_mutex_lock(&SERVER_IS_DYING);
 			if (SERVER_IS_DYING_VAR == 0) {
@@ -305,14 +306,27 @@ void *talk_to_server(void *idSocket)
 	NB_JOBS++;
 	pthread_mutex_unlock(&MUTEX_NB_JOBS);
 	recevoirTypeMessage(&type_requete, sockServer);
+	
 	switch (type_requete) {
 
 	case CONNECT:
 #ifdef DEBUG_SERVEUR_IMPL
 		printf("SERVER CONNECT\n");
 #endif
-		envoyerSockAddr(SERVEUR.serv_addr, sockServer);
-		recevoirSockAddr(&SERVEUR.suivServeur, sockServer);
+		recevoirOctet(&reponse,sockServer);
+		
+		if(reponse==0){
+		    envoyerSockAddr(SERVEUR.suivServeur, sockServer);
+		    recevoirSockAddr(&SERVEUR.suivServeur, sockServer);
+        }
+        else if(reponse==1){
+            recevoirSockAddr(&SERVEUR.precServeur, sockServer);
+        }
+        else {
+            printf("erreur connect\n");
+            exit(0);
+        }
+
 
 		break;
 
@@ -356,6 +370,7 @@ void *talk_to_server(void *idSocket)
 		envoyerOctet(0, sockServer);
 
 		reallocHashTable(&SERVEUR.tabl, SERVEUR.tabl.taille / 2, SERVEUR.h);
+
 		afficherInfoHashTable();
 		afficherHashTable(SERVEUR.tabl);
 		break;
@@ -367,29 +382,24 @@ void *talk_to_server(void *idSocket)
                 /*                printf("c'est fait!\n");*/
                 /*                return NULL;*/
 
-	case QUIT:
-#ifdef DEBUG_SERVEUR_IMPL
-		printf("QUIT\n");
-#endif
+	case TRANSFER_DHT:
+
+		printf("TRANSFER_DHT\n");
+		uint32_t taille_hashtab;
+		char reponse;
+		uint32_t new_size;
+
+
 		recevoirUInt_32(&taille_hashtab, sockServer);
 		recevoirUInt_64(&h, sockServer);
-		if (taille_hashtab < SERVEUR.tabl.taille) {
-			new_size = SERVEUR.tabl.taille;
-		} else if (taille_hashtab > SERVEUR.tabl.taille) {
-
-			new_size = taille_hashtab;
-		} else {
-
-			new_size = 2 * taille_hashtab;
-		}
-
-		assert(taille_hashtab <= MAX_TAILLE_HASH_TABLE);
+		
+		new_size = taille_hashtab + SERVEUR.tabl.taille;
+		assert(new_size <= MAX_TAILLE_HASH_TABLE);
 
 		recevoirOctet(&reponse, sockServer);
 		reallocHashTable(&SERVEUR.tabl, new_size, SERVEUR.h);
 
 		while (reponse) {
-
 			recevoirDonnee(&D, sockServer);
 			afficherDonnee(D);
 			putHashTable(D, SERVEUR.tabl);
@@ -401,7 +411,28 @@ void *talk_to_server(void *idSocket)
 
 		afficherMyIdConnexion();
 		break;
+		
+		
+	case QUIT:
+		
+	    printf("SERVER QUIT\n");
+		recevoirOctet(&reponse,sockServer);
+		
+		if(reponse==0){
+		    recevoirSockAddr(&SERVEUR.suivServeur, sockServer);
+        }
+        else if(reponse==1){
+            recevoirSockAddr(&SERVEUR.precServeur, sockServer);
+        }
+        else {
+            printf("erreur connect\n");
+            exit(0);
+        }
+	
+	    break;
+	    
 	default:
+
 		printf("Erreur:talk_to_server:Message inconnu");
 		break;
 
@@ -428,7 +459,8 @@ idConnexion_t get_my_idConnexion()
 			      SERVEUR.serv_addr,
 			      SERVEUR.h,
 			      SERVEUR.tabl.taille,
-			      SERVEUR.suivServeur);
+			      SERVEUR.suivServeur,
+			      SERVEUR.precServeur);
 }
 
 serveur_t *get_my_server()

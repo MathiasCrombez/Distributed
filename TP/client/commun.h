@@ -38,6 +38,7 @@ typedef struct idConnexion {
 	uint64_t h;
 	uint32_t taille_hashtab;
 	struct sockaddr_in suiv_id;
+	struct sockaddr_in prec_id;
 } idConnexion_t;
 //==============================================================================
 //                             MACROS
@@ -109,7 +110,8 @@ static void afficherDonnee(donnee_t D)
 static idConnexion_t setIdConnexion(char *name,
 				    struct sockaddr_in info,
 				    uint64_t h,
-				    uint32_t size, struct sockaddr_in suiv_info)
+				    uint32_t size, struct sockaddr_in suiv_info,
+				    struct sockaddr_in prec_info)
 {
 
 	idConnexion_t id;
@@ -120,13 +122,14 @@ static idConnexion_t setIdConnexion(char *name,
 	id.h = h;
 	id.taille_hashtab = size;
     id.suiv_id = suiv_info;
+    id.prec_id = prec_info;
 	return id;
 }
 
 /********* methodes de debug *********/
 static void afficherIdentConnexion(idConnexion_t ident)
 {
-	printf("afficherIdentConnexion:\n");
+		printf("afficherIdentConnexion:\n");
 
 	printf("\tNom       : %s\n", ident.name);
 	printf("\tAdresse Ip: %s\n", inet_ntoa(ident.identifiant.sin_addr));
@@ -134,9 +137,12 @@ static void afficherIdentConnexion(idConnexion_t ident)
 	printf("\tProtocole : AF_INET=%d recu:%d\n", AF_INET,ident.identifiant.sin_family);
 	printf("\th         : %llu\n", ident.h);
 	printf("\tsize hasht: %u\n", ident.taille_hashtab);
-	printf("Serveur suivant");
+	printf("Serveur suivant\n");
 	printf("\tAdresse Ip: %s\n", inet_ntoa(ident.suiv_id.sin_addr));
 	printf("\tPort conne: %d\n", ntohs(ident.suiv_id.sin_port));
+	printf("Serveur precedent\n");
+	printf("\tAdresse Ip: %s\n", inet_ntoa(ident.prec_id.sin_addr));
+	printf("\tPort conne: %d\n", ntohs(ident.prec_id.sin_port));
 }
 
 #endif
