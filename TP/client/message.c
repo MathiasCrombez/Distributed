@@ -1,6 +1,7 @@
 #include"message.h"
 
-#define DEBUG_MESSAGE_CLIENT
+//#define DEBUG_MESSAGE_CLIENT
+#undef DEBUG_MESSAGE_CLIENT
 
 /*
  * renvoi une structure sockaddr_in avec l'ip et le port de connexion
@@ -24,17 +25,21 @@ inline struct sockaddr_in ___get_sockaddr_in___(char *ip, uint32_t port)
 	return serv_addr;
 }
 
+
+/**
+ * Créer la connection avec le serveur et s'identifie en temps que client
+ *
+ */
 socket_t message_connect(char *ip, uint32_t port)
 {
 	struct sockaddr_in server_info;
 	char ack;
 	socket_t sockServer;
-
+        
 	server_info = ___get_sockaddr_in___(ip, port);
 	sockServer = ___connect2server___(server_info);
 	envoyerOrigine(FROM_CLIENT, sockServer);
 	envoyerTypeMessage(CONNECT, sockServer);
-	//    recevoirOctet(&ack,sockServer);
 #ifdef DEBUG_MESSAGE_CLIENT
 	printf("message_connexion:connexion:%d\n", sockServer);
 #endif
@@ -64,6 +69,9 @@ void message_put(donnee_t D, socket_t from)
 		envoyerOrigine(FROM_CLIENT, new_from);
 		message_put(D, new_from);
 	} else if (ack == 1) {
+            /*
+             * Le serveur a accepté la clé, il reçoit donc la donnée
+             */
 		envoyerDonnee(D, from);
 #ifdef DEBUG_MESSAGE_CLIENT
 		printf("message_put:\n");
@@ -156,6 +164,9 @@ void message_disconnect(socket_t from)
 	char ack;
 	int debug = (int)from;
 	envoyerTypeMessage(DISCONNECT, from);
+        /*
+         * Synchro avec l'étape de deconnexion 
+         */
 	recevoirOctet(&ack, from);
 	close(from);
 #ifdef DEBUG_MESSAGE_CLIENT

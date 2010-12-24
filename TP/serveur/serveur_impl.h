@@ -32,7 +32,7 @@
  *permet de supprimer ou afficher les messages de debug
  */
 //#define DEBUG_SERVEUR_IMPL
-
+#undef DEBUG_SERVEUR_IMPL
 
 #define HASH_TABLE_SIZE (1<<4)
 
