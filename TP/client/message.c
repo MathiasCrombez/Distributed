@@ -45,13 +45,12 @@ void message_put(donnee_t D, socket_t from)
 {
 
 	char ack;
-	idConnexion_t ident;
+	struct sockaddr_in ident;
 	socket_t new_from;
 
 	envoyerTypeMessage(PUT, from);
 	envoyerCle(D->cle, from);
 	recevoirOctet(&ack, from);
-	printf("couocu\n");
 	if (ack == 0) {
 #ifdef DEBUG_MESSAGE_CLIENT
 		printf("message_put:serveur suivant\n");
@@ -59,21 +58,15 @@ void message_put(donnee_t D, socket_t from)
 		/*
 		 * On relance la fonction avec un nouveau serveur et une nouvelle socket
 		 */
-		recevoirIdent(&ident, from);
+		recevoirSockAddr(&ident, from);
 		message_disconnect(from);
-/*                shutdown(from, 2);*/
-		printf("couocu\n");
-		new_from = ___connect2server___(ident.identifiant);
-		printf("couocu\n");
+		new_from = ___connect2server___(ident);
 		envoyerOrigine(FROM_CLIENT, new_from);
-		printf("couocu\n");
 		message_put(D, new_from);
-		printf("couocu\n");
 	} else if (ack == 1) {
 		envoyerDonnee(D, from);
 #ifdef DEBUG_MESSAGE_CLIENT
 		printf("message_put:\n");
-		afficherDonnee(D);
 #endif
 	}
 }
@@ -81,9 +74,9 @@ void message_put(donnee_t D, socket_t from)
 donnee_t message_get(cle_t K, socket_t from)
 {
 
-	donnee_t D;
+	donnee_t D = NULL;
 	char ack, ack2;
-	idConnexion_t ident;
+	struct sockaddr_in ident;
 	socket_t new_from;
 
 	envoyerTypeMessage(GET, from);
@@ -97,9 +90,9 @@ donnee_t message_get(cle_t K, socket_t from)
 		/*
 		 * On relance la fonction avec un nouveau serveur et une nouvelle socket
 		 */
-		recevoirIdent(&ident, from);
+		recevoirSockAddr(&ident, from);
 		message_disconnect(from);
-		new_from = ___connect2server___(ident.identifiant);
+		new_from = ___connect2server___(ident);
 		envoyerOrigine(FROM_CLIENT, new_from);
 		return message_get(K, new_from);
 	} else if (ack == 1) {
@@ -110,7 +103,6 @@ donnee_t message_get(cle_t K, socket_t from)
 			recevoirDonnee(&D, from);
 #ifdef DEBUG_MESSAGE_CLIENT
 			printf("message_get:\n");
-			afficherDonnee(D);
 #endif
 		}
 
@@ -122,26 +114,26 @@ donnee_t message_get(cle_t K, socket_t from)
 valeur_t message_remove(cle_t K, socket_t from)
 {
 
-    donnee_t D;
-    char ack, ack2;
-    valeur_t V;
-    idConnexion_t ident;
-    socket_t new_from;
+	donnee_t D;
+	char ack, ack2;
+	valeur_t V = NULL;
+	struct sockaddr_in ident;
+	socket_t new_from;
 
-    envoyerTypeMessage(REMOVEKEY, from);
-    envoyerCle(K, from);
-    //        recevoirOctet(&ack, from);
+	envoyerTypeMessage(REMOVEKEY, from);
+	envoyerCle(K, from);
+	recevoirOctet(&ack, from);
 
-    if (ack == 0) {
+	if (ack == 0) {
 #ifdef DEBUG_MESSAGE_CLIENT
 		printf("message_remove:serveur suivant\n");
 #endif
 		/*
 		 * On relance la fonction avec un nouveau serveur et une nouvelle socket
 		 */
-		recevoirIdent(&ident, from);
+		recevoirSockAddr(&ident, from);
 		message_disconnect(from);
-		new_from = ___connect2server___(ident.identifiant);
+		new_from = ___connect2server___(ident);
 		envoyerOrigine(FROM_CLIENT, new_from);
 		return message_remove(K, new_from);
 	} else if (ack == 1) {
@@ -165,7 +157,6 @@ void message_disconnect(socket_t from)
 	int debug = (int)from;
 	envoyerTypeMessage(DISCONNECT, from);
 	recevoirOctet(&ack, from);
-	shutdown(from, 2);
 	close(from);
 #ifdef DEBUG_MESSAGE_CLIENT
 	printf("message_disconnect:deconnexion:%d\n", debug);
@@ -174,7 +165,19 @@ void message_disconnect(socket_t from)
 
 void message_quit(socket_t from)
 {
-	envoyerTypeMessage(DISCONNECT_SERVEUR, from);
+	envoyerTypeMessage(QUIT, from);
+
+}
+
+idConnexion_t message_status(socket_t from)
+{
+
+	idConnexion_t server_info;
+
+	envoyerTypeMessage(STATUS, from);
+
+	recevoirIdent(&server_info, from);
+	return server_info;
 
 }
 

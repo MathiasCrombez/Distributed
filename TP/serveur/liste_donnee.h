@@ -103,6 +103,10 @@ static  valeur_t removeKey(liste_t * L_ptr, cle_t K)
 #endif
 		l = *L_ptr;
 		valeur = (valeur_t)malloc(strlen(l->data->valeur));
+		if(valeur == NULL){
+		        perror("malloc");
+		        exit(-1);
+		}
 		strcpy(valeur, l->data->valeur);
 		*L_ptr = l->suiv;
 		libererDonnee(l->data);
@@ -131,7 +135,11 @@ static  valeur_t removeKey(liste_t * L_ptr, cle_t K)
  suite:
 
                 valeur = malloc(strlen((*iterateur_ptr)->data->valeur));
-		valeur = (*iterateur_ptr)->data->valeur;
+                if(valeur == NULL){
+		        perror("malloc");
+		        exit(-1);
+		}
+		strcpy(valeur, (*iterateur_ptr)->data->valeur);
 		suivant_ptr = &((*iterateur_ptr)->suiv);
 
                 libererDonnee((*iterateur_ptr)->data);
@@ -143,14 +151,14 @@ static  valeur_t removeKey(liste_t * L_ptr, cle_t K)
 }
 
 //TODO PAS TESTéééééééééée!!!!
-static void libererListe(liste_t * L_ptr)
+static void libererListe(liste_t  L)
 {
         liste_t l;
         
-        while (*L_ptr != NULL) {
+        while (L != NULL) {
         
-                l = *L_ptr;
-                *L_ptr = l->suiv;
+                l = L;
+                L = l->suiv;
                 libererDonnee(l->data);
                 free(l);
         }

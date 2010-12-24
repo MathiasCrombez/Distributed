@@ -37,7 +37,7 @@ void libererHashTable(table_de_hachage_t hashTab)
 
 	int i = 0;
 	for (i = 0; i < hashTab.taille; i++) {
-		libererListe(hashTab.table_de_hachage + i);
+		libererListe(hashTab.table_de_hachage[i]);
 	}
 	/** le coup de grace ... **/
 	hashTab.taille=0;
@@ -168,7 +168,7 @@ void reallocHashTable(table_de_hachage_t* hashTab,uint32_t new_size, uint64_t h)
         liste_t* new_hash_tab;
         
         if(new_size<=hashTab->taille){
-                printf("jkjk\n");
+                assert(new_size>0);
                 new_hash_tab= (liste_t*)realloc(hashTab->table_de_hachage,new_size*sizeof(liste_t));
                 if(new_hash_tab==NULL){
                 
@@ -179,13 +179,14 @@ void reallocHashTable(table_de_hachage_t* hashTab,uint32_t new_size, uint64_t h)
                
         }
         else {
+                assert(new_size<=MAX_TAILLE_HASH_TABLE);
                 new_hash_tab = (liste_t* )calloc(new_size, sizeof(liste_t));
                 if(new_hash_tab==NULL){
                 
                         perror("realloc()");
                         exit(-1);
                 }
-                memcpy(new_hash_tab,hashTab->table_de_hachage+h%hashTab->taille,sizeof(liste_t)*hashTab->taille);
+                memcpy(new_hash_tab +h%new_size,hashTab->table_de_hachage,sizeof(liste_t)*hashTab->taille);
                 free(hashTab->table_de_hachage);
                 
         }

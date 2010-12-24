@@ -1,14 +1,10 @@
 #ifndef MESSAGE_COMMUN_H
 #define MESSAGE_COMMUN_H
 
-
-
 #include "commun.h"
 
-
-
 //============================================================================
-//	                             MACROS
+//                                   MACROS
 //============================================================================
 
 #define OUI 1
@@ -27,7 +23,6 @@
 #define T_CHAINE(string)   strlen(string)*T_OCTET
 #define T_DONNEE(donnee)   T_CHAINE(donnee->cle) + T_CHAINE(donnee->valeur)
 
-
 //#define DEBUG_MESSAGE_H
 #undef  DEBUG_MESSAGE_H
 
@@ -37,52 +32,47 @@
 #   define print_debug(chaine, args...)
 #endif
 
-
-
 //============================================================================
-//	                                TYPES
+//                                      TYPES
 //============================================================================
 
-typedef enum  {
-    FROM_SERVEUR,
-    FROM_CLIENT,
+typedef enum {
+	FROM_SERVEUR,
+	FROM_CLIENT,
 } origine_t;
 
-typedef enum  {
-	PUT=0,
-	GET=1,
-        REMOVEKEY=2,
-	ACK=3,
-	IDENT=4,
-	WHOIS_NEXT_SERVER=5,
-	CONNECT=6,
-	DISCONNECT=7,
-	RECEIVE_DHT=8,
-	AUTH_SERVER=9,
-	DISCONNECT_SERVEUR=10,
+typedef enum {
+	PUT = 0,
+	GET = 1,
+	REMOVEKEY = 2,
+	ACK = 3,
+	IDENT = 4,
+	WHOIS_NEXT_SERVER = 5,
+	CONNECT = 6,
+	DISCONNECT = 7,
+	RECEIVE_DHT = 8,
+	AUTH_SERVER = 9,
+	QUIT = 10,
+	STATUS = 11,
 
 } requete_t;
 
-
-
-
 //============================================================================
-//	                ENVOIS DES TYPES ELEMENTAIRES
+//                      ENVOIS DES TYPES ELEMENTAIRES
 //============================================================================
-
 
 /*
  *envoi d'un octet de synchro
  */
 static int envoyerSynchro(socket_t to)
 {
-    /* char O = 0; */
-    /* if (send(to, &O, T_OCTET, 0) == -1) { */
-    /*     perror("envoyerSynchro:send()"); */
-    /*     exit(-1); */
-    /* } */
-    /* print_debug("envoyerSynchro:%d\n", (int)O); */
-    return 1;
+	/* char O = 0; */
+	/* if (send(to, &O, T_OCTET, 0) == -1) { */
+	/*     perror("envoyerSynchro:send()"); */
+	/*     exit(-1); */
+	/* } */
+	/* print_debug("envoyerSynchro:%d\n", (int)O); */
+	return 1;
 }
 
 /*
@@ -90,13 +80,13 @@ static int envoyerSynchro(socket_t to)
  */
 static int recevoirSynchro(socket_t from)
 {
-    /* char O; */
-    /* if ( (recv(from, &O, T_OCTET, 0) == -1) && O != 0) { */
-    /*     perror("recevoirSynchro:recv()"); */
-    /*     exit(-1); */
-    /* } */
-    /* print_debug("recevoirSynchro:%d\n", (int)*O); */
-    return 1;
+	/* char O; */
+	/* if ( (recv(from, &O, T_OCTET, 0) == -1) && O != 0) { */
+	/*     perror("recevoirSynchro:recv()"); */
+	/*     exit(-1); */
+	/* } */
+	/* print_debug("recevoirSynchro:%d\n", (int)*O); */
+	return 1;
 }
 
 /*
@@ -104,13 +94,13 @@ static int recevoirSynchro(socket_t from)
  */
 static int envoyerOctet(char O, socket_t to)
 {
-    recevoirSynchro(to);
-    if (send(to, &O, T_OCTET, 0) == -1) {
-        perror("envoyerOctet:send()");
-        exit(-1);
-    }
-    print_debug("envoyerOctet:%d\n", (int)O);
-    return 1;
+	recevoirSynchro(to);
+	if (send(to, &O, T_OCTET, 0) == -1) {
+		perror("envoyerOctet:send()");
+		exit(-1);
+	}
+	print_debug("envoyerOctet:%d\n", (int)O);
+	return 1;
 }
 
 /*
@@ -118,13 +108,13 @@ static int envoyerOctet(char O, socket_t to)
  */
 static int recevoirOctet(char *O, socket_t from)
 {
-    envoyerSynchro(from);
-    if (recv(from, O, T_OCTET, 0) == -1) {
-        perror("recevoirOctet:recv()");
-        exit(-1);
-    }
-    print_debug("recevoirOctet:%d\n", (int)*O);
-    return 1;
+	envoyerSynchro(from);
+	if (recv(from, O, T_OCTET, 0) == -1) {
+		perror("recevoirOctet:recv()");
+		exit(-1);
+	}
+	print_debug("recevoirOctet:%d\n", (int)*O);
+	return 1;
 }
 
 /*
@@ -135,23 +125,22 @@ static int recevoirOctet(char *O, socket_t from)
 static int envoyerUInt_32(uint32_t I, socket_t to)
 {
 
-    char *s_I;
-    char ack;
-    if ( ( s_I = calloc(T_INT_32,T_OCTET) ) == NULL) {
-        perror("envoyerUInt_32:calloc()");
-        exit(-1);
-    }
-    sprintf(s_I, "%u", I);
-    recevoirSynchro(to);    
-    if (send(to, s_I, T_INT_32, 0) == -1) {
-        perror("envoyerUInt_32:send()");
-        exit(-1);
-    }
-    print_debug("envoyerUInt_32:%u\n", I);
-    free(s_I);
-    return 1;
+	char *s_I;
+	char ack;
+	if ((s_I = calloc(T_INT_32, T_OCTET)) == NULL) {
+		perror("envoyerUInt_32:calloc()");
+		exit(-1);
+	}
+	sprintf(s_I, "%u", I);
+	recevoirSynchro(to);
+	if (send(to, s_I, T_INT_32, 0) == -1) {
+		perror("envoyerUInt_32:send()");
+		exit(-1);
+	}
+	print_debug("envoyerUInt_32:%u\n", I);
+	free(s_I);
+	return 1;
 }
-
 
 /*
  *reception d'un entier sur 32 bits.
@@ -161,22 +150,21 @@ static int envoyerUInt_32(uint32_t I, socket_t to)
 static int recevoirUInt_32(uint32_t * I, socket_t from)
 {
 
-    char *s_I;
-    if ( ( s_I = calloc(T_INT_32,T_OCTET) ) == NULL) {
-        perror("recevoirUInt_32:calloc()");
-        exit(-1);
-    }
-    envoyerSynchro(from);
-    if (recv(from, s_I, T_INT_32, 0) == -1) {
-        perror("recevoirUInt_32:recv()");
-        exit(-1);
-    }
-    *I = (uint32_t)atol(s_I);
-    free(s_I);
-    print_debug("recevoirUInt_32:%u\n", *I);
-    return 1;
+	char *s_I;
+	if ((s_I = calloc(T_INT_32, T_OCTET)) == NULL) {
+		perror("recevoirUInt_32:calloc()");
+		exit(-1);
+	}
+	envoyerSynchro(from);
+	if (recv(from, s_I, T_INT_32, 0) == -1) {
+		perror("recevoirUInt_32:recv()");
+		exit(-1);
+	}
+	*I = (uint32_t) atol(s_I);
+	free(s_I);
+	print_debug("recevoirUInt_32:%u\n", *I);
+	return 1;
 }
-
 
 /*
  *envoi d'un entier sur 64 bits.
@@ -185,31 +173,31 @@ static int recevoirUInt_32(uint32_t * I, socket_t from)
 static int envoyerUInt_64(uint64_t I, socket_t to)
 {
 
-    char *s_I;
-    char ack;
-    if ( ( s_I = calloc(T_INT_64,T_OCTET) ) == NULL) {
-        perror("envoyerUInt_64:calloc()");
-        exit(-1);
-    }
-	
+	char *s_I;
+	char ack;
+	if ((s_I = calloc(T_INT_64, T_OCTET)) == NULL) {
+		perror("envoyerUInt_64:calloc()");
+		exit(-1);
+	}
 #if __WORDSIZE == 64
-    sprintf(s_I, "%lu", I);
+	sprintf(s_I, "%lu", I);
 #else
-    sprintf(s_I, "%llu", I);
+	sprintf(s_I, "%llu", I);
 #endif
-    recevoirSynchro(to);
-    if (send(to, s_I, T_INT_64, 0) == -1) {
-        perror("envoyerUInt_64:send()");
-        exit(-1);
-    }
+	recevoirSynchro(to);
+	if (send(to, s_I, T_INT_64, 0) == -1) {
+		perror("envoyerUInt_64:send()");
+		exit(-1);
+	}
 #if __WORDSIZE == 64
-    print_debug("envoyerUInt_64:%lu\n", I);
+	print_debug("envoyerUInt_64:%lu\n", I);
 #else
-    print_debug("envoyerUInt_64:%llu\n", I);
+	print_debug("envoyerUInt_64:%llu\n", I);
 #endif
-    free(s_I);
-    return 1;
+	free(s_I);
+	return 1;
 }
+
 /*
  *reception d'un entier sur 64 bits.
  *L'entier est reçu sous forme de chaine de caractere, qui est
@@ -217,52 +205,50 @@ static int envoyerUInt_64(uint64_t I, socket_t to)
  */
 static int recevoirUInt_64(uint64_t * I, socket_t from)
 {
-    char *s_I;
-    if ( ( s_I = calloc(T_INT_64,T_OCTET) ) == NULL) {
-        perror("recevoirUInt_64:calloc()");
-        exit(-1);
-    }
-    envoyerSynchro(from);
-    if (recv(from, s_I, T_INT_64, 0) == -1) {
-        perror("recevoirUInt_64:recv()");
-        exit(-1);
-    }
-    //TODO UN PEU OPTIMISTE ON SUPPOSE QUE ATOLL RECOI BIEN UN NETIER EN CHAINE
-	
-    *I = atoll(s_I);
+	char *s_I;
+	if ((s_I = calloc(T_INT_64, T_OCTET)) == NULL) {
+		perror("recevoirUInt_64:calloc()");
+		exit(-1);
+	}
+	envoyerSynchro(from);
+	if (recv(from, s_I, T_INT_64, 0) == -1) {
+		perror("recevoirUInt_64:recv()");
+		exit(-1);
+	}
+	//TODO UN PEU OPTIMISTE ON SUPPOSE QUE ATOLL RECOI BIEN UN NETIER EN CHAINE
+
+	*I = atoll(s_I);
 #if __WORDSIZE == 64
-    print_debug("recevoirUInt_64:%lu\n", *I);
+	print_debug("recevoirUInt_64:%lu\n", *I);
 #else
-    print_debug("recevoirUInt_64:%llu\n", *I);
+	print_debug("recevoirUInt_64:%llu\n", *I);
 #endif
-    free(s_I);
+	free(s_I);
 
-    return 1;
+	return 1;
 }
-
 
 /*
  * envoi d'une chaine de caractere.D'abord on envoi la taille puis la chaine elle meme
  */
 static int envoyerChaine(char *chaine, socket_t to)
 {
-    char ack;
-    uint32_t taille_chaine;
-    taille_chaine = T_CHAINE(chaine);
-    print_debug("\t:");
-    if (!envoyerUInt_32(taille_chaine, to)) {
-        exit(-1);
-    }
-    print_debug("\t:");
-    recevoirSynchro(to);
-    if (send(to, chaine, taille_chaine, 0) == -1) {
-        perror("envoyerChaine:send()");
-        exit(-1);
-    }
-    print_debug("envoyerChaine:%s\n", chaine);
-    return 1;
+	char ack;
+	uint32_t taille_chaine;
+	taille_chaine = T_CHAINE(chaine);
+	print_debug("\t:");
+	if (!envoyerUInt_32(taille_chaine, to)) {
+		exit(-1);
+	}
+	print_debug("\t:");
+	recevoirSynchro(to);
+	if (send(to, chaine, taille_chaine, 0) == -1) {
+		perror("envoyerChaine:send()");
+		exit(-1);
+	}
+	print_debug("envoyerChaine:%s\n", chaine);
+	return 1;
 }
-
 
 /*
  *reception d'une chaine de caractere
@@ -270,28 +256,28 @@ static int envoyerChaine(char *chaine, socket_t to)
 static int recevoirChaine(char **chaine, socket_t from)
 {
 
-    uint32_t taille_chaine;
-    print_debug("\t:");
-    if (!recevoirUInt_32(&taille_chaine, from)) {
-        exit(-1);
-    }
-    print_debug("\t:");
+	uint32_t taille_chaine;
+	print_debug("\t:");
+	if (!recevoirUInt_32(&taille_chaine, from)) {
+		exit(-1);
+	}
+	print_debug("\t:");
 
-    if ( ( *chaine = (char *)calloc(taille_chaine,T_OCTET) ) == NULL) {
-        perror("calloc");
-        exit(-1);
-    }
-    envoyerSynchro(from);
-    if (recv(from, *chaine, taille_chaine, 0) == -1) {
-        perror("recevoirChaine:recv()");
-        exit(-1);
-    }
-       
-    print_debug("recevoirChaine:%s\n",*chaine);
+	if ((*chaine = (char *)calloc(taille_chaine, T_OCTET)) == NULL) {
+		perror("calloc");
+		exit(-1);
+	}
+	envoyerSynchro(from);
+	if (recv(from, *chaine, taille_chaine, 0) == -1) {
+		perror("recevoirChaine:recv()");
+		exit(-1);
+	}
 
-    return 1;
+	print_debug("recevoirChaine:%s\n", *chaine);
+
+	return 1;
 }
-	
+
 /* envoyer une valeur ou une cle revient à envoyer une chaine de caractere*/
 #define envoyerValeur(valeur,to)  envoyerChaine(valeur,to)
 #define envoyerCle(cle,to)        envoyerChaine(cle,to)
@@ -299,45 +285,42 @@ static int recevoirChaine(char **chaine, socket_t from)
 #define recevoirValeur(valeur,to)  recevoirChaine(valeur,to)
 #define recevoirCle(cle,to)        recevoirChaine(cle,to)
 
-
 /*
  *envoi une donné
  */
 static int envoyerDonnee(donnee_t D, socket_t to)
 {
-    print_debug("envoyerDonnee:Debut\n");
-    envoyerChaine(D->cle, to);
-    envoyerChaine(D->valeur, to);
-    print_debug("envoyerDonnee:Fin\n");
-    return 1;
+	print_debug("envoyerDonnee:Debut\n");
+	envoyerChaine(D->cle, to);
+	envoyerChaine(D->valeur, to);
+	print_debug("envoyerDonnee:Fin\n");
+	return 1;
 }
-
 
 /*
  *reception d'une donné
  */
 static int recevoirDonnee(donnee_t * D, socket_t from)
 {
-    cle_t K;
-    valeur_t V;
-	
-    print_debug("recevoirDonnee:Debut\n");
-    recevoirCle(&K, from);
-    recevoirValeur(&V, from);
-    *D = creerDonnee(K, V);
-    free(K);
-    free(V);
-    print_debug("recevoirDonnee:Fin\n");
-    return 1;
-}
+	cle_t K;
+	valeur_t V;
 
+	print_debug("recevoirDonnee:Debut\n");
+	recevoirCle(&K, from);
+	recevoirValeur(&V, from);
+	*D = creerDonnee(K, V);
+	free(K);
+	free(V);
+	print_debug("recevoirDonnee:Fin\n");
+	return 1;
+}
 
 /*
  *envoi le type de message
  */
 static int envoyerTypeMessage(requete_t I, socket_t to)
 {
-    return envoyerUInt_32(I, to);
+	return envoyerUInt_32(I, to);
 }
 
 /*
@@ -345,7 +328,7 @@ static int envoyerTypeMessage(requete_t I, socket_t to)
  */
 static int recevoirTypeMessage(requete_t * I, socket_t from)
 {
-    return recevoirUInt_32(I, from);
+	return recevoirUInt_32(I, from);
 }
 
 /*
@@ -353,7 +336,7 @@ static int recevoirTypeMessage(requete_t * I, socket_t from)
  */
 static int envoyerOrigine(origine_t I, socket_t to)
 {
-    return envoyerUInt_32(I, to);
+	return envoyerUInt_32(I, to);
 }
 
 /*
@@ -361,13 +344,39 @@ static int envoyerOrigine(origine_t I, socket_t to)
  */
 static int recevoirOrigine(origine_t * I, socket_t from)
 {
-    return recevoirUInt_32(I, from);
+	return recevoirUInt_32(I, from);
 }
-
-
 
 #define envoyerHash( h, to) envoyerUInt_64(h, to)
 #define recevoirHash(h,from) recevoirUInt_64(h, from)
+
+static int envoyerSockAddr(struct sockaddr_in ident, socket_t to)
+{
+
+	print_debug("envoyerSockAddr:Debut\n");
+	envoyerUInt_32(ident.sin_addr.s_addr, to);
+	envoyerUInt_32(ident.sin_port, to);
+	envoyerUInt_32(ident.sin_family, to);
+	print_debug("envoyerSockAddr:Fin\n");
+	return 1;
+}
+
+static int recevoirSockAddr(struct sockaddr_in *ident, socket_t from)
+{
+
+	in_addr_t ip;
+	uint32_t port;
+	uint32_t protocol;
+
+	print_debug("recevoirSockAddr:Debut\n");
+	recevoirUInt_32(&ip, from);
+	recevoirUInt_32(&port, from);
+	recevoirUInt_32(&protocol, from);
+	print_debug("recevoirSockAddr:Debut\n");
+	ident->sin_addr.s_addr = ip;
+	ident->sin_port = port;
+	ident->sin_family = (short)protocol;
+}
 
 /*
  * envoi de l'identité du client
@@ -375,50 +384,39 @@ static int recevoirOrigine(origine_t * I, socket_t from)
 static int envoyerIdent(idConnexion_t ident, socket_t to)
 {
 
-    print_debug("envoyerIdent:Debut\n");
-    envoyerUInt_32(ident.identifiant.sin_addr.s_addr, to);
-    envoyerUInt_32(ident.identifiant.sin_port, to);
-    envoyerUInt_32(ident.identifiant.sin_family,to);
-    envoyerChaine(ident.name,to);
-    envoyerHash(ident.h,to);
-    envoyerUInt_32(ident.taille_hashtab,to);
-    print_debug("envoyerIdent:Fin\n");
-    return 1;
+	print_debug("envoyerIdent:Debut\n");
+	envoyerSockAddr(ident.identifiant, to);
+	envoyerChaine(ident.name, to);
+	envoyerHash(ident.h, to);
+	envoyerUInt_32(ident.taille_hashtab, to);
+	envoyerSockAddr(ident.suiv_id, to);
+	print_debug("envoyerIdent:Fin\n");
+	return 1;
 }
 
 /*
  *reception de l'identité du client ou serveur
  */
-static int recevoirIdent(idConnexion_t* ident, socket_t from)
+static int recevoirIdent(idConnexion_t * ident, socket_t from)
 {
-    in_addr_t ip;
-    uint32_t port;
-    uint32_t protocol;
-    char *name;
-    uint64_t h;
-    uint32_t taille_hashtab;
-    struct sockaddr_in info;
-	
-    print_debug("recevoirIdent:Debut\n");
-    recevoirUInt_32(&ip,from);
-    recevoirUInt_32(&port,from);
-    recevoirUInt_32(&protocol,from);
-    recevoirChaine(&name,from);
-    recevoirHash(&h,from);
-    recevoirUInt_32(&taille_hashtab,from);
-	
-    info.sin_addr.s_addr = ip;
-    info.sin_port = port;
-    info.sin_family = (short)protocol;
-	
-    *ident = setIdConnexion(name,info, h, taille_hashtab);
-    free(name);
-    print_debug("recevoirIdent:Fin\n");
-    return 1;
-	
-	
-}
+	char *name;
+	uint64_t h;
+	uint32_t taille_hashtab;
+	struct sockaddr_in info;
+	struct sockaddr_in suiv_info;
 
+	print_debug("recevoirIdent:Debut\n");
+	recevoirSockAddr(&info, from);
+	recevoirChaine(&name, from);
+	recevoirHash(&h, from);
+	recevoirUInt_32(&taille_hashtab, from);
+	recevoirSockAddr(&suiv_info, from);
+
+	*ident = setIdConnexion(name, info, h, taille_hashtab, suiv_info);
+	free(name);
+	print_debug("recevoirIdent:Fin\n");
+	return 1;
+}
 
 #endif
 
