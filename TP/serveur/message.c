@@ -177,9 +177,9 @@ inline int ___message_receive_DHT_from___(idConnexion_t from_server, uint64_t h)
         
         envoyerHash(h,sock_server);
         
-        my_server_ptr->mutexTab = malloc(taille * sizeof(pthread_mutex_t));
+        my_server_ptr->tabl.mutexTab = malloc(taille * sizeof(pthread_mutex_t));
         for(i = 0; i< taille; i++) {
-                pthread_mutex_init(&(my_server_ptr->mutexTab[i]), NULL);
+                pthread_mutex_init(&(my_server_ptr->tabl.mutexTab[i]), NULL);
         }
         
         

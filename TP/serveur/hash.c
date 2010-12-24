@@ -162,7 +162,7 @@ table_de_hachage_t TEST_HASH_TABLE()
 
 
 
-void reallocHashTable(table_de_hachage_t* hashTab,uint32_t new_size, uint64_t h, pthread_mutex_t ** mutexTab)
+void reallocHashTable(table_de_hachage_t* hashTab,uint32_t new_size, uint64_t h)
 {
         assert(hashTab!=NULL);
         liste_t* new_hash_tab;
@@ -193,9 +193,9 @@ void reallocHashTable(table_de_hachage_t* hashTab,uint32_t new_size, uint64_t h,
         }
         hashTab->table_de_hachage= new_hash_tab;
         hashTab->taille = new_size;
-        free(*mutexTab);
-        *mutexTab = malloc(new_size * sizeof(pthread_mutex_t));
+        free(hashTab->mutexTab);
+        hashTab->mutexTab = malloc(new_size * sizeof(pthread_mutex_t));
         for(i = 0; i < new_size; i++) {
-                pthread_mutex_init((*mutexTab)[i], NULL);
+                pthread_mutex_init(hashTab->mutexTab[i], NULL);
         }
 }

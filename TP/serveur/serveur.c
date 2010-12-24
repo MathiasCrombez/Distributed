@@ -37,9 +37,9 @@ int main(int argc, char *argv[])
 	} else {
 		printf("vous êtes le premier serveur de la DHT\n");
 		serveur_ptr->tabl = TEST_HASH_TABLE();
-                serveur_ptr->mutexTab = malloc(MAX_TAILLE_HASH_TABLE * sizeof(pthread_mutex_t));
+                serveur_ptr->tabl.mutexTab = malloc(MAX_TAILLE_HASH_TABLE * sizeof(pthread_mutex_t));
                 for(i = 0; i< MAX_TAILLE_HASH_TABLE; i++) {
-                        pthread_mutex_init(&(serveur_ptr->mutexTab[i]), NULL);
+                        pthread_mutex_init(&(serveur_ptr->tabl.mutexTab[i]), NULL);
                 }
 	}
 

@@ -20,6 +20,8 @@ typedef struct Table_De_Hachage {
      * sa table avec un autre processus serveur
      */
     liste_t *table_de_hachage;
+        pthread_mutex_t * mutexTab;
+
 } table_de_hachage_t;
 
 
@@ -73,7 +75,6 @@ table_de_hachage_t TEST_HASH_TABLE();
 void afficherLigneHashTable(table_de_hachage_t hashTab, uint64_t numeroLigne);
 void afficherHashTable(table_de_hachage_t hashTab);
 
-void reallocHashTable(table_de_hachage_t* hashTab,uint32_t new_size, uint64_t h,
-                      pthread_mutex_t ** mutexTab);
+void reallocHashTable(table_de_hachage_t* hashTab,uint32_t new_size, uint64_t h);
 #endif
 

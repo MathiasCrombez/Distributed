@@ -86,7 +86,6 @@ typedef struct serveur {
 
 	uint64_t h;
 	table_de_hachage_t tabl;
-        pthread_mutex_t * mutexTab;
 	
 	tabClient_t tableauClient;
 	struct sockaddr_in suivServeur;
