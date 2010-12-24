@@ -4,7 +4,7 @@ int main(int argc, char *argv[])
 {
 
 	if (argc < 3) {
-		printf("Usage: %s nomDuServeur Port\n", argv[0]);
+		printf("Usage: %s AdresseIpServeur Port\n", argv[0]);
 		exit(0);
 	}
 

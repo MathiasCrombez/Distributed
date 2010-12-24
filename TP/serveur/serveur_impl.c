@@ -10,12 +10,12 @@
 /*
  *Initialisation de la variable globale SERVEUR.
  */
-serveur_t *creerServeur(char *nomDuServeur, uint64_t port)
+serveur_t *creerServeur(char *ipServeur, uint64_t port)
 {
 
 	int yes = 1;
 
-	SET_SERVEUR_NAME(nomDuServeur, port);
+	SET_SERVEUR_NAME(ipServeur, port);
 	SERVEUR.idSocket = socket(AF_INET, SOCK_STREAM, 0);
 	if (SERVEUR.idSocket < 0) {
 		perror("socket()");
@@ -23,7 +23,7 @@ serveur_t *creerServeur(char *nomDuServeur, uint64_t port)
 	}
 	//initialisation de la structure serveur
 	SERVEUR.serv_addr.sin_family = AF_INET;
-	SERVEUR.serv_addr.sin_addr.s_addr = inet_addr(SERVEURNAME);
+	SERVEUR.serv_addr.sin_addr.s_addr = inet_addr(ipServeur);
 	SERVEUR.serv_addr.sin_port = htons(port);
 
 	SERVEUR.suivServeur = SERVEUR.serv_addr;

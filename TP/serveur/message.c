@@ -336,7 +336,7 @@ int message_quit()
         
         struct sockaddr_in serv_addr;
         serveur_t* my_server_ptr;
-        my_server_ptr = get_my_idConnexion;
+        my_server_ptr = get_my_server();
         
         if(my_server_ptr->serv_addr.sin_port!=my_server_ptr->suivServeur.sin_port) {
         
