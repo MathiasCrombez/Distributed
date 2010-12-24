@@ -5,7 +5,6 @@
 #include "liste_donnee.h"
 
 
-
 //==============================================================================
 //				TYPES
 //=============================================================================
@@ -74,6 +73,7 @@ table_de_hachage_t TEST_HASH_TABLE();
 void afficherLigneHashTable(table_de_hachage_t hashTab, uint64_t numeroLigne);
 void afficherHashTable(table_de_hachage_t hashTab);
 
-void reallocHashTable(table_de_hachage_t* hashTab,uint32_t new_size, uint64_t h);
+void reallocHashTable(table_de_hachage_t* hashTab,uint32_t new_size, uint64_t h,
+                      pthread_mutex_t ** mutexTab);
 #endif
 

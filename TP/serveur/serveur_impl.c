@@ -107,7 +107,9 @@ void *talk_to_client(void *idSocket)
 			    && h < (SERVEUR.h + SERVEUR.tabl.taille)) {
 				envoyerOctet(1, sockClient);
 				recevoirDonnee(&D, sockClient);
+                                pthread_mutex_lock(&(SERVEUR.mutexTab[h - SERVEUR.h]));
 				putHashTable(D, SERVEUR.tabl);
+                                pthread_mutex_unlock(&(SERVEUR.mutexTab[h - SERVEUR.h]));
 			} else {
 				envoyerOctet(0, sockClient);
 				envoyerSockAddr(SERVEUR.suivServeur,
@@ -163,8 +165,10 @@ void *talk_to_client(void *idSocket)
 				if (D == NULL) {
 					envoyerOctet(0, sockClient);
 				} else {
+                                        pthread_mutex_lock(&(SERVEUR.mutexTab[h - SERVEUR.h]));
 					valeur_t V =
                                                 removeHashTable(K, SERVEUR.tabl);
+                                        pthread_mutex_unlock(&(SERVEUR.mutexTab[h - SERVEUR.h]));
 					envoyerOctet(1, sockClient);
 					envoyerValeur(V, sockClient);
 					free(V);
@@ -196,7 +200,7 @@ void *talk_to_client(void *idSocket)
 				//envoyerOctet 0
 			}
 			pthread_mutex_unlock(&SERVER_IS_DYING);
-
+                        free(SERVEUR.mutexTab);
 			if (NB_JOBS != 1) {
 				printf
                                         ("en attente que les requetes soient satisfaites\n");
@@ -352,7 +356,7 @@ void *talk_to_server(void *idSocket)
 		envoyerOctet(0, sockServer);
 
 		reallocHashTable(&SERVEUR.tabl, SERVEUR.tabl.taille / 2,
-				 SERVEUR.h);
+				 SERVEUR.h, &(SERVEUR.mutexTab));
 		afficherInfoHashTable();
 		afficherHashTable(SERVEUR.tabl);
 		break;
@@ -383,7 +387,7 @@ void *talk_to_server(void *idSocket)
 		assert(taille_hashtab <= MAX_TAILLE_HASH_TABLE);
 
 		recevoirOctet(&reponse, sockServer);
-		reallocHashTable(&SERVEUR.tabl, new_size, SERVEUR.h);
+		reallocHashTable(&SERVEUR.tabl, new_size, SERVEUR.h, &(SERVEUR.mutexTab));
 
 		while (reponse) {
 
